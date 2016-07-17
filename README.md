@@ -26,33 +26,29 @@ Instances launched inside a VPC are invisible to the rest of the internet by def
 
 ```
 aws ec2 modify-vpc-attribute --vpc-id $vpcID --enable-dns-support "{\"Value\":true}"
-
 aws ec2 modify-vpc-attribute --vpc-id $vpcID --enable-dns-hostnames "{\"Value\":true}"
 ```
 
 #### Add a rule that allows inbound SSH, HTTP, HTTP traffic ( from any source )
 
-_Interesting read here about why we need to use security group ID instead of name; [AWS Documentation](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-network-security.html) & [Github Bug Report](https://github.com/hashicorp/terraform/issues/575)
+_Interesting read here about why we need to use security group ID instead of name; [AWS Documentation](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-network-security.html) & [Github Bug Report](https://github.com/hashicorp/terraform/issues/575)_
 
 ```
 When you specify a security group for a nondefault VPC to the CLI or the API actions, you must use the security group ID and not the security group name to identify the security group.
 ```
 
-##### To describe a security group for EC2-VPC
+> To describe a security group for EC2-VPC
+>`aws ec2 describe-security-groups --group-ids $webSecGrpID`
 
-`aws ec2 describe-security-groups --group-ids $webSecGrpID`
 
-
-`aws ec2 authorize-security-group-ingress --group-id ${webSecGrpID} --protocol tcp --port 22 --cidr 0.0.0.0/28`
-
-`aws ec2 authorize-security-group-ingress --group-id ${webSecGrpID} --protocol tcp --port 80 --cidr 0.0.0.0/28`
-
-`aws ec2 authorize-security-group-ingress --group-id ${webSecGrpID} --protocol tcp --port 443 --cidr 0.0.0.0/28`
+```
+aws ec2 authorize-security-group-ingress --group-id ${webSecGrpID} --protocol tcp --port 22 --cidr 0.0.0.0/28
+aws ec2 authorize-security-group-ingress --group-id ${webSecGrpID} --protocol tcp --port 80 --cidr 0.0.0.0/28
+aws ec2 authorize-security-group-ingress --group-id ${webSecGrpID} --protocol tcp --port 443 --cidr 0.0.0.0/28
+```
 
 
 ### Create a security group for RDS - MySQL from web security group
-
-
 
 Group Name - `dbSecGrp`
 Description - “My Database Security Group”
