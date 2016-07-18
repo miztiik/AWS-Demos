@@ -17,12 +17,13 @@ vpcID=$(aws ec2 create-vpc --cidr-block 10.0.0.0/28 --query 'Vpc.VpcId' --output
  - Group Name - `webSecGrp`
  - Description - `My Web Security Group`
 
-`webSecGrpID=$(aws ec2 create-security-group --group-name webSecGrp --description "My Security Group for web servers" --vpc-id $vpcID --output text)`
-
+```sh
+webSecGrpID=$(aws ec2 create-security-group --group-name webSecGrp --description "My Security Group for web servers" --vpc-id $vpcID --output text)
+```
 
 Instances launched inside a VPC are invisible to the rest of the internet by default. AWS therefore does not bother assigning them a public DNS name. This can be changed easily,
 
-```
+```sh
 aws ec2 modify-vpc-attribute --vpc-id $vpcID --enable-dns-support "{\"Value\":true}"
 
 aws ec2 modify-vpc-attribute --vpc-id $vpcID --enable-dns-hostnames "{\"Value\":true}"
@@ -47,8 +48,12 @@ _Interesting read here about why we need to use security group ID instead of nam
  - Description - `My Database Security Group`
 
 
-`dbSecGrpID=$(aws ec2 create-security-group --group-name dbSecGrp --description "My Database Group for web servers" --vpc-id $vpcID --output text)`
+```sh
+dbSecGrpID=$(aws ec2 create-security-group --group-name dbSecGrp --description "My Database Group for web servers" --vpc-id $vpcID --output text)
+```
 
 #### Add a rule that allows inbound MySQL ( from any source )
 
-`aws ec2 authorize-security-group-ingress --group-id ${dbSecGrpID} --protocol tcp --port 3306 --source-group ${webSecGrpID}`
+```sh
+aws ec2 authorize-security-group-ingress --group-id ${dbSecGrpID} --protocol tcp --port 3306 --source-group ${webSecGrpID}
+```
