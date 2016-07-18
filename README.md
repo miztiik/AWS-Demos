@@ -7,7 +7,6 @@ Assuming you have already setup your AWS CLI, lets move forward;
 
 ```
 Excellent resource to understand CIDR blocks - http://bradthemad.org/tech/notes/cidr_subnets.php & [here](https://coderwall.com/p/ndm54w/creating-an-ec2-instance-in-a-vpc-with-the-aws-command-line-interface)
-
 ```
 
 `vpcID=$(aws ec2 create-vpc --cidr-block 10.0.0.0/28 --query 'Vpc.VpcId' --output text)`
@@ -25,6 +24,7 @@ Instances launched inside a VPC are invisible to the rest of the internet by def
 
 ```
 aws ec2 modify-vpc-attribute --vpc-id $vpcID --enable-dns-support "{\"Value\":true}"
+
 aws ec2 modify-vpc-attribute --vpc-id $vpcID --enable-dns-hostnames "{\"Value\":true}"
 ```
 
