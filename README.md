@@ -1,4 +1,4 @@
-# AWS 2 Tier Architecture setup with AWS CLI - Wordpress application on AWS RDS running MySQL/Aurora
+# AWS 2 Tier Architecture setup with AWS CLI - Wordpress application on AWS RDS running MySQL
 
 Assuming you have already setup your AWS CLI, lets move forward;
 
@@ -14,7 +14,7 @@ Excellent resource to understand CIDR blocks - http://bradthemad.org/tech/notes/
 
 
 
-### Creating a security group
+### Creating a security group for the Web Servers
  - Group Name - `webSecGrp`
  - Description - `My Web Security Group`
 
@@ -42,13 +42,13 @@ _Interesting read here about why we need to use security group ID instead of nam
 >When you specify a security group for a nondefault VPC to the CLI or the API actions, you must use the security group ID and not the >security group name to identify the security group.
 
 
-### Create a security group for RDS - MySQL from web security group
+### Creating a Security Group for Database RDS - MySQL from Web Security Group
  - Group Name - `dbSecGrp`
  - Description - `My Database Security Group`
 
 
 `dbSecGrpID=$(aws ec2 create-security-group --group-name dbSecGrp --description "My Database Group for web servers" --vpc-id $vpcID --output text)`
 
-#### Add a rule that allows inbound MySQL/Aurora ( from any source )
+#### Add a rule that allows inbound MySQL ( from any source )
 
 `aws ec2 authorize-security-group-ingress --group-id ${dbSecGrpID} --protocol tcp --port 3306 --source-group ${webSecGrpID}`
