@@ -5,9 +5,9 @@ Assuming you have already setup your AWS CLI, lets move forward;
 
 ### Create a VPC
 
-```
+
 Excellent resource to understand CIDR blocks - http://bradthemad.org/tech/notes/cidr_subnets.php & [here](https://coderwall.com/p/ndm54w/creating-an-ec2-instance-in-a-vpc-with-the-aws-command-line-interface)
-```
+
 
 `vpcID=$(aws ec2 create-vpc --cidr-block 10.0.0.0/28 --query 'Vpc.VpcId' --output text)`
 
