@@ -15,7 +15,7 @@ Excellent resource to understand CIDR blocks - http://bradthemad.org/tech/notes/
 
 
 ### Creating a security group
-
+**Settings**
 Group Name - `webSecGrp`
 
 Description - `My Web Security Group`
