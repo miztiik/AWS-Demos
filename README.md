@@ -41,9 +41,9 @@ aws ec2 authorize-security-group-ingress --group-id ${webSecGrpID} --protocol tc
 ```
 _Interesting read here about why we need to use security group ID instead of name; [AWS Documentation](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-network-security.html) & [Github Bug Report](https://github.com/hashicorp/terraform/issues/575)_
 
-```
-When you specify a security group for a nondefault VPC to the CLI or the API actions, you must use the security group ID and not the security group name to identify the security group.
-```
+
+>When you specify a security group for a nondefault VPC to the CLI or the API actions, you must use the security group ID and not the >security group name to identify the security group.
+
 
 ### Create a security group for RDS - MySQL from web security group
 
