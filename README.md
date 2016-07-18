@@ -15,10 +15,8 @@ Excellent resource to understand CIDR blocks - http://bradthemad.org/tech/notes/
 
 
 ### Creating a security group
-**Settings**
-Group Name - `webSecGrp`
-
-Description - `My Web Security Group`
+ - Group Name - `webSecGrp`
+ - Description - `My Web Security Group`
 
 `webSecGrpID=$(aws ec2 create-security-group --group-name webSecGrp --description "My Security Group for web servers" --vpc-id $vpcID --output text)`
 
@@ -32,8 +30,7 @@ aws ec2 modify-vpc-attribute --vpc-id $vpcID --enable-dns-hostnames "{\"Value\":
 
 #### Add a rule that allows inbound SSH, HTTP, HTTP traffic ( from any source )
 
-Incase you want to confirm yor security group to be sure, To describe a security group for EC2-VPC, 
->`aws ec2 describe-security-groups --group-ids $webSecGrpID`
+Incase you want to confirm yor security group to be sure, To describe a security group for EC2-VPC, `aws ec2 describe-security-groups --group-ids $webSecGrpID`
 
 ```sh
 aws ec2 authorize-security-group-ingress --group-id ${webSecGrpID} --protocol tcp --port 22 --cidr 0.0.0.0/28
@@ -46,10 +43,8 @@ _Interesting read here about why we need to use security group ID instead of nam
 
 
 ### Create a security group for RDS - MySQL from web security group
-
-Group Name - `dbSecGrp`
-
-Description - `My Database Security Group`
+ - Group Name - `dbSecGrp`
+ - Description - `My Database Security Group`
 
 
 `dbSecGrpID=$(aws ec2 create-security-group --group-name dbSecGrp --description "My Database Group for web servers" --vpc-id $vpcID --output text)`
