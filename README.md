@@ -9,7 +9,6 @@ Lets create a `Virtual Private Cloud - VPC` for our setup with 512 IPs and get o
 ```sh
 vpcID=$(aws ec2 create-vpc \
       --cidr-block 10.0.0.0/23 \
-      --tags Key=Name,Value=tVPC
       --query 'Vpc.VpcId' \
       --output text)
 ```
