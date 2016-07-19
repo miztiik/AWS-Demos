@@ -94,7 +94,27 @@ dbSecGrpID=$(aws ec2 create-security-group --group-name dbSecGrp --description "
 ```sh
 aws ec2 authorize-security-group-ingress --group-id ${dbSecGrpID} --protocol tcp --port 3306 --source-group ${webSecGrpID}
 ```
+
+#### Creating the RDS - MySQL Instance
+```sh
+aws rds create-db-instance \
+--db-instance-identifier sg-cli-test \
+--allocated-storage 20 \
+--db-instance-class t2.micro \
+--engine mysql \
+--master-username dbuser \
+--master-user-password dbuserpass
+```
+
+
 #### Launch an instance in your public subnet
 ```sh
 aws ec2 run-instances --image-id ami-a4827dc9 --count 1 --instance-type t2.micro --key-name MyKeyPair --security-group-ids sg-e1fb8c9a --subnet-id subnet-b46032ec
 ```
+
+
+
+
+
+
+
