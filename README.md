@@ -27,7 +27,11 @@ aws ec2 modify-vpc-attribute --vpc-id $vpcID --enable-dns-support "{\"Value\":tr
 
 aws ec2 modify-vpc-attribute --vpc-id $vpcID --enable-dns-hostnames "{\"Value\":true}"
 ```
-> _Check if internet gateway is set._
+_Check if internet gateway is set, If it wasn't there then do these,_
+```sh 
+iGW-ID=$(aws ec2 create-internet-gateway --output text)
+aws ec2 attach-internet-gateway --vpc-id $vpcID --internet-gateway-id $iGW
+```
 
 #### Add a rule that allows inbound SSH, HTTP, HTTP traffic ( from any source )
 
