@@ -12,8 +12,10 @@ vpcID=$(aws ec2 create-vpc --cidr-block 10.0.0.0/23 --query 'Vpc.VpcId' --output
 <sup>I have chosen /23 CIDR deliberately to allow us to create different subnets for our db and web instances. **Important:** _AWS reserves both the first four and the last IP address in each subnet's CIDR block. They're not available for use. The smallest subnet (and VPC) you can create uses a /28 netmask (16 IP addresses), and the largest uses a /16 netmask (65,536 IP addresses)._ Excellent resource to understand [CIDR blocks](http://bradthemad.org/tech/notes/cidr_subnets.php) & [here](https://coderwall.com/p/ndm54w/creating-an-ec2-instance-in-a-vpc-with-the-aws-command-line-interface)<sup>
 
 #### Creating subnets for the Database and Web Servers
+Lets reserve the IP Range `10.0.1.0 - 10.0.1.15` for DB Servers & IP Ranges `10.0.1.16 - 10.0.1.31` for Web Servers
 ```sh
-aws ec2 create-subnet --vpc-id $vpcID --cidr-block 10.0.1.0/16
+dbSubnetId=$(aws ec2 create-subnet --vpc-id $vpcID --cidr-block 10.0.1.0/16 --query 'Subnet.SubnetId' --output text)
+webSubnetId=$(aws ec2 create-subnet --vpc-id $vpcID --cidr-block 10.0.1.16/16 --query 'Subnet.SubnetId' --output text)
 ```
 
 ### Creating a security group for the Web Servers
