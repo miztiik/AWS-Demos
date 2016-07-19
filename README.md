@@ -50,7 +50,9 @@ aws ec2 create-route --route-table-id $routeTableID --destination-cidr-block 0.0
  - Description - `My Web Security Group`
 
 ```sh
-webSecGrpID=$(aws ec2 create-security-group --group-name webSecGrp --description "My Security Group for web servers" --vpc-id $vpcID --output text)
+webSecGrpID=$(aws ec2 create-security-group --group-name webSecGrp \ --description "My Security Group for web servers" \
+--vpc-id $vpcID \
+--output text)
 ```
 
 #### Add a rule that allows inbound SSH, HTTP, HTTP traffic ( from any source )
