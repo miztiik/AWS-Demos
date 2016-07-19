@@ -47,8 +47,12 @@ aws ec2 modify-vpc-attribute --vpc-id $vpcID --enable-dns-hostnames "{\"Value\":
 ```
 _Check if internet gateway is set, If it wasn't there then do these,_
 ```sh 
-intGatewayID=$(aws ec2 create-internet-gateway --output text)
-aws ec2 attach-internet-gateway --vpc-id $vpcID --internet-gateway-id "$intGatewayID"
+internetGatewayId=$(aws ec2 create-internet-gateway --query 'InternetGateway.InternetGatewayId' --output text) && echo $internetGatewayId
+aws ec2 attach-internet-gateway --internet-gateway-id $internetGatewayId --vpc-id $vpcID
+```
+##### Tag the Internet Gateway
+```sh
+aws ec2 create-tags --resources $internetGatewayId --tags 'Key=Name,Value=tmpVPC-Internet-Gateway'
 ```
 
 #### Configuring the Route Table
