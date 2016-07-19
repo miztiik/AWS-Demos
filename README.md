@@ -98,12 +98,13 @@ aws ec2 authorize-security-group-ingress --group-id ${dbSecGrpID} --protocol tcp
 #### Creating the RDS - MySQL Instance
 ```sh
 aws rds create-db-instance \
---db-instance-identifier sg-cli-test \
---allocated-storage 20 \
+--db-instance-identifier rds-mysql-inst01 \
+--allocated-storage 5 \
 --db-instance-class t2.micro \
 --engine mysql \
 --master-username dbuser \
 --master-user-password dbuserpass
+--backup-retention-period 3
 ```
 
 
