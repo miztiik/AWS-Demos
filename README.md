@@ -9,8 +9,14 @@ Lets create a `Virtual Private Cloud - VPC` for our setup with 16 IPs and get ou
 ```sh
 vpcID=$(aws ec2 create-vpc --cidr-block 10.0.0.0/23 --query 'Vpc.VpcId' --output text)
 ```
-<sup>I have chosen /23 CIDR deliberately to allow us to create different subnets for our db and web instances. Excellent resource to understand [CIDR blocks](http://bradthemad.org/tech/notes/cidr_subnets.php) & [here](https://coderwall.com/p/ndm54w/creating-an-ec2-instance-in-a-vpc-with-the-aws-command-line-interface)<sup>
+<sup>I have chosen /23 CIDR deliberately to allow us to create different subnets for our db and web instances. **Important:** AWS reserves both the first four and the last IP address in each subnet's CIDR block. They're not available for use.
 
+Excellent resource to understand [CIDR blocks](http://bradthemad.org/tech/notes/cidr_subnets.php) & [here](https://coderwall.com/p/ndm54w/creating-an-ec2-instance-in-a-vpc-with-the-aws-command-line-interface)<sup>
+
+#### Creating subnets for the Database and Web Servers
+```sh
+aws ec2 create-subnet --vpc-id $vpcID --cidr-block 10.0.1.0/16
+```
 
 ### Creating a security group for the Web Servers
  - Group Name - `webSecGrp`
@@ -60,4 +66,8 @@ dbSecGrpID=$(aws ec2 create-security-group --group-name dbSecGrp --description "
 
 ```sh
 aws ec2 authorize-security-group-ingress --group-id ${dbSecGrpID} --protocol tcp --port 3306 --source-group ${webSecGrpID}
+```
+#### Launch an instance in your public subnet
+```sh
+aws ec2 run-instances --image-id ami-a4827dc9 --count 1 --instance-type t2.micro --key-name MyKeyPair --security-group-ids sg-e1fb8c9a --subnet-id subnet-b46032ec
 ```
