@@ -117,8 +117,12 @@ aws rds create-db-instance \
 --engine mysql \
 --master-username dbuser \
 --master-user-password dbuserpass \
+--db-name wpdb \
 --backup-retention-period 3
 ```
+_**Refer:**_ 
+- [1] https://www.linux.com/blog/introduction-aws-command-line-tool-part-2
+- [2] http://docs.aws.amazon.com/cli/latest/reference/rds/create-db-instance.html
 
 
 #### Launch an instance in your public subnet
