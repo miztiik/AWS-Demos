@@ -63,9 +63,9 @@ The following adds a route table to our subnet that allows traffic not meant for
 ```sh
 routeTableID=$(aws ec2 create-route-table --vpc-id $vpcID --query 'RouteTable.RouteTableId' --output text)
 
-aws ec2 associate-route-table --route-table-id $routeTableID --subnet-id $subnetId
+aws ec2 associate-route-table --route-table-id $routeTableID --subnet-id $webSubnetID
 
-aws ec2 create-route --route-table-id $routeTableID --destination-cidr-block 0.0.0.0/0 --gateway-id $iGatewayID
+aws ec2 create-route --route-table-id $routeTableID --destination-cidr-block 0.0.0.0/0 --gateway-id $internetGatewayId
 ```
 
 ### Creating a security group for the Web Servers
@@ -123,7 +123,17 @@ aws rds create-db-instance \
 
 #### Launch an instance in your public subnet
 ```sh
-aws ec2 run-instances --image-id ami-a4827dc9 --count 1 --instance-type t2.micro --key-name MyKeyPair --security-group-ids sg-e1fb8c9a --subnet-id subnet-b46032ec
+instanceId=$(aws ec2 run-instances 
+\ --image-id ami-ecd5e884 
+\ --count 1 
+\ --instance-type t2.micro 
+\ --key-name ec2-dev 
+\ --security-group-ids $securityGroupId 
+\ --subnet-id $webSubnetID 
+\ --associate-public-ip-address 
+\ --query 'Instances[0].InstanceId' 
+\ --output text)
+
 ```
 
 
