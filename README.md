@@ -14,16 +14,9 @@ vpcID=$(aws ec2 create-vpc --cidr-block 10.0.0.0/23 --query 'Vpc.VpcId' --output
 #### Creating subnets for the Database and Web Servers
 Lets reserve the IP Range `10.0.1.0 - 10.0.1.15` for DB Servers & IP Ranges `10.0.1.16 - 10.0.1.31` for Web Servers
 ```sh
-dbSubnetId=$(aws ec2 create-subnet --vpc-id $vpcID --cidr-block 10.0.1.0/16 --query 'Subnet.SubnetId' --output text)
-webSubnetId=$(aws ec2 create-subnet --vpc-id $vpcID --cidr-block 10.0.1.16/16 --query 'Subnet.SubnetId' --output text)
-```
+dbSubnetID=$(aws ec2 create-subnet --vpc-id $vpcID --cidr-block 10.0.1.0/16 --query 'Subnet.SubnetId' --output text)
 
-### Creating a security group for the Web Servers
- - Group Name - `webSecGrp`
- - Description - `My Web Security Group`
-
-```sh
-webSecGrpID=$(aws ec2 create-security-group --group-name webSecGrp --description "My Security Group for web servers" --vpc-id $vpcID --output text)
+webSubnetID=$(aws ec2 create-subnet --vpc-id $vpcID --cidr-block 10.0.1.16/16 --query 'Subnet.SubnetId' --output text)
 ```
 
 Instances launched inside a VPC are invisible to the rest of the internet by default. AWS therefore does not bother assigning them a public DNS name. This can be changed easily by enabling the `DNS` support as shown below,
@@ -35,8 +28,29 @@ aws ec2 modify-vpc-attribute --vpc-id $vpcID --enable-dns-hostnames "{\"Value\":
 ```
 _Check if internet gateway is set, If it wasn't there then do these,_
 ```sh 
-iGW-ID=$(aws ec2 create-internet-gateway --output text)
+iGatewayID=$(aws ec2 create-internet-gateway --output text)
 aws ec2 attach-internet-gateway --vpc-id $vpcID --internet-gateway-id $iGW
+```
+
+#### Configuring the Route Table
+Each subnet needs to have a route table associated with it to specify the routing of its outbound traffic. By default every subnet inherits the default VPC route table which allows for intra-VPC communication only.
+
+The following adds a route table to our subnet that allows traffic not meant for an instance inside the VPC to be routed to the internet through our earlier created internet gateway.
+
+```sh
+routeTableID=$(aws ec2 create-route-table --vpc-id $vpcID --query 'RouteTable.RouteTableId' --output text)
+
+aws ec2 associate-route-table --route-table-id $routeTableID --subnet-id $subnetId
+
+aws ec2 create-route --route-table-id $routeTableID --destination-cidr-block 0.0.0.0/0 --gateway-id $iGatewayID
+```
+
+### Creating a security group for the Web Servers
+ - Group Name - `webSecGrp`
+ - Description - `My Web Security Group`
+
+```sh
+webSecGrpID=$(aws ec2 create-security-group --group-name webSecGrp --description "My Security Group for web servers" --vpc-id $vpcID --output text)
 ```
 
 #### Add a rule that allows inbound SSH, HTTP, HTTP traffic ( from any source )
