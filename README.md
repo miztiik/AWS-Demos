@@ -27,12 +27,14 @@ webSubnetID=$(aws ec2 create-subnet \
            --cidr-block 10.0.1.0/28 \
            --query 'Subnet.SubnetId' \
            --output text)
+           
 aws ec2 create-tags --resources $webSubnetID --tags 'Key=Name,Value=WebSubnet'
 
 dbSubnetID=$(aws ec2 create-subnet \
             --vpc-id $vpcID \
             --cidr-block 10.0.1.16/28 \
             --query 'Subnet.SubnetId' --output text)
+
 aws ec2 create-tags --resources $dbSubnetID --tags 'Key=Name,Value=DBSubnet'
 ```
 
@@ -45,8 +47,8 @@ aws ec2 modify-vpc-attribute --vpc-id $vpcID --enable-dns-hostnames "{\"Value\":
 ```
 _Check if internet gateway is set, If it wasn't there then do these,_
 ```sh 
-iGatewayID=$(aws ec2 create-internet-gateway --output text)
-aws ec2 attach-internet-gateway --vpc-id $vpcID --internet-gateway-id $iGW
+intGatewayID=$(aws ec2 create-internet-gateway --output text)
+aws ec2 attach-internet-gateway --vpc-id $vpcID --internet-gateway-id "$intGatewayID"
 ```
 
 #### Configuring the Route Table
