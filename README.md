@@ -12,8 +12,8 @@ vpcID=$(aws ec2 create-vpc \
       --query 'Vpc.VpcId' \
       --output text)
 ```
-##### Tag our VPC
-Its is a good practice to give meaningful name to the AWS resources, Lets call our VPC `tmpVPC'
+##### Tag the VPC
+Its is a good practice to give meaningful name to the AWS resources, Lets call our VPC `tmpVPC`
 ```sh
 aws ec2 create-tags --resources $vpcID --tags 'Key=Name,Value=tmpVPC'
 ```
