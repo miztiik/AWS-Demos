@@ -12,6 +12,11 @@ vpcID=$(aws ec2 create-vpc \
       --query 'Vpc.VpcId' \
       --output text)
 ```
+##### Tag our VPC
+Its is a good practice to give meaningful name to the AWS resources, Lets call our VPC `tmpVPC'
+```sh
+aws ec2 create-tags --resources $vpcID --tags 'Key=Name,Value=tmpVPC'
+```
 <sup>I have chosen /23 CIDR deliberately to allow us to create different subnets for our db and web instances. **Important:** _AWS reserves both the first four and the last IP address in each subnet's CIDR block. They're not available for use. The smallest subnet (and VPC) you can create uses a /28 netmask (16 IP addresses), and the largest uses a /16 netmask (65,536 IP addresses)._ Excellent resource to understand [CIDR blocks](http://bradthemad.org/tech/notes/cidr_subnets.php) & [here](https://coderwall.com/p/ndm54w/creating-an-ec2-instance-in-a-vpc-with-the-aws-command-line-interface)<sup>
 
 #### Creating subnets for the Database and Web Servers
