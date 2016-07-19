@@ -3,14 +3,13 @@
 Assuming you have already setup your AWS CLI, lets move forward;
 
 
-### Create a VPC
+### Creating a VPC
 Lets create a `Virtual Private Cloud - VPC` for our setup with 16 IPs and get our VPC ID using the `query` parameter and set the output format to `text`. 
 
 ```sh
-vpcID=$(aws ec2 create-vpc --cidr-block 10.0.0.0/28 --query 'Vpc.VpcId' --output text)
+vpcID=$(aws ec2 create-vpc --cidr-block 10.0.0.0/23 --query 'Vpc.VpcId' --output text)
 ```
-
-<sup>Excellent resource to understand [CIDR blocks](http://bradthemad.org/tech/notes/cidr_subnets.php) & [here](https://coderwall.com/p/ndm54w/creating-an-ec2-instance-in-a-vpc-with-the-aws-command-line-interface)<sup>
+<sup>I have chosen /23 CIDR deliberately to allow us to create different subnets for our db and web instances. Excellent resource to understand [CIDR blocks](http://bradthemad.org/tech/notes/cidr_subnets.php) & [here](https://coderwall.com/p/ndm54w/creating-an-ec2-instance-in-a-vpc-with-the-aws-command-line-interface)<sup>
 
 
 ### Creating a security group for the Web Servers
