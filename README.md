@@ -84,9 +84,9 @@ webSecGrpID=$(aws ec2 create-security-group --group-name webSecGrp \
 Incase you want to confirm yor security group to be sure, To describe a security group for EC2-VPC, `aws ec2 describe-security-groups --group-ids $webSecGrpID`
 
 ```sh
-aws ec2 authorize-security-group-ingress --group-id ${webSecGrpID} --protocol tcp --port 22 --cidr 0.0.0.0/28
-aws ec2 authorize-security-group-ingress --group-id ${webSecGrpID} --protocol tcp --port 80 --cidr 0.0.0.0/28
-aws ec2 authorize-security-group-ingress --group-id ${webSecGrpID} --protocol tcp --port 443 --cidr 0.0.0.0/28
+aws ec2 authorize-security-group-ingress --group-id ${webSecGrpID} --protocol tcp --port 22 --cidr 0.0.0.0/0
+aws ec2 authorize-security-group-ingress --group-id ${webSecGrpID} --protocol tcp --port 80 --cidr 0.0.0.0/0
+aws ec2 authorize-security-group-ingress --group-id ${webSecGrpID} --protocol tcp --port 443 --cidr 0.0.0.0/0
 ```
 _Interesting read here about why we need to use security group ID instead of name; [AWS Documentation](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-network-security.html) & [Github Bug Report](https://github.com/hashicorp/terraform/issues/575)_
 
@@ -113,10 +113,10 @@ aws ec2 authorize-security-group-ingress --group-id ${dbSecGrpID} --protocol tcp
 aws rds create-db-instance \
 --db-instance-identifier rds-mysql-inst01 \
 --allocated-storage 5 \
---db-instance-class t2.micro \
+--db-instance-class db.t2.micro \
 --engine mysql \
 --master-username dbuser \
---master-user-password dbuserpass
+--master-user-password dbuserpass \
 --backup-retention-period 3
 ```
 
