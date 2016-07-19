@@ -9,9 +9,9 @@ Lets create a `Virtual Private Cloud - VPC` for our setup with 16 IPs and get ou
 ```sh
 vpcID=$(aws ec2 create-vpc --cidr-block 10.0.0.0/23 --query 'Vpc.VpcId' --output text)
 ```
-<sup>I have chosen /23 CIDR deliberately to allow us to create different subnets for our db and web instances. Excellent resource to understand [CIDR blocks](http://bradthemad.org/tech/notes/cidr_subnets.php) & [here](https://coderwall.com/p/ndm54w/creating-an-ec2-instance-in-a-vpc-with-the-aws-command-line-interface)
+<sup>I have chosen /23 CIDR deliberately to allow us to create different subnets for our db and web instances. **Important:** AWS reserves both the first four and the last IP address in each subnet's CIDR block. They're not available for use.<sup>
 
-**Important:** AWS reserves both the first four and the last IP address in each subnet's CIDR block. They're not available for use.<sup>
+<sup>Excellent resource to understand [CIDR blocks](http://bradthemad.org/tech/notes/cidr_subnets.php) & [here](https://coderwall.com/p/ndm54w/creating-an-ec2-instance-in-a-vpc-with-the-aws-command-line-interface)<sup>
 
 #### Creating subnets for the Database and Web Servers
 ```sh
