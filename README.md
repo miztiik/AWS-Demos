@@ -23,7 +23,8 @@ aws ec2 create-tags --resources $vpcID --tags 'Key=Name,Value=tmpVPC'
 
 #### Creating subnets for the Database and Web Servers
 Lets [reserve the IP Range](https://medium.com/aws-activate-startup-blog/practical-vpc-design-8412e1a18dcc#.dqxj9dlh2) to spread across multiple availability zones.
-| 10.0.0.0/16 |               |                   |
+
+| 10.0.0.0/16 | IP Ranges     | Availability Zone |
 |-------------|---------------|-------------------|
 |             |  10.0.0.0/18  |        AZ A       |
 |             |  10.0.64.0/18 |        AZ B       |
