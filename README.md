@@ -20,11 +20,12 @@ aws ec2 create-tags --resources $vpcID --tags 'Key=Name,Value=tmpVPC'
 <sup>I have chosen /23 CIDR deliberately to allow us to create different subnets for our db and web instances. **Important:** _AWS reserves both the first four and the last IP address in each subnet's CIDR block. They're not available for use. The smallest subnet (and VPC) you can create uses a /28 netmask (16 IP addresses), and the largest uses a /16 netmask (65,536 IP addresses)._ Excellent resource to understand [CIDR blocks](http://bradthemad.org/tech/notes/cidr_subnets.php) & [here](https://coderwall.com/p/ndm54w/creating-an-ec2-instance-in-a-vpc-with-the-aws-command-line-interface)<sup>
 
 #### Creating subnets for the Database and Web Servers
-Lets reserve the IP Range `10.0.1.0 - 10.0.1.15` for Web Servers & IP Ranges `10.0.1.16 - 10.0.1.31` for Database Servers
+Lets reserve the IP Range `10.0.1.0 - 10.0.1.15` for Web Servers & IP Ranges `10.0.1.16 - 10.0.1.31` for Database Servers and create them in different availability Zones. **Important:** [The RDS instances requires the db subnet group requires the subnets to span across(atleast two) availability zones]([http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html?shortFooter=true)
 ```sh
 webSubnetID=$(aws ec2 create-subnet \
            --vpc-id $vpcID \
            --cidr-block 10.0.1.0/28 \
+           --availability-zone us-east-1d \
            --query 'Subnet.SubnetId' \
            --output text)
            
@@ -33,7 +34,9 @@ aws ec2 create-tags --resources $webSubnetID --tags 'Key=Name,Value=WebSubnet'
 dbSubnetID=$(aws ec2 create-subnet \
             --vpc-id $vpcID \
             --cidr-block 10.0.1.16/28 \
-            --query 'Subnet.SubnetId' --output text)
+           --availability-zone us-east-1e \
+            --query 'Subnet.SubnetId' \
+            --output text)
 
 aws ec2 create-tags --resources $dbSubnetID --tags 'Key=Name,Value=DBSubnet'
 ```
