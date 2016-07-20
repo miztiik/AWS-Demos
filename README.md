@@ -127,10 +127,12 @@ aws rds create-db-instance \
         --db-instance-class db.t2.micro \
         --no-multi-az \
         --availability-zone us-east-1e \
-        --vpc-security-group-ids $vpcID \
+        --vpc-security-group-ids $dbSecGrpID \
         --db-security-groups $webSecGrpID $dbSecGrpID \
-        --db-subnet-group-name "Subnet for the RDS Database"
+        --db-subnet-group-name "Subnet for the RDS Database" \
+        --no-auto-minor-version-upgrade \
         --engine mysql \
+        --port 3306 \
         --master-username dbuser \
         --master-user-password dbuserpass \
         --db-name wpdb \
