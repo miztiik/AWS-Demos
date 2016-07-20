@@ -22,7 +22,8 @@ aws ec2 create-tags --resources $vpcID --tags 'Key=Name,Value=tmpVPC'
 
 
 #### Creating subnets for the Database and Web Servers
-Lets reserve the IP Range `10.0.1.0 - 10.0.1.15` for Web Servers & IP Ranges `10.0.1.16 - 10.0.1.31` for Database Servers and create them in different availability Zones. **Important:** [The RDS instances requires the db subnet group requires the subnets to span across (atleast two) availability zones](http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html?shortFooter=true)
+Lets reserve the IP Range `10.0.1.0 - 10.0.1.15` for Web Servers & IP Ranges `10.0.1.16 - 10.0.1.31` for Database Servers and create them in different availability Zones. 
+<sup>**Important:** _[The RDS instances requires the db subnet group requires the subnets to span across (atleast two) availability zones](http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html?shortFooter=true)_<sup>
 ```sh
 webSubnetID=$(aws ec2 create-subnet \
            --vpc-id $vpcID \
