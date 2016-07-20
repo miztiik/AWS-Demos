@@ -127,8 +127,9 @@ aws rds create-db-instance \
         --db-instance-class db.t2.micro \
         --no-multi-az \
         --availability-zone us-east-1e \
-        --vpc-security-group-ids webSecGrpID dbSecGrpID \
-        --db-subnet-group-name dbSu
+        --vpc-security-group-ids $vpcID \
+        --db-security-groups $webSecGrpID $dbSecGrpID \
+        --db-subnet-group-name "Subnet for the RDS Database"
         --engine mysql \
         --master-username dbuser \
         --master-user-password dbuserpass \
