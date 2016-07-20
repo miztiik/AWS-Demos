@@ -4,11 +4,11 @@ Assuming you have already setup your AWS CLI, lets move forward;
 
 
 ### Creating a VPC
-Lets create a `Virtual Private Cloud - VPC` for our setup with 512 IPs and get our VPC ID using the `query` parameter and set the output format to `text`. 
+Lets create a `Virtual Private Cloud - VPC` for our setup with /16 range and get our VPC ID using the `query` parameter and set the output format to `text`. 
 
 ```sh
 vpcID=$(aws ec2 create-vpc \
-      --cidr-block 10.0.0.0/23 \
+      --cidr-block 10.0.0.0/16 \
       --query 'Vpc.VpcId' \
       --output text)
 ```
@@ -22,7 +22,7 @@ aws ec2 create-tags --resources $vpcID --tags 'Key=Name,Value=tmpVPC'
 
 
 #### Creating subnets for the Database and Web Servers
-Lets reserve the IP Range `10.0.1.0 - 10.0.1.15` for Web Servers & IP Ranges `10.0.1.16 - 10.0.1.31` for Database Servers and create them in different availability Zones. 
+Lets [reserve the IP Range](https://medium.com/aws-activate-startup-blog/practical-vpc-design-8412e1a18dcc#.dqxj9dlh2) `10.0.1.0 - 10.0.1.15` for Web Servers & IP Ranges `10.0.1.16 - 10.0.1.31` for Database Servers and create them in different availability Zones. 
 
 <sup>**Important:** _[The RDS instances requires the db subnet group to span across (atleast two) availability zones](http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html?shortFooter=true)_<sup>
 ```sh
@@ -121,6 +121,8 @@ aws ec2 authorize-security-group-ingress \
 
 #### Creating the RDS - MySQL Instance
 ```sh
+
+        --db-security-groups $webSecGrpID $dbSecGrpID \
 aws rds create-db-instance \
         --db-instance-identifier rds-mysql-inst01 \
         --allocated-storage 5 \
@@ -128,8 +130,7 @@ aws rds create-db-instance \
         --no-multi-az \
         --availability-zone us-east-1e \
         --vpc-security-group-ids $dbSecGrpID \
-        --db-security-groups $webSecGrpID $dbSecGrpID \
-        --db-subnet-group-name "Subnet for the RDS Database" \
+        --db-subnet-group-name "DBSubnet" \
         --no-auto-minor-version-upgrade \
         --engine mysql \
         --port 3306 \
