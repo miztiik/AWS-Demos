@@ -98,10 +98,9 @@ _Interesting reading here about why we need to use security group ID instead of 
 >When you specify a security group for a nondefault VPC to the CLI or the API actions, you must use the security group ID and not the >security group name to identify the security group.
 
 
-### Creating a Security Group for Database RDS - MySQL from Web Security Group
+### Creating a Security Group for RDS Database (running MySQL)
  - Group Name - `dbSecGrp`
  - Description - `My Database Security Group`
-
 
 ```sh
 dbSecGrpID=$(aws ec2 create-security-group --group-name dbSecGrp --description "My Database Group for web servers" --vpc-id $vpcID --output text)
