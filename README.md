@@ -107,23 +107,28 @@ _Interesting reading here about why we need to use security group ID instead of 
 dbSecGrpID=$(aws ec2 create-security-group --group-name dbSecGrp --description "My Database Group for web servers" --vpc-id $vpcID --output text)
 ```
 
-#### Add a rule that allows inbound MySQL ( from any source )
+#### Add a rule that allows inbound MySQL from Webservers (in our Web Security Group)
 
 ```sh
-aws ec2 authorize-security-group-ingress --group-id ${dbSecGrpID} --protocol tcp --port 3306 --source-group ${webSecGrpID}
+aws ec2 authorize-security-group-ingress \
+        --group-id ${dbSecGrpID} \
+        --protocol tcp \
+        --port 3306 \
+        --source-group \
+        ${webSecGrpID}
 ```
 
 #### Creating the RDS - MySQL Instance
 ```sh
 aws rds create-db-instance \
---db-instance-identifier rds-mysql-inst01 \
---allocated-storage 5 \
---db-instance-class db.t2.micro \
---engine mysql \
---master-username dbuser \
---master-user-password dbuserpass \
---db-name wpdb \
---backup-retention-period 3
+        --db-instance-identifier rds-mysql-inst01 \
+        --allocated-storage 5 \
+        --db-instance-class db.t2.micro \
+        --engine mysql \
+        --master-username dbuser \
+        --master-user-password dbuserpass \
+        --db-name wpdb \
+        --backup-retention-period 3
 ```
 _**Refer:**_ 
 - [1] https://www.linux.com/blog/introduction-aws-command-line-tool-part-2
