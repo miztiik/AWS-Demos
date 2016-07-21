@@ -21,7 +21,7 @@ aws ec2 create-tags --resources $vpcID --tags 'Key=Name,Value=tmpVPC'
 
 
 
-#### Creating subnets for the Database and Web Servers
+#### Subnets plan for the Database, Web Servers & future
 Lets [reserve the IP Range](https://medium.com/aws-activate-startup-blog/practical-vpc-design-8412e1a18dcc#.dqxj9dlh2) to spread across multiple availability zones.
 
 | 10.0.0.0/16 | IP Ranges     | Availability Zone |
@@ -122,8 +122,10 @@ _Interesting reading here about why we need to use security group ID instead of 
 
 # Creating the RDS Instance
 ## Pre-Requisites
-- A DB Subnet - <sup>**Important:** _[The RDS instances requires the db subnet group to span across (atleast two) availability zones](http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html?shortFooter=true)_<sup>
-### Creating a Security Group for RDS Database (running MySQL)
+- DB Subnet - _[The RDS instances requires the db subnet group to span across (atleast two) availability zones](http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html?shortFooter=true)_
+ - DB Security Group - _Security group all allows other EC2  instances to connect with this RDS instance_
+
+#### Creating a Security Group for RDS Database (running MySQL)
  - Group Name - `dbSecGrp`
  - Description - `My Database Security Group`
 
@@ -131,8 +133,28 @@ _Interesting reading here about why we need to use security group ID instead of 
 dbSecGrpID=$(aws ec2 create-security-group --group-name dbSecGrp --description "My Database Group for web servers" --vpc-id $vpcID --output text)
 ```
 
+#### Add a rule that allows inbound MySQL from Webservers (in our Web Security Group)
 
+```sh
+aws ec2 authorize-security-group-ingress \
+        --group-id ${dbSecGrpID} \
+        --protocol tcp \
+        --port 3306 \
+        --source-group \
+        ${webSecGrpID}
+```
 
+##### Create the `DB Subnet`
+```sh
+dbSubnetID=$(aws ec2 create-subnet \
+            --vpc-id $vpcID \
+            --cidr-block 10.0.1.16/28 \
+           --availability-zone us-east-1e \
+            --query 'Subnet.SubnetId' \
+            --output text)
+
+aws ec2 create-tags --resources $dbSubnetID --tags 'Key=Name,Value=DB-Subnet'
+```
 
 ```sh
 
@@ -151,27 +173,9 @@ aws ec2 create-db-subnet-group \
         
 ```
 
-```sh
-dbSubnetID=$(aws ec2 create-subnet \
-            --vpc-id $vpcID \
-            --cidr-block 10.0.1.16/28 \
-           --availability-zone us-east-1e \
-            --query 'Subnet.SubnetId' \
-            --output text)
 
-aws ec2 create-tags --resources $dbSubnetID --tags 'Key=Name,Value=DB-Subnet'
-```
 
-#### Add a rule that allows inbound MySQL from Webservers (in our Web Security Group)
 
-```sh
-aws ec2 authorize-security-group-ingress \
-        --group-id ${dbSecGrpID} \
-        --protocol tcp \
-        --port 3306 \
-        --source-group \
-        ${webSecGrpID}
-```
 
 #### Creating the RDS - MySQL Instance
 Creates a new DB subnet group. DB subnet groups must contain at least one subnet in at least two AZs in the region.
