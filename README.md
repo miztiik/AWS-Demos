@@ -63,7 +63,7 @@ webSubnetID=$(aws ec2 create-subnet \
            --query 'Subnet.SubnetId' \
            --output text)
            
-aws ec2 create-tags --resources $webSubnetID --tags 'Key=Name,Value=WebSubnet'
+aws ec2 create-tags --resources $webSubnetID --tags 'Key=Name,Value=Web-Subnet'
 ```
 <sup>**Important:** _[The RDS instances requires the db subnet group to span across (atleast two) availability zones](http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html?shortFooter=true)_<sup>
 ```sh
@@ -74,7 +74,7 @@ dbSubnetID=$(aws ec2 create-subnet \
             --query 'Subnet.SubnetId' \
             --output text)
 
-aws ec2 create-tags --resources $dbSubnetID --tags 'Key=Name,Value=DBSubnet'
+aws ec2 create-tags --resources $dbSubnetID --tags 'Key=Name,Value=DB-Subnet'
 ```
 
 Instances launched inside a VPC are invisible to the rest of the internet by default. AWS therefore does not bother assigning them a public DNS name. This can be changed easily by enabling the `DNS` support as shown below,
@@ -179,17 +179,21 @@ _**Refer:**_
 
 #### Launch an instance in your public subnet
 ```sh
-instanceId=$(aws ec2 run-instances 
-\ --image-id ami-ecd5e884 
-\ --count 1 
-\ --instance-type t2.micro 
-\ --key-name ec2-dev 
-\ --security-group-ids $securityGroupId 
-\ --subnet-id $webSubnetID 
-\ --associate-public-ip-address 
-\ --query 'Instances[0].InstanceId' 
-\ --output text)
+instanceID=$(aws ec2 run-instances \
+           --image-id ami-ecd5e884 \
+           --count 1 \
+           --instance-type t2.micro \
+           --key-name ec2-dev \
+           --security-group-ids $securityGroupId \
+           --subnet-id $webSubnetID \
+           --associate-public-ip-address \
+           --query 'Instances[0].InstanceId' \
+           --output text)
 
+instanceUrl=$(aws ec2 describe-instances \
+            --instance-ids $instanceID \
+            --query 'Reservations[0].Instances[0].PublicDnsName' \
+            --output text)
 ```
 
 
