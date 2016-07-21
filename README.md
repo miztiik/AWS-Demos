@@ -85,7 +85,8 @@ USEast1c_SpareSubnetID=$(aws ec2 create-subnet --vpc-id ${vpcID} --cidr-block 10
 # Tag the subnet ID's for AZ2
 aws ec2 create-tags --resources ${USEast1c_DbSubnetID} --tags 'Key=Name,Value=az1-us-east-1c-DB-Subnet'
 aws ec2 create-tags --resources ${USEast1c_WebSubnetID} --tags 'Key=Name,Value=az1-us-east-1c-Web-Subnet'
-aws ec2 create-tags --resources ${USEast1c_SpareSubnetID} --tags 'Key=Name,Value=az1-us-east-1c-Spare-Subnet'```
+aws ec2 create-tags --resources ${USEast1c_SpareSubnetID} --tags 'Key=Name,Value=az1-us-east-1c-Spare-Subnet'
+```
 
 
 #### Configuring the Route Table
