@@ -133,33 +133,12 @@ _Interesting reading here about why we need to use security group ID instead of 
 - DB Subnet - _[The RDS instances requires the db subnet group to span across (atleast two) availability zones](http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html?shortFooter=true)_
  - DB Security Group - _Security group all allows other EC2  instances to connect with this RDS instance_
 
-##### Create the `DB Subnet`
+### Create the `DB Subnet`
 ```sh
-dbSubnetID=$(aws ec2 create-subnet \
-           --vpc-id $vpcID \
-           --cidr-block 10.0.1.16/28 \
-           --availability-zone us-east-1e \
-           --query 'Subnet.SubnetId' \
-           --output text)
-
-aws ec2 create-tags --resources $dbSubnetID --tags 'Key=Name,Value=DB-Subnet'
-```
-
-```sh
-
-create-db-subnet-group
---db-subnet-group-name <value>
---db-subnet-group-description <value>
---subnet-ids <value>
-[--tags <value>]
-[--cli-input-json <value>]
-[--generate-cli-skeleton]
-
-aws ec2 create-db-subnet-group \
-        --db-subnet-group-name "myDBSubnet"
-        --db-subnet-group-description "Subnet group for my databases"
-        --subnet-ids 
-        
+aws rds create-db-subnet-group \
+        --db-subnet-group-name "mysqlDBSubnet" \
+        --db-subnet-group-description "Subnet group for my databases instances" \
+        --subnet-ids ${USEast1b_DbSubnetID} ${USEast1c_DbSubnetID}
 ```
 
 #### Creating a Security Group for RDS Database (running MySQL)
@@ -184,9 +163,6 @@ aws ec2 authorize-security-group-ingress \
         --source-group \
         ${webSecGrpID}
 ```
-
-
-
 
 #### Creating the RDS - MySQL Instance
 Creates a new DB subnet group. DB subnet groups must contain at least one subnet in at least two AZs in the region.
