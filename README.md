@@ -34,7 +34,7 @@ Lets [reserve the IP Range](https://medium.com/aws-activate-startup-blog/practic
 ```sh
 10.0.0.0/16:
     10.0.0.0/18 - AZ A
-        10.0.0.0/19 - Private
+        10.0.0.0/19 - Private (for DB in AZ)
         10.0.32.0/19
                10.0.32.0/20 - Public
                10.0.48.0/20 - Spare
@@ -50,7 +50,7 @@ Lets [reserve the IP Range](https://medium.com/aws-activate-startup-blog/practic
                 10.0.176.0/20 - Spare
     10.0.192.0/18 - Spare
 ```
-
+![alt tag](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/img/VPC-Subnet-AZ-Mapping.png)
 , `10.0.1.0 - 10.0.1.15` for Web Servers & IP Ranges `10.0.1.16 - 10.0.1.31` for Database Servers and create them in different availability Zones. 
 
 <sup>**Important:** _[The RDS instances requires the db subnet group to span across (atleast two) availability zones](http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html?shortFooter=true)_<sup>
