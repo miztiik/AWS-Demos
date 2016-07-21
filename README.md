@@ -167,17 +167,14 @@ aws ec2 authorize-security-group-ingress \
 #### Creating the RDS - MySQL Instance
 Creates a new DB subnet group. DB subnet groups must contain at least one subnet in at least two AZs in the region.
 ```sh
-
-        
 aws rds create-db-instance \
         --db-instance-identifier rds-mysql-inst01 \
         --allocated-storage 5 \
         --db-instance-class db.t2.micro \
         --no-multi-az \
-        --availability-zone us-east-1e \
+        --availability-zone us-east-1b \
         --vpc-security-group-ids $dbSecGrpID \
-        --db-subnet-group-name "DBSubnet" \
-        --db-security-groups $dbSecGrpID \
+        --db-subnet-group-name "mysqldbsubnet" \
         --no-auto-minor-version-upgrade \
         --engine mysql \
         --port 3306 \
