@@ -54,7 +54,7 @@ _After creating all the subnets, It should look something like this,_
 ![alt tag](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/img/VPC-Subnet-AZ-Mapping.png)
  
 
-<sup>**Important:** _[The RDS instances requires the db subnet group to span across (atleast two) availability zones](http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html?shortFooter=true)_<sup>
+
 ```sh
 webSubnetID=$(aws ec2 create-subnet \
            --vpc-id $vpcID \
@@ -64,7 +64,9 @@ webSubnetID=$(aws ec2 create-subnet \
            --output text)
            
 aws ec2 create-tags --resources $webSubnetID --tags 'Key=Name,Value=WebSubnet'
-
+```
+<sup>**Important:** _[The RDS instances requires the db subnet group to span across (atleast two) availability zones](http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html?shortFooter=true)_<sup>
+```sh
 dbSubnetID=$(aws ec2 create-subnet \
             --vpc-id $vpcID \
             --cidr-block 10.0.1.16/28 \
