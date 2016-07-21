@@ -33,6 +33,12 @@ internetGatewayId=$(aws ec2 create-internet-gateway \
 aws ec2 attach-internet-gateway --internet-gateway-id $internetGatewayId --vpc-id $vpcID
 ```
 
+##### Tag the Internet Gateway
+
+```sh
+aws ec2 create-tags --resources $internetGatewayId --tags 'Key=Name,Value=tmpVPC-Internet-Gateway'
+```
+
 <sup>I have chosen /16 CIDR deliberately to allow us to create different subnets for our db, web instances and reserve some for the future. **Important:** _AWS reserves both the first four and the last IP address in each subnet's CIDR block. They're not available for use. The smallest subnet (and VPC) you can create uses a /28 netmask (16 IP addresses), and the largest uses a /16 netmask (65,536 IP addresses). Excellent resources to understand CIDR blocks [here](http://bradthemad.org/tech/notes/cidr_subnets.php) & [here](https://coderwall.com/p/ndm54w/creating-an-ec2-instance-in-a-vpc-with-the-aws-command-line-interface) & my quick help [gist](https://gist.github.com/miztiik/baecbaa67b1f10e38186d70e51c13a6c#file-cidr-ip-range)_<sup>
 
 
@@ -61,21 +67,26 @@ _After creating all the subnets, It should look something like this,_
 
 
 ```sh
-webSubnetID=$(aws ec2 create-subnet \
-           --vpc-id $vpcID \
-           --cidr-block 10.0.1.0/28 \
-           --availability-zone us-east-1d \
-           --query 'Subnet.SubnetId' \
-           --output text)
-           
-aws ec2 create-tags --resources $webSubnetID --tags 'Key=Name,Value=Web-Subnet'
-```
+# Creating subnets for the DB & Web Servers in Multiple AZ1
+USEast1b_DbSubnetID=$(aws ec2 create-subnet --vpc-id ${vpcID} --cidr-block 10.0.0.0/22 --availability-zone us-east-1b --query 'Subnet.SubnetId' --output text)
+USEast1b_WebSubnetID=$(aws ec2 create-subnet --vpc-id ${vpcID} --cidr-block 10.0.4.0/23 --availability-zone us-east-1b --query 'Subnet.SubnetId' --output text)
+USEast1b_SpareSubnetID=$(aws ec2 create-subnet --vpc-id ${vpcID} --cidr-block 10.0.6.0/23 --availability-zone us-east-1b --query 'Subnet.SubnetId' --output text)
 
-##### Tag the Internet Gateway
+# Tag the subnet ID's for AZ1
+aws ec2 create-tags --resources ${USEast1b_DbSubnetID} --tags 'Key=Name,Value=az1-us-east-1b-DB-Subnet'
+aws ec2 create-tags --resources ${USEast1b_WebSubnetID} --tags 'Key=Name,Value=az1-us-east-1b-Web-Subnet'
+aws ec2 create-tags --resources ${USEast1b_SpareSubnetID} --tags 'Key=Name,Value=az1-us-east-1b-Spare-Subnet'
 
-```sh
-aws ec2 create-tags --resources $internetGatewayId --tags 'Key=Name,Value=tmpVPC-Internet-Gateway'
-```
+# Creating subnets for the DB & Web Servers in Multiple AZ2
+USEast1c_DbSubnetID=$(aws ec2 create-subnet --vpc-id ${vpcID} --cidr-block 10.0.8.0/22 --availability-zone us-east-1c --query 'Subnet.SubnetId' --output text)
+USEast1c_WebSubnetID=$(aws ec2 create-subnet --vpc-id ${vpcID} --cidr-block 10.0.12.0/23 --availability-zone us-east-1c --query 'Subnet.SubnetId' --output text)
+USEast1c_SpareSubnetID=$(aws ec2 create-subnet --vpc-id ${vpcID} --cidr-block 10.0.14.0/23 --availability-zone us-east-1c --query 'Subnet.SubnetId' --output text)
+
+# Tag the subnet ID's for AZ2
+aws ec2 create-tags --resources ${USEast1c_DbSubnetID} --tags 'Key=Name,Value=az1-us-east-1c-DB-Subnet'
+aws ec2 create-tags --resources ${USEast1c_WebSubnetID} --tags 'Key=Name,Value=az1-us-east-1c-Web-Subnet'
+aws ec2 create-tags --resources ${USEast1c_SpareSubnetID} --tags 'Key=Name,Value=az1-us-east-1c-Spare-Subnet'```
+
 
 #### Configuring the Route Table
 Each subnet needs to have a route table associated with it to specify the routing of its outbound traffic. By default every subnet inherits the default VPC route table which allows for intra-VPC communication only.
