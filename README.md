@@ -87,12 +87,13 @@ USEast1c_WebSubnetID=$(aws ec2 create-subnet --vpc-id ${vpcID} --cidr-block 10.0
 USEast1c_SpareSubnetID=$(aws ec2 create-subnet --vpc-id ${vpcID} --cidr-block 10.0.14.0/23 --availability-zone us-east-1c --query 'Subnet.SubnetId' --output text)
 ```
 #### Tag the subnet ID's for AZ2
+```sh
 aws ec2 create-tags --resources ${USEast1c_DbSubnetID} --tags 'Key=Name,Value=az1-us-east-1c-DB-Subnet'
 aws ec2 create-tags --resources ${USEast1c_WebSubnetID} --tags 'Key=Name,Value=az1-us-east-1c-Web-Subnet'
 aws ec2 create-tags --resources ${USEast1c_SpareSubnetID} --tags 'Key=Name,Value=az1-us-east-1c-Spare-Subnet'
 ```
 
-#### Configuring the Route Table
+### Configuring the Route Table
 Each subnet needs to have a route table associated with it to specify the routing of its outbound traffic. By default every subnet inherits the default VPC route table which allows for intra-VPC communication only.
 
 The following adds a route table to our subnet that allows traffic not meant for an instance inside the VPC to be routed to the internet through our earlier created internet gateway.
