@@ -32,24 +32,23 @@ Lets [reserve the IP Range](https://medium.com/aws-activate-startup-blog/practic
 |             | 10.0.192.0/18 |        None       |
 
 ```sh
-
 10.0.0.0/16:
-    10.0.0.0/18 — AZ A
-        10.0.0.0/19 — Private
+    10.0.0.0/18 - AZ A
+        10.0.0.0/19 - Private
         10.0.32.0/19
-               10.0.32.0/20 — Public
-               10.0.48.0/20 — Spare
-    10.0.64.0/18 — AZ B
-        10.0.64.0/19 — Private
+               10.0.32.0/20 - Public
+               10.0.48.0/20 - Spare
+    10.0.64.0/18 - AZ B
+        10.0.64.0/19 - Private
         10.0.96.0/19
-                10.0.96.0/20 — Public
-                10.0.112.0/20 — Spare
-    10.0.128.0/18 — AZ C
-        10.0.128.0/19 — Private
+                10.0.96.0/20 - Public
+                10.0.112.0/20 - Spare
+    10.0.128.0/18 - AZ C
+        10.0.128.0/19 - Private
         10.0.160.0/19
-                10.0.160.0/20 — Public
-                10.0.176.0/20 — Spare
-    10.0.192.0/18 — Spare
+                10.0.160.0/20 - Public
+                10.0.176.0/20 - Spare
+    10.0.192.0/18 - Spare
 ```
 
 , `10.0.1.0 - 10.0.1.15` for Web Servers & IP Ranges `10.0.1.16 - 10.0.1.31` for Database Servers and create them in different availability Zones. 
