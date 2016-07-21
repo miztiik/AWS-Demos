@@ -40,32 +40,21 @@ aws ec2 attach-internet-gateway --internet-gateway-id $internetGatewayId --vpc-i
 #### Subnets plan for the Database, Web Servers & future
 Lets [reserve the IP Range](https://medium.com/aws-activate-startup-blog/practical-vpc-design-8412e1a18dcc#.dqxj9dlh2) to spread across multiple availability zones.
 
-| 10.0.0.0/16 | IP Ranges     | Availability Zone |
-|-------------|---------------|-------------------|
-|             |  10.0.0.0/18  |        AZ A       |
-|             |  10.0.64.0/18 |        AZ B       |
-|             | 10.0.128.0/18 |        AZ C       |
-|             | 10.0.192.0/18 |        None       |
-
-```sh
-10.0.0.0/16:
-    10.0.0.0/18 - AZ A
-        10.0.0.0/19 - Private (for DB in AZ)
-        10.0.32.0/19
-               10.0.32.0/20 - Public
-               10.0.48.0/20 - Spare
-    10.0.64.0/18 - AZ B
-        10.0.64.0/19 - Private
-        10.0.96.0/19
-                10.0.96.0/20 - Public
-                10.0.112.0/20 - Spare
-    10.0.128.0/18 - AZ C
-        10.0.128.0/19 - Private
-        10.0.160.0/19
-                10.0.160.0/20 - Public
-                10.0.176.0/20 - Spare
-    10.0.192.0/18 - Spare
-```
+| VPC Range   | Availability Zone | Reservation Purpose | IP Ranges   | IP Ranges    | IP Ranges    |
+|-------------|-------------------|---------------------|-------------|--------------|--------------|
+| 10.0.0.0/20 |                   |                     |             |              |              |
+|             | AZ1               | US-East-1b          | 10.0.0.0/21 |              |              |
+|             | AZ1               | Private - DB Subnet |             |  10.0.0.0/22 |              |
+|             | AZ1               |                     |             |  10.0.4.0/22 |              |
+|             | AZ1               | Web Subnet          |             |              |  10.0.4.0/23 |
+|             | AZ1               | Spare Subnet        |             |              |  10.0.6.0/23 |
+|             |                   |                     |             |              |              |
+|             | AZ2               | US-East-1c          | 10.0.8.0/21 |              |              |
+|             | AZ2               | Private - DB Subnet |             |  10.0.8.0/22 |              |
+|             | AZ2               |                     |             | 10.0.12.0/22 |              |
+|             | AZ2               | Web Subnet          |             |              | 10.0.12.0/23 |
+|             | AZ2               | Spare Subnet        |             |              | 10.0.14.0/23 |
+       
 _After creating all the subnets, It should look something like this,_
 ![alt tag](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/img/VPC-Subnet-AZ-Mapping.png)
  
