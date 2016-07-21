@@ -12,7 +12,7 @@ vpcID=$(aws ec2 create-vpc \
       --query 'Vpc.VpcId' \
       --output text)
 ```
-##### Tag the VPC,
+##### Tag the VPC
 ```sh
 aws ec2 create-tags --resources $vpcID --tags 'Key=Name,Value=tmpVPC'
 ```
@@ -43,7 +43,7 @@ aws ec2 create-tags --resources $internetGatewayId --tags 'Key=Name,Value=tmpVPC
 
 
 
-#### Subnets plan for the Database, Web Servers & future
+## Subnet Reservation for the Database, Web Servers & future
 Lets [reserve the IP Range](https://medium.com/aws-activate-startup-blog/practical-vpc-design-8412e1a18dcc#.dqxj9dlh2) to spread across multiple availability zones.
 
 | VPC Range   | Availability Zone | Reservation Purpose | IP Ranges   | IP Ranges    | IP Ranges    |
@@ -73,7 +73,7 @@ USEast1b_WebSubnetID=$(aws ec2 create-subnet --vpc-id ${vpcID} --cidr-block 10.0
 USEast1b_SpareSubnetID=$(aws ec2 create-subnet --vpc-id ${vpcID} --cidr-block 10.0.6.0/23 --availability-zone us-east-1b --query 'Subnet.SubnetId' --output text)
 ```
 
-#### Tag the subnet ID's for AZ1
+##### Tag the subnet ID's for AZ1
 ```sh
 aws ec2 create-tags --resources ${USEast1b_DbSubnetID} --tags 'Key=Name,Value=az1-us-east-1b-DB-Subnet'
 aws ec2 create-tags --resources ${USEast1b_WebSubnetID} --tags 'Key=Name,Value=az1-us-east-1b-Web-Subnet'
@@ -86,7 +86,7 @@ USEast1c_DbSubnetID=$(aws ec2 create-subnet --vpc-id ${vpcID} --cidr-block 10.0.
 USEast1c_WebSubnetID=$(aws ec2 create-subnet --vpc-id ${vpcID} --cidr-block 10.0.12.0/23 --availability-zone us-east-1c --query 'Subnet.SubnetId' --output text)
 USEast1c_SpareSubnetID=$(aws ec2 create-subnet --vpc-id ${vpcID} --cidr-block 10.0.14.0/23 --availability-zone us-east-1c --query 'Subnet.SubnetId' --output text)
 ```
-#### Tag the subnet ID's for AZ2
+##### Tag the subnet ID's for AZ2
 ```sh
 aws ec2 create-tags --resources ${USEast1c_DbSubnetID} --tags 'Key=Name,Value=az1-us-east-1c-DB-Subnet'
 aws ec2 create-tags --resources ${USEast1c_WebSubnetID} --tags 'Key=Name,Value=az1-us-east-1c-Web-Subnet'
