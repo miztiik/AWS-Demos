@@ -65,17 +65,7 @@ webSubnetID=$(aws ec2 create-subnet \
            
 aws ec2 create-tags --resources $webSubnetID --tags 'Key=Name,Value=Web-Subnet'
 ```
-<sup>**Important:** _[The RDS instances requires the db subnet group to span across (atleast two) availability zones](http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html?shortFooter=true)_<sup>
-```sh
-dbSubnetID=$(aws ec2 create-subnet \
-            --vpc-id $vpcID \
-            --cidr-block 10.0.1.16/28 \
-           --availability-zone us-east-1e \
-            --query 'Subnet.SubnetId' \
-            --output text)
 
-aws ec2 create-tags --resources $dbSubnetID --tags 'Key=Name,Value=DB-Subnet'
-```
 
 Instances launched inside a VPC are invisible to the rest of the internet by default. AWS therefore does not bother assigning them a public DNS name. This can be changed easily by enabling the `DNS` support as shown below,
 
@@ -90,6 +80,7 @@ internetGatewayId=$(aws ec2 create-internet-gateway --query 'InternetGateway.Int
 aws ec2 attach-internet-gateway --internet-gateway-id $internetGatewayId --vpc-id $vpcID
 ```
 ##### Tag the Internet Gateway
+
 ```sh
 aws ec2 create-tags --resources $internetGatewayId --tags 'Key=Name,Value=tmpVPC-Internet-Gateway'
 ```
@@ -120,8 +111,6 @@ webSecGrpID=$(aws ec2 create-security-group --group-name webSecGrp \
 
 #### Add a rule that allows inbound SSH, HTTP, HTTP traffic ( from any source )
 
-Incase you want to confirm yor security group to be sure, To describe a security group for EC2-VPC, `aws ec2 describe-security-groups --group-ids $webSecGrpID`
-
 ```sh
 aws ec2 authorize-security-group-ingress --group-id ${webSecGrpID} --protocol tcp --port 22 --cidr 0.0.0.0/0
 aws ec2 authorize-security-group-ingress --group-id ${webSecGrpID} --protocol tcp --port 80 --cidr 0.0.0.0/0
@@ -129,15 +118,48 @@ aws ec2 authorize-security-group-ingress --group-id ${webSecGrpID} --protocol tc
 ```
 _Interesting reading here about why we need to use security group ID instead of name; [AWS Documentation](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-network-security.html) & [Github Bug Report](https://github.com/hashicorp/terraform/issues/575)_
 
->When you specify a security group for a nondefault VPC to the CLI or the API actions, you must use the security group ID and not the >security group name to identify the security group.
+>When you specify a security group for a nondefault VPC to the CLI or the API actions, you must use the security group ID and not the security group name to identify the security group.
 
-
+# Creating the RDS Instance
+## Pre-Requisites
+- A DB Subnet - <sup>**Important:** _[The RDS instances requires the db subnet group to span across (atleast two) availability zones](http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html?shortFooter=true)_<sup>
 ### Creating a Security Group for RDS Database (running MySQL)
  - Group Name - `dbSecGrp`
  - Description - `My Database Security Group`
 
 ```sh
 dbSecGrpID=$(aws ec2 create-security-group --group-name dbSecGrp --description "My Database Group for web servers" --vpc-id $vpcID --output text)
+```
+
+
+
+
+```sh
+
+  create-db-subnet-group
+--db-subnet-group-name <value>
+--db-subnet-group-description <value>
+--subnet-ids <value>
+[--tags <value>]
+[--cli-input-json <value>]
+[--generate-cli-skeleton]
+
+aws ec2 create-db-subnet-group \
+        --db-subnet-group-name "myDBSubnet"
+        --db-subnet-group-description "Subnet group for my databases"
+        --subnet-ids 
+        
+```
+
+```sh
+dbSubnetID=$(aws ec2 create-subnet \
+            --vpc-id $vpcID \
+            --cidr-block 10.0.1.16/28 \
+           --availability-zone us-east-1e \
+            --query 'Subnet.SubnetId' \
+            --output text)
+
+aws ec2 create-tags --resources $dbSubnetID --tags 'Key=Name,Value=DB-Subnet'
 ```
 
 #### Add a rule that allows inbound MySQL from Webservers (in our Web Security Group)
@@ -152,9 +174,10 @@ aws ec2 authorize-security-group-ingress \
 ```
 
 #### Creating the RDS - MySQL Instance
+Creates a new DB subnet group. DB subnet groups must contain at least one subnet in at least two AZs in the region.
 ```sh
 
-        --db-security-groups $webSecGrpID $dbSecGrpID \
+        
 aws rds create-db-instance \
         --db-instance-identifier rds-mysql-inst01 \
         --allocated-storage 5 \
@@ -163,6 +186,7 @@ aws rds create-db-instance \
         --availability-zone us-east-1e \
         --vpc-security-group-ids $dbSecGrpID \
         --db-subnet-group-name "DBSubnet" \
+        --db-security-groups $dbSecGrpID \
         --no-auto-minor-version-upgrade \
         --engine mysql \
         --port 3306 \
