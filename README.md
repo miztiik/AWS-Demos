@@ -133,7 +133,11 @@ _Interesting reading here about why we need to use security group ID instead of 
  - Description - `My Database Security Group`
 
 ```sh
-dbSecGrpID=$(aws ec2 create-security-group --group-name dbSecGrp --description "My Database Group for web servers" --vpc-id $vpcID --output text)
+dbSecGrpID=$(aws ec2 create-security-group \
+           --group-name dbSecGrp \
+           --description "My Database Group for web servers" \
+           --vpc-id $vpcID \
+           --output text)
 ```
 
 #### Add a rule that allows inbound MySQL from Webservers (in our Web Security Group)
