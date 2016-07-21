@@ -4,7 +4,7 @@ Assuming you have already setup your AWS CLI, lets move forward;
 
 
 ### Creating a VPC
-Lets create a `Virtual Private Cloud - VPC` for our setup with /16 range and get our VPC ID using the `query` parameter and set the output format to `text`. 
+Lets create a `Virtual Private Cloud - VPC` for our setup with /16 range and get our VPC ID using the `query` parameter and set the output format to `text`. Its is a good practice to give meaningful name to the AWS resources, Lets call our VPC `tmpVPC`
 
 ```sh
 vpcID=$(aws ec2 create-vpc \
@@ -12,12 +12,26 @@ vpcID=$(aws ec2 create-vpc \
       --query 'Vpc.VpcId' \
       --output text)
 ```
-##### Tag the VPC
-Its is a good practice to give meaningful name to the AWS resources, Lets call our VPC `tmpVPC`
+##### Tag the VPC,
 ```sh
 aws ec2 create-tags --resources $vpcID --tags 'Key=Name,Value=tmpVPC'
 ```
-<sup>I have chosen /23 CIDR deliberately to allow us to create different subnets for our db and web instances. **Important:** _AWS reserves both the first four and the last IP address in each subnet's CIDR block. They're not available for use. The smallest subnet (and VPC) you can create uses a /28 netmask (16 IP addresses), and the largest uses a /16 netmask (65,536 IP addresses). Excellent resources to understand CIDR blocks [here](http://bradthemad.org/tech/notes/cidr_subnets.php) & [here](https://coderwall.com/p/ndm54w/creating-an-ec2-instance-in-a-vpc-with-the-aws-command-line-interface) & my quick help [gist](https://gist.github.com/miztiik/baecbaa67b1f10e38186d70e51c13a6c#file-cidr-ip-range)_<sup>
+
+Instances launched inside a VPC are invisible to the rest of the internet by default. AWS therefore does not bother assigning them a public DNS name. This can be changed easily by enabling the `DNS` support as shown below,
+
+```sh
+aws ec2 modify-vpc-attribute --vpc-id $vpcID --enable-dns-support "{\"Value\":true}"
+
+aws ec2 modify-vpc-attribute --vpc-id $vpcID --enable-dns-hostnames "{\"Value\":true}"
+```
+
+_Check if internet gateway is set. If it wasn't there then do these,_
+```sh 
+internetGatewayId=$(aws ec2 create-internet-gateway --query 'InternetGateway.InternetGatewayId' --output text) && echo $internetGatewayId
+aws ec2 attach-internet-gateway --internet-gateway-id $internetGatewayId --vpc-id $vpcID
+```
+
+<sup>I have chosen /16 CIDR deliberately to allow us to create different subnets for our db, web instances and reserve some for the future. **Important:** _AWS reserves both the first four and the last IP address in each subnet's CIDR block. They're not available for use. The smallest subnet (and VPC) you can create uses a /28 netmask (16 IP addresses), and the largest uses a /16 netmask (65,536 IP addresses). Excellent resources to understand CIDR blocks [here](http://bradthemad.org/tech/notes/cidr_subnets.php) & [here](https://coderwall.com/p/ndm54w/creating-an-ec2-instance-in-a-vpc-with-the-aws-command-line-interface) & my quick help [gist](https://gist.github.com/miztiik/baecbaa67b1f10e38186d70e51c13a6c#file-cidr-ip-range)_<sup>
 
 
 
@@ -66,19 +80,6 @@ webSubnetID=$(aws ec2 create-subnet \
 aws ec2 create-tags --resources $webSubnetID --tags 'Key=Name,Value=Web-Subnet'
 ```
 
-
-Instances launched inside a VPC are invisible to the rest of the internet by default. AWS therefore does not bother assigning them a public DNS name. This can be changed easily by enabling the `DNS` support as shown below,
-
-```sh
-aws ec2 modify-vpc-attribute --vpc-id $vpcID --enable-dns-support "{\"Value\":true}"
-
-aws ec2 modify-vpc-attribute --vpc-id $vpcID --enable-dns-hostnames "{\"Value\":true}"
-```
-_Check if internet gateway is set, If it wasn't there then do these,_
-```sh 
-internetGatewayId=$(aws ec2 create-internet-gateway --query 'InternetGateway.InternetGatewayId' --output text) && echo $internetGatewayId
-aws ec2 attach-internet-gateway --internet-gateway-id $internetGatewayId --vpc-id $vpcID
-```
 ##### Tag the Internet Gateway
 
 ```sh
