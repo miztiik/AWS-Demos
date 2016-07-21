@@ -27,7 +27,9 @@ aws ec2 modify-vpc-attribute --vpc-id $vpcID --enable-dns-hostnames "{\"Value\":
 
 _Check if internet gateway is set. If it wasn't there then do these,_
 ```sh 
-internetGatewayId=$(aws ec2 create-internet-gateway --query 'InternetGateway.InternetGatewayId' --output text) && echo $internetGatewayId
+internetGatewayId=$(aws ec2 create-internet-gateway \
+                  --query 'InternetGateway.InternetGatewayId' \
+                  --output text) && echo $internetGatewayId
 aws ec2 attach-internet-gateway --internet-gateway-id $internetGatewayId --vpc-id $vpcID
 ```
 
