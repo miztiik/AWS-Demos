@@ -39,7 +39,7 @@ aws ec2 attach-internet-gateway --internet-gateway-id $internetGatewayId --vpc-i
 aws ec2 create-tags --resources $internetGatewayId --tags 'Key=Name,Value=tmpVPC-Internet-Gateway'
 ```
 
-<sup>I have chosen /16 CIDR deliberately to allow us to create different subnets for our db, web instances and reserve some for the future. **Important:** _AWS reserves both the first four and the last IP address in each subnet's CIDR block. They're not available for use. The smallest subnet (and VPC) you can create uses a /28 netmask (16 IP addresses), and the largest uses a /16 netmask (65,536 IP addresses). Excellent resources to understand CIDR blocks [here](http://bradthemad.org/tech/notes/cidr_subnets.php) & [here](https://coderwall.com/p/ndm54w/creating-an-ec2-instance-in-a-vpc-with-the-aws-command-line-interface) & my quick help [gist](https://gist.github.com/miztiik/baecbaa67b1f10e38186d70e51c13a6c#file-cidr-ip-range)_<sup>
+<sup>I have chosen /20 CIDR deliberately to allow us to create different subnets for our db, web instances and reserve some for the future. You might want to choose something else that works better for you. **Important:** _AWS reserves both the first four and the last IP address in each subnet's CIDR block. They're not available for use. The smallest subnet (and VPC) you can create uses a /28 netmask (16 IP addresses), and the largest uses a /16 netmask (65,536 IP addresses). Excellent resources to understand CIDR blocks [here](http://bradthemad.org/tech/notes/cidr_subnets.php) & [here](https://coderwall.com/p/ndm54w/creating-an-ec2-instance-in-a-vpc-with-the-aws-command-line-interface) & my quick help [gist](https://gist.github.com/miztiik/baecbaa67b1f10e38186d70e51c13a6c#file-cidr-ip-range)_<sup>
 
 
 
@@ -172,10 +172,10 @@ aws rds create-db-instance \
         --allocated-storage 5 \
         --db-instance-class db.t2.micro \
         --no-multi-az \
+        --no-auto-minor-version-upgrade \
         --availability-zone us-east-1b \
         --vpc-security-group-ids $dbSecGrpID \
         --db-subnet-group-name "mysqldbsubnet" \
-        --no-auto-minor-version-upgrade \
         --engine mysql \
         --port 3306 \
         --master-username dbuser \
@@ -187,6 +187,7 @@ aws rds create-db-instance \
 _**Refer:**_ 
 - [1] https://www.linux.com/blog/introduction-aws-command-line-tool-part-2
 - [2] http://docs.aws.amazon.com/cli/latest/reference/rds/create-db-instance.html
+- [3] [Cloning RDS Instances for Testing](http://blog.dmcquay.com/devops/2015/09/18/cloning-rds-instances-for-testing.html)
 
 
 #### Launch an instance in your public subnet
