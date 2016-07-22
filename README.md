@@ -79,9 +79,13 @@ USEast1b_SpareSubnetID=$(aws ec2 create-subnet --vpc-id ${vpcID} --cidr-block 10
 
 ##### Tag the subnet ID's for AZ1
 ```sh
-aws ec2 create-tags --resources ${USEast1b_DbSubnetID} --tags 'Key=Name,Value=az1-us-east-1b-DB-Subnet'
-aws ec2 create-tags --resources ${USEast1b_WebSubnetID} --tags 'Key=Name,Value=az1-us-east-1b-Web-Subnet'
-aws ec2 create-tags --resources ${USEast1b_SpareSubnetID} --tags 'Key=Name,Value=az1-us-east-1b-Spare-Subnet'
+
+aws ec2 create-tags --resources "$USEast1b_DbSubnetID" --tags 'Key=Name,Value=az1-us-east-1b-DB-Subnet'
+
+aws ec2 create-tags --resources "$USEast1b_WebSubnetID" --tags 'Key=Name,Value=az1-us-east-1b-Web-Subnet'
+
+aws ec2 create-tags --resources "$USEast1b_SpareSubnetID" --tags 'Key=Name,Value=az1-us-east-1b-Spare-Subnet'
+
 ```
 
 ### Creating subnets for the DB & Web Servers in AZ2
