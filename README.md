@@ -122,7 +122,7 @@ routeTableID=$(aws ec2 create-route-table --vpc-id "$vpcID" --query 'RouteTable.
 
 aws ec2 create-route --route-table-id "$routeTableID" --destination-cidr-block 0.0.0.0/0 --gateway-id "$internetGatewayId"
 
-aws ec2 associate-route-table --route-table-id "$routeTableID" --subnet-id "$USEast1c_WebSubnetID"
+aws ec2 associate-route-table --route-table-id "$routeTableID" --subnet-id "$USEast1b_WebSubnetID"
 
 aws ec2 associate-route-table --route-table-id "$routeTableID" --subnet-id "$USEast1c_WebSubnetID"
 ```
