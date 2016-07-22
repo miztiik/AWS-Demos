@@ -120,7 +120,7 @@ The following adds a route table to our subnet that allows traffic not meant for
 ```sh
 routeTableID=$(aws ec2 create-route-table --vpc-id "$vpcID" --query 'RouteTable.RouteTableId' --output text)
 
-aws ec2 associate-route-table --route-table-id "$routeTableID" --subnet-id "$webSubnetID"
+aws ec2 associate-route-table --route-table-id "$routeTableID" --subnet-id "$USEast1b_WebSubnetID" "USEast1c_WebSubnetID"
 
 aws ec2 create-route --route-table-id "$routeTableID" --destination-cidr-block 0.0.0.0/0 --gateway-id "$internetGatewayId"
 ```
