@@ -1,7 +1,11 @@
 # AWS 2 Tier Architecture setup with AWS CLI - Wordpress application on AWS RDS running MySQL
 
-Assuming you have already setup your AWS CLI, lets move forward;
+Assuming you have already setup your AWS CLI for Region `US East (N. Virginia)`, lets move forward;
 
+### Setting the AWS Region
+```sh
+aws ec2 describe-availability-zones --region us-east-1
+```
 
 ### Creating a VPC
 Lets create a `Virtual Private Cloud - VPC` for our setup with /20 range and get our VPC ID using the `query` parameter and set the output format to `text`. Its is a good practice to give meaningful name to the AWS resources, Lets call our VPC `tmpVPC`
