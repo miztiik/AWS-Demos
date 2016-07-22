@@ -9,7 +9,7 @@ Assuming you have already setup your AWS CLI for Region `US East (N. Virginia)`.
 # Part 1 - Create VPC, Subnet, Security Group
 ### Setting the AWS Region
 ```sh
-aws ec2 describe-availability-zones --region us-east-1
+export AWS_DEFAULT_REGION=us-east-1
 ```
 
 ### Creating a VPC
