@@ -18,23 +18,23 @@ vpcID=$(aws ec2 create-vpc \
 ```
 ##### Tag the VPC
 ```sh
-aws ec2 create-tags --resources $vpcID --tags 'Key=Name,Value=tmpVPC'
+aws ec2 create-tags --resources "$vpcID" --tags 'Key=Name,Value=tmpVPC'
 ```
 
 Instances launched inside a VPC are invisible to the rest of the internet by default. AWS therefore does not bother assigning them a public DNS name. This can be changed easily by enabling the `DNS` support as shown below,
 
 ```sh
-aws ec2 modify-vpc-attribute --vpc-id $vpcID --enable-dns-support "{\"Value\":true}"
+aws ec2 modify-vpc-attribute --vpc-id "$vpcID" --enable-dns-support "{\"Value\":true}"
 
-aws ec2 modify-vpc-attribute --vpc-id $vpcID --enable-dns-hostnames "{\"Value\":true}"
+aws ec2 modify-vpc-attribute --vpc-id "$vpcID" --enable-dns-hostnames "{\"Value\":true}"
 ```
 
 _Check if internet gateway is set. If it wasn't there then do these,_
 ```sh 
 internetGatewayId=$(aws ec2 create-internet-gateway \
                   --query 'InternetGateway.InternetGatewayId' \
-                  --output text) && echo $internetGatewayId
-aws ec2 attach-internet-gateway --internet-gateway-id $internetGatewayId --vpc-id $vpcID
+                  --output text) && echo "$internetGatewayId"
+aws ec2 attach-internet-gateway --internet-gateway-id "$internetGatewayId" --vpc-id "$vpcID"
 ```
 
 ##### Tag the Internet Gateway
@@ -72,9 +72,11 @@ _After creating all the subnets, It should look something like this,_
 
 ### Creating subnets for the DB & Web Servers in AZ1
 ```sh
-USEast1b_DbSubnetID=$(aws ec2 create-subnet --vpc-id ${vpcID} --cidr-block 10.0.0.0/22 --availability-zone us-east-1b --query 'Subnet.SubnetId' --output text)
-USEast1b_WebSubnetID=$(aws ec2 create-subnet --vpc-id ${vpcID} --cidr-block 10.0.4.0/23 --availability-zone us-east-1b --query 'Subnet.SubnetId' --output text)
-USEast1b_SpareSubnetID=$(aws ec2 create-subnet --vpc-id ${vpcID} --cidr-block 10.0.6.0/23 --availability-zone us-east-1b --query 'Subnet.SubnetId' --output text)
+USEast1b_DbSubnetID=$(aws ec2 create-subnet --vpc-id "$vpcID" --cidr-block 10.0.0.0/22 --availability-zone us-east-1b --query 'Subnet.SubnetId' --output text)
+
+USEast1b_WebSubnetID=$(aws ec2 create-subnet --vpc-id "$vpcID" --cidr-block 10.0.4.0/23 --availability-zone us-east-1b --query 'Subnet.SubnetId' --output text)
+
+USEast1b_SpareSubnetID=$(aws ec2 create-subnet --vpc-id "$vpcID" --cidr-block 10.0.6.0/23 --availability-zone us-east-1b --query 'Subnet.SubnetId' --output text)
 ```
 
 ##### Tag the subnet ID's for AZ1
@@ -111,11 +113,11 @@ Each subnet needs to have a route table associated with it to specify the routin
 The following adds a route table to our subnet that allows traffic not meant for an instance inside the VPC to be routed to the internet through our earlier created internet gateway.
 
 ```sh
-routeTableID=$(aws ec2 create-route-table --vpc-id $vpcID --query 'RouteTable.RouteTableId' --output text)
+routeTableID=$(aws ec2 create-route-table --vpc-id "$vpcID" --query 'RouteTable.RouteTableId' --output text)
 
-aws ec2 associate-route-table --route-table-id $routeTableID --subnet-id $webSubnetID
+aws ec2 associate-route-table --route-table-id "$routeTableID" --subnet-id "$webSubnetID"
 
-aws ec2 create-route --route-table-id $routeTableID --destination-cidr-block 0.0.0.0/0 --gateway-id $internetGatewayId
+aws ec2 create-route --route-table-id "$routeTableID" --destination-cidr-block 0.0.0.0/0 --gateway-id "$internetGatewayId"
 ```
 
 ### Creating a security group for the Web Servers
@@ -125,16 +127,16 @@ aws ec2 create-route --route-table-id $routeTableID --destination-cidr-block 0.0
 ```sh
 webSecGrpID=$(aws ec2 create-security-group --group-name webSecGrp \
             --description "My Security Group for web servers" \
-            --vpc-id $vpcID \
+            --vpc-id "$vpcID" \
             --output text)
 ```
 
 #### Add a rule that allows inbound SSH, HTTP, HTTP traffic ( from any source )
 
 ```sh
-aws ec2 authorize-security-group-ingress --group-id ${webSecGrpID} --protocol tcp --port 22 --cidr 0.0.0.0/0
-aws ec2 authorize-security-group-ingress --group-id ${webSecGrpID} --protocol tcp --port 80 --cidr 0.0.0.0/0
-aws ec2 authorize-security-group-ingress --group-id ${webSecGrpID} --protocol tcp --port 443 --cidr 0.0.0.0/0
+aws ec2 authorize-security-group-ingress --group-id "$webSecGrpID" --protocol tcp --port 22 --cidr 0.0.0.0/0
+aws ec2 authorize-security-group-ingress --group-id "$webSecGrpID" --protocol tcp --port 80 --cidr 0.0.0.0/0
+aws ec2 authorize-security-group-ingress --group-id "$webSecGrpID" --protocol tcp --port 443 --cidr 0.0.0.0/0
 ```
 _Interesting reading here about why we need to use security group ID instead of name; [AWS Documentation](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-network-security.html) & [Github Bug Report](https://github.com/hashicorp/terraform/issues/575)_
 
@@ -150,7 +152,7 @@ _Interesting reading here about why we need to use security group ID instead of 
 aws rds create-db-subnet-group \
         --db-subnet-group-name "mysqlDBSubnet" \
         --db-subnet-group-description "Subnet group for my databases instances" \
-        --subnet-ids ${USEast1b_DbSubnetID} ${USEast1c_DbSubnetID}
+        --subnet-ids "$USEast1b_DbSubnetID" "$USEast1c_DbSubnetID"
 ```
 
 #### Creating a Security Group for RDS Database (running MySQL)
@@ -161,7 +163,7 @@ aws rds create-db-subnet-group \
 dbSecGrpID=$(aws ec2 create-security-group \
            --group-name dbSecGrp \
            --description "My Database Group for web servers" \
-           --vpc-id $vpcID \
+           --vpc-id "$vpcID" \
            --output text)
 ```
 
@@ -169,11 +171,11 @@ dbSecGrpID=$(aws ec2 create-security-group \
 
 ```sh
 aws ec2 authorize-security-group-ingress \
-        --group-id ${dbSecGrpID} \
+        --group-id "$dbSecGrpID" \
         --protocol tcp \
         --port 3306 \
         --source-group \
-        ${webSecGrpID}
+        "$webSecGrpID"
 ```
 
 #### Creating the RDS - MySQL Instance
@@ -186,7 +188,7 @@ aws rds create-db-instance \
         --no-multi-az \
         --no-auto-minor-version-upgrade \
         --availability-zone us-east-1b \
-        --vpc-security-group-ids $dbSecGrpID \
+        --vpc-security-group-ids "$dbSecGrpID" \
         --db-subnet-group-name "mysqldbsubnet" \
         --engine mysql \
         --port 3306 \
@@ -209,14 +211,14 @@ instanceID=$(aws ec2 run-instances \
            --count 1 \
            --instance-type t2.micro \
            --key-name ec2-dev \
-           --security-group-ids $securityGroupId \
-           --subnet-id $webSubnetID \
+           --security-group-ids "$securityGroupId" \
+           --subnet-id "$webSubnetID" \
            --associate-public-ip-address \
            --query 'Instances[0].InstanceId' \
            --output text)
 
 instanceUrl=$(aws ec2 describe-instances \
-            --instance-ids $instanceID \
+            --instance-ids "$instanceID" \
             --query 'Reservations[0].Instances[0].PublicDnsName' \
             --output text)
 ```
