@@ -228,6 +228,8 @@ instanceUrl=$(aws ec2 describe-instances \
 ```
 
 ### Create the Elastic Load Balancer
+_**Ref:**_ https://aws.amazon.com/articles/1636185810492479
+
 aws elb create-load-balancer \
 --load-balancer-name my-load-balancer \
 --listeners "Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80" \
