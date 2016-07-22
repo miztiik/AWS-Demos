@@ -62,7 +62,7 @@ Lets [reserve the IP Range](https://medium.com/aws-activate-startup-blog/practic
 |             | AZ2               | Spare Subnet        |             |              | 10.0.14.0/23 |
        
 _After creating all the subnets, It should look something like this,_
-![alt tag](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/img/VPC-Subnet-AZ-Mapping.png)
+![alt tag](https://github.com/miztiik/AWS-Demos/blob/master/img/VPC-Subnet-AZ%5B1-2%5D-Mapping.png)
  
 
 
