@@ -4,11 +4,11 @@ Assuming you have already setup your AWS CLI, lets move forward;
 
 
 ### Creating a VPC
-Lets create a `Virtual Private Cloud - VPC` for our setup with /16 range and get our VPC ID using the `query` parameter and set the output format to `text`. Its is a good practice to give meaningful name to the AWS resources, Lets call our VPC `tmpVPC`
+Lets create a `Virtual Private Cloud - VPC` for our setup with /20 range and get our VPC ID using the `query` parameter and set the output format to `text`. Its is a good practice to give meaningful name to the AWS resources, Lets call our VPC `tmpVPC`
 
 ```sh
 vpcID=$(aws ec2 create-vpc \
-      --cidr-block 10.0.0.0/16 \
+      --cidr-block 10.0.0.0/20 \
       --query 'Vpc.VpcId' \
       --output text)
 ```
