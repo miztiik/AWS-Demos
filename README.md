@@ -2,6 +2,11 @@
 
 Assuming you have already setup your AWS CLI for Region `US East (N. Virginia)`, lets move forward;
 
+There are two parts to the setup
+- **Part 1** - Setting up the network infrastructure (VPC, Subnets, Security Groups)
+- **Part 2** - Creating & Configure the Database, Web & Load Balancer Instances
+
+# Part 1 - Create VPC, Subnet, Security Group
 ### Setting the AWS Region
 ```sh
 aws ec2 describe-availability-zones --region us-east-1
@@ -177,8 +182,8 @@ aws ec2 authorize-security-group-ingress \
         --source-group \
         "$webSecGrpID"
 ```
-
-#### Creating the RDS - MySQL Instance
+# Part 2 - Creating & Configure the Database, Web & Load Balancer Instances
+### Creating the RDS - MySQL Instance
 Creates a new DB subnet group. DB subnet groups must contain at least one subnet in at least two AZs in the region.
 ```sh
 aws rds create-db-instance \
@@ -203,8 +208,7 @@ _**Refer:**_
 - [2] http://docs.aws.amazon.com/cli/latest/reference/rds/create-db-instance.html
 - [3] [Cloning RDS Instances for Testing](http://blog.dmcquay.com/devops/2015/09/18/cloning-rds-instances-for-testing.html)
 
-
-#### Launch an instance in your public subnet
+### Create the Web Servers
 ```sh
 instanceID=$(aws ec2 run-instances \
            --image-id ami-ecd5e884 \
@@ -223,7 +227,8 @@ instanceUrl=$(aws ec2 describe-instances \
             --output text)
 ```
 
-
+### Create the Elastic Load Balancer
+aws elb create-load-balancer --load-balancer-name my-load-balancer --listeners "Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80" --subnets subnet-15aaab61 --security-groups sg-a61988c3
 
 
 
