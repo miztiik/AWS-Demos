@@ -1,10 +1,10 @@
 # AWS 2 Tier Architecture setup with AWS CLI - Wordpress application on AWS RDS running MySQL
 
-Assuming you have already setup your AWS CLI for Region `US East (N. Virginia)`, lets move forward;
-
-There are two parts to the setup
+There are two parts to the setup,
 - **Part 1** - Setting up the network infrastructure (VPC, Subnets, Security Groups)
 - **Part 2** - Creating & Configure the Database, Web & Load Balancer Instances
+
+Assuming you have already setup your AWS CLI for Region `US East (N. Virginia)`. Lets move forward;
 
 # Part 1 - Create VPC, Subnet, Security Group
 ### Setting the AWS Region
