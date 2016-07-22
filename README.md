@@ -131,7 +131,7 @@ aws ec2 create-route --route-table-id "$routeTableID" --destination-cidr-block 0
 
 ```sh
 webSecGrpID=$(aws ec2 create-security-group --group-name webSecGrp \
-            --description "My Security Group for web servers" \
+            --description "Security Group for Web servers" \
             --vpc-id "$vpcID" \
             --output text)
 ```
@@ -167,7 +167,7 @@ aws rds create-db-subnet-group \
 ```sh
 dbSecGrpID=$(aws ec2 create-security-group \
            --group-name dbSecGrp \
-           --description "My Database Group for web servers" \
+           --description "Security Group for database servers" \
            --vpc-id "$vpcID" \
            --output text)
 ```
