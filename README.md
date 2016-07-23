@@ -210,26 +210,73 @@ _**Refer:**_
 - [2] http://docs.aws.amazon.com/cli/latest/reference/rds/create-db-instance.html
 - [3] [Cloning RDS Instances for Testing](http://blog.dmcquay.com/devops/2015/09/18/cloning-rds-instances-for-testing.html)
 
+##### Create a DB parameter group to monitor CRUD
+```sh
+aws rds create-db-parameter-group \
+    --db-parameter-group-name myParamGrp \
+    --db-parameter-group-family MySQL5.6 \
+    --description "My new parameter group"
+
+aws rds modify-db-instance --db-instance-identifier rds-mysql-inst01 --db-parameter-group-name myParamGrp
+
+aws rds modify-db-parameter-group --db-parameter-group-name myParamGrp --parameters "ParameterName=general_log, ParameterValue=ON, Description=logParameter,ApplyMethod=immediate"
+```
+
+
+
+
+
+```sh
+aws ec2 create-key-pair --key-name webKey --query 'KeyMaterial' --output text > webKey.pem
+chmod 400 webKey.pem
+
+cat >> userDataScript <<EOF
+#!/bin/bash
+set -e -x
+
+# Setting up the HTTP server 
+yum update -y
+yum install -y httpd php php-mysql mysql
+service httpd start
+chkconfig httpd on
+groupadd www
+usermod -a -G www ec2-user
+
+
+# Download wordpress site & move to http
+cd /var/www/
+wget https://wordpress.org/latest.tar.gz && tar -zxf latest.tar.gz
+rm -rf /var/www/html
+mv wordpress /var/www/html
+
+# Set the permissions
+chown -R root:www /var/www
+chmod 2775 /var/www
+find /var/www -type d -exec chmod 2775 {} +
+find /var/www -type f -exec chmod 0664 {} +
+echo "<?php phpinfo(); ?>" > /var/www/html/phpinfo.php
+EOF
+```
 ### Create the Web Servers
 ```sh
 instanceID=$(aws ec2 run-instances \
-           --image-id ami-ecd5e884 \
+           --image-id ami-2051294a \
            --count 1 \
            --instance-type t2.micro \
-           --key-name ec2-dev \
-           --security-group-ids "$securityGroupId" \
+           --key-name webKey \
+           --security-group-ids "$webSecGrpID" \
            --subnet-id "$webSubnetID" \
+           --user-data file://userDataScript \
            --associate-public-ip-address \
            --query 'Instances[0].InstanceId' \
            --output text)
-
+           
 instanceUrl=$(aws ec2 describe-instances \
             --instance-ids "$instanceID" \
             --query 'Reservations[0].Instances[0].PublicDnsName' \
             --output text)
             
 # Get the IP address of the running instance:
-
 ip_address=$(aws ec2 describe-instances \
            --instance-ids $instance_id \
            --output text --query 'Reservations[*].Instances[*].PublicIpAddress')
