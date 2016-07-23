@@ -263,14 +263,14 @@ instanceID=$(aws ec2 run-instances \
            --image-id ami-2051294a \
            --count 1 \
            --instance-type t2.micro \
-           --key-name webKey \
+           --key-name wpKey \
            --security-group-ids "$webSecGrpID" \
-           --subnet-id "$USEast1c_WebSubnetID" \
+           --subnet-id "$webSubnetID" \
            --user-data file://userDataScript \
            --associate-public-ip-address \
            --query 'Instances[0].InstanceId' \
            --output text)
-           
+
 instanceUrl=$(aws ec2 describe-instances \
             --instance-ids "$instanceID" \
             --query 'Reservations[0].Instances[0].PublicDnsName' \
@@ -280,7 +280,7 @@ instanceUrl=$(aws ec2 describe-instances \
 ip_address=$(aws ec2 describe-instances \
            --instance-ids "$instanceID" \
            --output text --query 'Reservations[*].Instances[*].PublicIpAddress')
-           ```
+```
 
 ### Create the Elastic Load Balancer
 _**Ref:**_ https://aws.amazon.com/articles/1636185810492479
