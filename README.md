@@ -257,6 +257,7 @@ find /var/www -type f -exec chmod 0664 {} +
 
 # SE Linux permissive
 setsebool -P httpd_can_network_connect=1
+setsebool httpd_can_network_connect_db on
 
 systemctl restart httpd
 echo "<?php phpinfo(); ?>" > /var/www/html/phpinfo.php
