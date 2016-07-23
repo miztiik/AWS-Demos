@@ -245,7 +245,7 @@ usermod -a -G www ec2-user
 
 # Download wordpress site & move to http
 cd /var/www/
-wget https://wordpress.org/latest.tar.gz && tar -zxf latest.tar.gz
+curl -o https://wordpress.org/latest.tar.gz && tar -zxf latest.tar.gz
 rm -rf /var/www/html
 mv wordpress /var/www/html
 
