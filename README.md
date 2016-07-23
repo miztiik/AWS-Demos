@@ -225,7 +225,7 @@ aws rds modify-db-parameter-group --db-parameter-group-name myParamGrp --paramet
 
 
 
-
+## Create the Web Servers
 ```sh
 aws ec2 create-key-pair --key-name webKey --query 'KeyMaterial' --output text > webKey.pem
 chmod 400 webKey.pem
@@ -257,7 +257,7 @@ find /var/www -type f -exec chmod 0664 {} +
 echo "<?php phpinfo(); ?>" > /var/www/html/phpinfo.php
 EOF
 ```
-### Create the Web Servers
+
 ```sh
 instanceID=$(aws ec2 run-instances \
            --image-id ami-2051294a \
