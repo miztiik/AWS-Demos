@@ -275,12 +275,12 @@ instanceUrl=$(aws ec2 describe-instances \
             --instance-ids "$instanceID" \
             --query 'Reservations[0].Instances[0].PublicDnsName' \
             --output text)
-            
+
 # Get the IP address of the running instance:
 ip_address=$(aws ec2 describe-instances \
-           --instance-ids $instance_id \
+           --instance-ids "$instanceID" \
            --output text --query 'Reservations[*].Instances[*].PublicIpAddress')
-```
+           ```
 
 ### Create the Elastic Load Balancer
 _**Ref:**_ https://aws.amazon.com/articles/1636185810492479
