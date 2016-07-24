@@ -155,6 +155,7 @@ _Interesting reading here about why we need to use security group ID instead of 
  - DB Security Group - _Security group all allows other EC2  instances to connect with this RDS instance_
 
 ### Create the `DB Subnet`
+Creates a new DB subnet group. DB subnet groups must contain at least one subnet in at least two AZs in the region.
 ```sh
 aws rds create-db-subnet-group \
         --db-subnet-group-name "mysqlDBSubnet" \
@@ -184,12 +185,22 @@ aws ec2 authorize-security-group-ingress \
         --source-group \
         "$webSecGrpID"
 ```
-# Part 2 - Creating & Configure the Database, Web & Load Balancer Instances
-### Creating the RDS - MySQL Instance
-Creates a new DB subnet group. DB subnet groups must contain at least one subnet in at least two AZs in the region.
+
+##### Create a DB parameter group to monitor CRUD
 ```sh
+aws rds create-db-parameter-group \
+    --db-parameter-group-name myParamGrp \
+    --db-parameter-group-family MySQL5.6 \
+    --description "My new parameter group"
+
+aws rds modify-db-parameter-group --db-parameter-group-name myParamGrp --parameters "ParameterName=general_log, ParameterValue=ON, Description=logParameter,ApplyMethod=immediate"
+```
+
+### Creating the RDS - MySQL Instance
+```sh
+rdsInstID=rds-mysql-inst01
 aws rds create-db-instance \
-        --db-instance-identifier rds-mysql-inst01 \
+        --db-instance-identifier "$rdsInstID" \
         --allocated-storage 5 \
         --db-instance-class db.t2.micro \
         --no-multi-az \
@@ -201,8 +212,11 @@ aws rds create-db-instance \
         --port 3306 \
         --master-username dbuser \
         --master-user-password dbuserpass \
+        --db-parameter-group-name myParamGrp \
         --db-name wpdb \
         --backup-retention-period 3
+        
+aws rds modify-db-instance --db-instance-identifier "$rdsInstID" --db-parameter-group-name myParamGrp
 ```
 
 _**Refer:**_ 
@@ -210,22 +224,7 @@ _**Refer:**_
 - [2] http://docs.aws.amazon.com/cli/latest/reference/rds/create-db-instance.html
 - [3] [Cloning RDS Instances for Testing](http://blog.dmcquay.com/devops/2015/09/18/cloning-rds-instances-for-testing.html)
 
-##### Create a DB parameter group to monitor CRUD
-```sh
-aws rds create-db-parameter-group \
-    --db-parameter-group-name myParamGrp \
-    --db-parameter-group-family MySQL5.6 \
-    --description "My new parameter group"
-
-aws rds modify-db-instance --db-instance-identifier rds-mysql-inst01 --db-parameter-group-name myParamGrp
-
-aws rds modify-db-parameter-group --db-parameter-group-name myParamGrp --parameters "ParameterName=general_log, ParameterValue=ON, Description=logParameter,ApplyMethod=immediate"
-```
-
-
-
-
-## Create the Web Servers
+# Part 2 - Creating & Configure the Database, Web & Load Balancer Instances
 ```sh
 aws ec2 create-key-pair --key-name webKey --query 'KeyMaterial' --output text > webKey.pem
 chmod 400 webKey.pem
