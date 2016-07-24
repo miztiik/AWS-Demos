@@ -153,7 +153,7 @@ _Interesting reading here about why we need to use security group ID instead of 
 ## Creating the RDS Instance
 ### Pre-Requisites
 - DB Subnet - _[The RDS instances requires the db subnet group to span across (atleast two) availability zones](http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html?shortFooter=true)_
- - DB Security Group - _Security group all allows other EC2  instances to connect with this RDS instance_
+- DB Security Group - _Security group all allows other EC2  instances to connect with this RDS instance_
 
 #### Create the `DB Subnet`
 Creates a new DB subnet group. DB subnet groups must contain at least one subnet in at least two AZs in the region.
