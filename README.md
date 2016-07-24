@@ -2,7 +2,7 @@
 
 There are two parts to the setup,
 - **Part 1** - Setting up the network infrastructure (VPC, Subnets, Security Groups)
-- **Part 2** - Creating & Configure the Database, Web & Load Balancer Instances
+- **Part 2** - Create & Configure the Database, Web & Load Balancer Instances
 
 Assuming you have already setup your AWS CLI for Region `US East (N. Virginia)`. Lets move forward;
 
@@ -149,12 +149,13 @@ _Interesting reading here about why we need to use security group ID instead of 
 
 >When you specify a security group for a nondefault VPC to the CLI or the API actions, you must use the security group ID and not the security group name to identify the security group.
 
-# Creating the RDS Instance
-## Pre-Requisites
+# Part 2 - Create & Configure the Database, Web & Load Balancer Instances
+## Creating the RDS Instance
+### Pre-Requisites
 - DB Subnet - _[The RDS instances requires the db subnet group to span across (atleast two) availability zones](http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html?shortFooter=true)_
  - DB Security Group - _Security group all allows other EC2  instances to connect with this RDS instance_
 
-### Create the `DB Subnet`
+#### Create the `DB Subnet`
 Creates a new DB subnet group. DB subnet groups must contain at least one subnet in at least two AZs in the region.
 ```sh
 aws rds create-db-subnet-group \
@@ -196,7 +197,7 @@ aws rds create-db-parameter-group \
 aws rds modify-db-parameter-group --db-parameter-group-name myParamGrp --parameters "ParameterName=general_log, ParameterValue=ON, Description=logParameter,ApplyMethod=immediate"
 ```
 
-### Creating the RDS - MySQL Instance
+### Start the RDS - MySQL Instance
 ```sh
 rdsInstID=rds-mysql-inst01
 aws rds create-db-instance \
@@ -224,7 +225,9 @@ _**Refer:**_
 - [2] http://docs.aws.amazon.com/cli/latest/reference/rds/create-db-instance.html
 - [3] [Cloning RDS Instances for Testing](http://blog.dmcquay.com/devops/2015/09/18/cloning-rds-instances-for-testing.html)
 
-# Part 2 - Creating & Configure the Database, Web & Load Balancer Instances
+# Create the Web Servers
+
+#### Create the SSH Keys & boot-strap the binaries
 ```sh
 aws ec2 create-key-pair --key-name webKey --query 'KeyMaterial' --output text > webKey.pem
 chmod 400 webKey.pem
@@ -255,14 +258,17 @@ find /var/www -type d -exec chmod 2775 {} +
 find /var/www -type f -exec chmod 0664 {} +
 
 # SE Linux permissive
+# needed to make wp connect to DB over newtork
 setsebool -P httpd_can_network_connect=1
 setsebool httpd_can_network_connect_db on
 
 systemctl restart httpd
+# Remove below file after testing
 echo "<?php phpinfo(); ?>" > /var/www/html/phpinfo.php
 EOF
 ```
 
+### Start the Web Instance
 ```sh
 instanceID=$(aws ec2 run-instances \
            --image-id ami-2051294a \
@@ -287,7 +293,7 @@ ip_address=$(aws ec2 describe-instances \
            --output text --query 'Reservations[*].Instances[*].PublicIpAddress')
 ```
 
-### Create the Elastic Load Balancer
+# Create the Elastic Load Balancer
 _**Ref:**_ https://aws.amazon.com/articles/1636185810492479
 
 ```
