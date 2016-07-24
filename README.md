@@ -299,6 +299,67 @@ aws elb create-load-balancer \
 --security-groups "$webSecGrpID"
 ```
 
+# Apache Workbench Results
+```sh
+[root@ip-172-31-55-78 ec2-user]# ab -n 20000 -c 30 -k http://xx.xx.xx.xx/
+This is ApacheBench, Version 2.3 <$Revision: 1430300 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking xx.xx.xx.xx (be patient)
+Completed 2000 requests
+Completed 4000 requests
+Completed 6000 requests
+Completed 8000 requests
+Completed 10000 requests
+Completed 12000 requests
+Completed 14000 requests
+Completed 16000 requests
+Completed 18000 requests
+Completed 20000 requests
+Finished 20000 requests
+
+
+Server Software:        Apache/2.4.6
+Server Hostname:        xx.xx.xx.xx
+Server Port:            80
+
+Document Path:          /
+Document Length:        11951 bytes
+
+Concurrency Level:      30
+Time taken for tests:   4684.053 seconds
+Complete requests:      20000
+Failed requests:        5641
+   (Connect: 0, Receive: 0, Length: 5641, Exceptions: 0)
+Write errors:           0
+Keep-Alive requests:    0
+Total transferred:      349703793 bytes
+HTML transferred:       344441217 bytes
+Requests per second:    4.27 [#/sec] (mean)
+Time per request:       7026.079 [ms] (mean)
+Time per request:       234.203 [ms] (mean, across all concurrent requests)
+Transfer rate:          72.91 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        1    2  49.6      1    7014
+Processing:   356 7013 3842.2   5067   43302
+Waiting:        0 6040 3317.2   4332   40634
+Total:        357 7014 3842.9   5069   43303
+
+Percentage of the requests served within a certain time (ms)
+  50%   5069
+  66%   7997
+  75%   9596
+  80%  10332
+  90%  12134
+  95%  13574
+  98%  16122
+  99%  18490
+ 100%  43303 (longest request)
+[root@ip-172-31-55-78 ec2-user]#
+```
 
 
 
