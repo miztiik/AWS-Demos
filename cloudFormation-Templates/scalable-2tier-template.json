@@ -1,20 +1,14 @@
 {
-  "AWSTemplateFormatVersion" : "2010-09-09",
-  
+  "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "This template will setup a scalable fault tolerant multi-tier web application from scratch",
-  
   "Parameters": {
     "KeyName": {
-	  "Description": "The SSH Key to be used for this stack",
-	  "Type": "AWS::EC2::KeyPair::KeyName",
-	  "Default": "kum-key"
-	}
+      "Description": "The SSH Key to be used for this stack",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "Default": "kum-key"
+    }
   },
-  
-  "Mappings": {
-    
-  },
-  
+  "Mappings": {},
   "Resources": {
     "tmpVPC": {
       "Type": "AWS::EC2::VPC",
@@ -53,151 +47,274 @@
         }
       }
     },
-	
-	"az0DbSubnet": {
-	  "Type": "AWS::EC2::Subnet",
-	  "Properties": {
-	    "VpcId": { "Ref": "tmpVPC" },
-		"CidrBlock": "10.0.0.0/22",
-		"AvailabilityZone": { "Fn::Select" : [ "0", { "Fn::GetAZs" : "" } ] },
-		"Tags" : [ { "Key": "Name", "Value": "kum-az0-db-Subnet" } ]
-	  }
-	},
-	"az0WebSubnet": {
-	  "Type": "AWS::EC2::Subnet",
-	  "Properties": {
-	    "VpcId": { "Ref": "tmpVPC" },
-		"CidrBlock": "10.0.4.0/23",
-		"AvailabilityZone": { "Fn::Select" : [ "0", { "Fn::GetAZs" : "" } ] },
-		"Tags" : [ { "Key": "Name", "Value": "kum-az0-web-Subnet" } ]
-	  }
-	},
-	"az0SpareSubnet": {
-	  "Type": "AWS::EC2::Subnet",
-	  "Properties": {
-	    "VpcId": { "Ref": "tmpVPC" },
-		"CidrBlock": "10.0.6.0/23",
-		"AvailabilityZone": { "Fn::Select" : [ "0", { "Fn::GetAZs" : "" } ] },
-		"Tags" : [ { "Key": "Name", "Value": "kum-az0-spare-Subnet" } ]
-	  }
-	},
-	
-	"az1DbSubnet": {
-	  "Type": "AWS::EC2::Subnet",
-	  "Properties": {
-	    "VpcId": { "Ref": "tmpVPC" },
-		"CidrBlock": "10.0.8.0/22",
-		"AvailabilityZone": { "Fn::Select" : [ "1", { "Fn::GetAZs" : "" } ] },
-		"Tags" : [ { "Key": "Name", "Value": "kum-az1-db-Subnet" } ]
-	  }
-	},
-	"az1WebSubnet": {
-	  "Type": "AWS::EC2::Subnet",
-	  "Properties": {
-	    "VpcId": { "Ref": "tmpVPC" },
-		"CidrBlock": "10.0.12.0/23",
-		"AvailabilityZone": { "Fn::Select" : [ "1", { "Fn::GetAZs" : "" } ] },
-		"Tags" : [ { "Key": "Name", "Value": "kum-az1-web-Subnet" } ]
-	  }
-	},
-	"az1SpareSubnet": {
-	  "Type": "AWS::EC2::Subnet",
-	  "Properties": {	
-	    "VpcId": { "Ref": "tmpVPC" },
-		"CidrBlock": "10.0.14.0/23",
-		"AvailabilityZone": { "Fn::Select" : [ "1", { "Fn::GetAZs" : "" } ] },
-		"Tags" : [ { "Key": "Name", "Value": "kum-az1-spare-Subnet" } ]
-	  }
-	},
-
-	"myRouteTbl": {
-	  "Type": "AWS::EC2::RouteTable",
-	  "Properties": {
-	    "VpcId": { "Ref": "tmpVPC" },
-		"Tags" : [ { "Key": "Name", "Value": "kum-myRouteTbl" } ]
-	  }
-	},
-	
-	"routeForInternet": {
-	  "Type": "AWS::EC2::Route",
-	  "DependsOn": "GatewayToInternet",
-	  "Properties": {
-	    "RouteTableId": { "Ref": "myRouteTbl" },
-		"DestinationCidrBlock": "0.0.0.0/0",
-		"GatewayId": { "Ref": "tmpVPCIntGateway" }
-	  }
-	},
-	
-	"az0webSubnetRouteTblAssn": {
-	  "Type": "AWS::EC2::SubnetRouteTableAssociation",
-	  "Properties": {
-	    "SubnetId": { "Ref": "az0webSubnet" },
-		"RouteTableId": { "Ref": "myRouteTbl" }
-	  }
-	},
-	"az1webSubnetRouteTblAssn": {
-	  "Type": "AWS::EC2::SubnetRouteTableAssociation",
-	  "Properties": {
-	    "SubnetId": { "Ref": "az1webSubnet" },
-		"RouteTableId": { "Ref": "myRouteTbl" }
-	  }
-	},
-	
-	"webSecGrp": {
-	  "Type": "AWS::EC2::SecurityGroup",
-	  "Properties": {
-	    "Description": "Security Group for Web servers",
-		"VpcId": { "Ref": "tmpVPC" }
-	  }
-	},
-	"webSecGrpInBoundRule": {
-	  "Type": "AWS::EC2::SecurityGroupIngress",
-	  "Properties": [
-	    {
-	      "IpProtocol": "tcp",
-		  "FromPort": "22",
-		  "ToPort": "22",
-		  "CidrIp": "0.0.0.0/0"
-	    },
-		{
-          "IpProtocol" : "tcp",
-          "FromPort" : "80",
-          "ToPort" : "80",
-          "CidrIp" : "0.0.0.0/0"
+    "azADbSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "tmpVPC"
         },
-		{
-          "IpProtocol" : "tcp",
-          "FromPort" : "443",
-          "ToPort" : "443",
-          "CidrIp" : "0.0.0.0/0"
+        "CidrBlock": "10.0.0.0/22",
+        "AvailabilityZone": {
+          "Fn::Select": [
+            "0",
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "kum-azA-db-Subnet"
+          }
+        ]
+      }
+    },
+    "azAWebSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "tmpVPC"
+        },
+        "CidrBlock": "10.0.4.0/23",
+        "AvailabilityZone": {
+          "Fn::Select": [
+            "0",
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "kum-azA-web-Subnet"
+          }
+        ]
+      }
+    },
+    "azASpareSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "tmpVPC"
+        },
+        "CidrBlock": "10.0.6.0/23",
+        "AvailabilityZone": {
+          "Fn::Select": [
+            "0",
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "kum-azA-spare-Subnet"
+          }
+        ]
+      }
+    },
+    "azBDbSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "tmpVPC"
+        },
+        "CidrBlock": "10.0.8.0/22",
+        "AvailabilityZone": {
+          "Fn::Select": [
+            "1",
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "kum-azB-db-Subnet"
+          }
+        ]
+      }
+    },
+    "azBWebSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "tmpVPC"
+        },
+        "CidrBlock": "10.0.12.0/23",
+        "AvailabilityZone": {
+          "Fn::Select": [
+            "1",
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "kum-azB-web-Subnet"
+          }
+        ]
+      }
+    },
+    "azBSpareSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "tmpVPC"
+        },
+        "CidrBlock": "10.0.14.0/23",
+        "AvailabilityZone": {
+          "Fn::Select": [
+            "1",
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "kum-azB-spare-Subnet"
+          }
+        ]
+      }
+    },
+    "myRouteTbl": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "tmpVPC"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "kum-myRouteTbl"
+          }
+        ]
+      }
+    },
+    "routeForInternet": {
+      "Type": "AWS::EC2::Route",
+      "DependsOn": "GatewayToInternet",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "myRouteTbl"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "tmpVPCIntGateway"
         }
-	  ],
-	},
-	"dbSecGrp": {
-	  "Type": "AWS::EC2::SecurityGroup",
-	  	"Properties": {
-	    "Description": "Security Group for Database servers",
-		"VpcId": { "Ref": "tmpVPC" }
-	  }
-	},
-	"dbSecGrpInBoundRule": {
-	  "Type": "AWS::EC2::SecurityGroupIngress",
-	  "Properties": [
-	    {
-		  "IpProtocol" : "tcp",
-          "FromPort" : "3306",
-          "ToPort" : "3306",
-		  "SourceSecurityGroupID": { "Ref": "webSecGrp" }
-		}
-	  ]
-	},
+      }
+    },
 	
-	"dbSubnetGroup": {
-	  "Type": "AWS::EC2::DBSubnetGroup",
-	  "Properties": {
-	    "DBSubnetGroupDescription": "The group of subnets where RDS Instance will be hosted",
-		"SubnetIds": [ {"Ref": "az0DbSubnet"} , {"Ref": "az1DbSubnet"} ]
-	  }
-	}
+    "azAwebSubnetRouteTblAssn": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": { "Ref": "azAwebSubnet" },
+        "RouteTableId": { "Ref": "myRouteTbl" }
+      }
+    },
+    "azBwebSubnetRouteTblAssn": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": { "Ref": "azBwebSubnet" },
+        "RouteTableId": { "Ref": "myRouteTbl" }
+      }
+    },
+    "webSecGrp": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "Description": "Security Group for Web servers",
+        "VpcId": {
+          "Ref": "tmpVPC"
+        }
+      }
+    },
+	"webSecGrpInBoundRule1": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties":{
+        "IpProtocol": "tcp",
+        "FromPort": "0",
+        "ToPort": "22",
+        "GroupId": {
+          "Fn::GetAtt": [
+            "webSecGrp",
+            "GroupId"
+          ]
+        }
+      }
+    },
+	"webSecGrpInBoundRule2": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties":{
+        "IpProtocol": "tcp",
+        "FromPort": "0",
+        "ToPort": "80",
+        "GroupId": {
+          "Fn::GetAtt": [
+            "webSecGrp",
+            "GroupId"
+          ]
+        }
+      }
+    },	
+	"webSecGrpInBoundRule3": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties":{
+        "IpProtocol": "tcp",
+        "FromPort": "0",
+        "ToPort": "443",
+        "GroupId": {
+          "Fn::GetAtt": [
+            "webSecGrp",
+            "GroupId"
+          ]
+        }
+      }
+    },
+	
+	
+    "dbSecGrp": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "Description": "Security Group for Database servers",
+        "VpcId": {
+          "Ref": "tmpVPC"
+        }
+      }
+    },
+    "dbSecGrpInBoundRule": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": [
+        {
+          "IpProtocol": "tcp",
+          "FromPort": "3306",
+          "ToPort": "3306",
+          "SourceSecurityGroupID": {
+            "Ref": "webSecGrp"
+          }
+        }
+      ]
+    },
+    "dbSubnetGroup": {
+      "Type": "AWS::RDS::DBSubnetGroup",
+      "Properties": {
+        "DBSubnetGroupDescription": "The group of subnets where RDS Instance will be hosted",
+        "SubnetIds": [
+          {
+            "Ref": "azADbSubnet"
+          },
+          {
+            "Ref": "azBDbSubnet"
+          }
+        ]
+      }
+    }
   }
 }
