@@ -224,10 +224,14 @@
       }
     },
     "azBwebSubnetRouteTblAssn": {
-	  "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
-        "SubnetId": { "Ref": "azBwebSubnet" },
-        "RouteTableId": { "Ref": "myRouteTbl" }
+        "SubnetId": {
+          "Ref": "azBwebSubnet"
+        },
+        "RouteTableId": {
+          "Ref": "myRouteTbl"
+        }
       }
     },
     "webSecGrp": {
@@ -292,16 +296,13 @@
     },
     "dbSecGrpInBoundRule": {
       "Type": "AWS::EC2::SecurityGroupIngress",
-      "Properties": [
-        {
+      "Properties": {
           "IpProtocol": "tcp",
           "FromPort": "3306",
           "ToPort": "3306",
-          "SourceSecurityGroupID": {
-            "Ref": "webSecGrp"
-          }
+          "SourceSecurityGroupId": { "Fn::GetAtt": [ "webSecGrp", "GroupId" ] },
+          "GroupId": { "Fn::GetAtt": [ "webSecGrp", "GroupId" ] }
         }
-      ]
     },
     "dbSubnetGroup": {
       "Type": "AWS::RDS::DBSubnetGroup",
