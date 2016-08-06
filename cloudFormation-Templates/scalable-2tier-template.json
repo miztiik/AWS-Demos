@@ -297,12 +297,22 @@
     "dbSecGrpInBoundRule": {
       "Type": "AWS::EC2::SecurityGroupIngress",
       "Properties": {
-          "IpProtocol": "tcp",
-          "FromPort": "3306",
-          "ToPort": "3306",
-          "SourceSecurityGroupId": { "Fn::GetAtt": [ "webSecGrp", "GroupId" ] },
-          "GroupId": { "Fn::GetAtt": [ "webSecGrp", "GroupId" ] }
+        "IpProtocol": "tcp",
+        "FromPort": "3306",
+        "ToPort": "3306",
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "webSecGrp",
+            "GroupId"
+          ]
+        },
+        "GroupId": {
+          "Fn::GetAtt": [
+            "webSecGrp",
+            "GroupId"
+          ]
         }
+      }
     },
     "dbSubnetGroup": {
       "Type": "AWS::RDS::DBSubnetGroup",
