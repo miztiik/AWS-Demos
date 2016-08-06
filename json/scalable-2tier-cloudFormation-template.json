@@ -1,0 +1,41 @@
+{
+  "Resources": {
+    "tmpVPC": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.0.0.0/20",
+        "EnableDnsSupport": "True",
+        "EnableDnsHostnames": "True",
+        "InstanceTenancy": "default",
+        "Tags": [
+          {
+            "Key": "kum-VPC-Tag",
+            "Value": "kum-tmpVPC"
+          }
+        ]
+      }
+    },
+    "tmpVPCIntGateway": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "tmpVPC-Internet-Gateway"
+          }
+        ]
+      }
+    },
+    "AttachGateway": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": {
+          "Ref": "tmpVPC"
+        },
+        "InternetGatewayId": {
+          "Ref": "tmpVPCIntGateway"
+        }
+      }
+    }
+  }
+}
