@@ -139,7 +139,7 @@
         ]
       }
     },
-    "azBWebSubnet": {
+    "azBwebSubnet": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "VpcId": {
@@ -201,7 +201,7 @@
     },
     "routeForInternet": {
       "Type": "AWS::EC2::Route",
-      "DependsOn": "GatewayToInternet",
+      "DependsOn": "tmpVPCIntGateway",
       "Properties": {
         "RouteTableId": {
           "Ref": "myRouteTbl"
@@ -216,7 +216,7 @@
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
         "SubnetId": {
-          "Ref": "azAwebSubnet"
+          "Ref": "azAWebSubnet"
         },
         "RouteTableId": {
           "Ref": "myRouteTbl"
@@ -224,14 +224,10 @@
       }
     },
     "azBwebSubnetRouteTblAssn": {
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+	  "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
-        "SubnetId": {
-          "Ref": "azBwebSubnet"
-        },
-        "RouteTableId": {
-          "Ref": "myRouteTbl"
-        }
+        "SubnetId": { "Ref": "azBwebSubnet" },
+        "RouteTableId": { "Ref": "myRouteTbl" }
       }
     },
     "webSecGrp": {
