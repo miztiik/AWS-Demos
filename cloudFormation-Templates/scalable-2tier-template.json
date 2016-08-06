@@ -1,4 +1,20 @@
 {
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  
+  "Description": "This template will setup a scalable fault tolerant multi-tier web application from scratch",
+  
+  "Parameters": {
+    "KeyName": {
+	  "Description": "The SSH Key to be used for this stack",
+	  "Type": "AWS::EC2::KeyPair::KeyName",
+	  "Default": "kum-key"
+	}
+  },
+  
+  "Mappings": {
+    
+  },
+  
   "Resources": {
     "tmpVPC": {
       "Type": "AWS::EC2::VPC",
@@ -9,7 +25,7 @@
         "InstanceTenancy": "default",
         "Tags": [
           {
-            "Key": "kum-VPC-Tag",
+            "Key": "Name",
             "Value": "kum-tmpVPC"
           }
         ]
@@ -21,7 +37,7 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "tmpVPC-Internet-Gateway"
+            "Value": "kum-tmpVPC-Internet-Gateway"
           }
         ]
       }
@@ -36,6 +52,82 @@
           "Ref": "tmpVPCIntGateway"
         }
       }
-    }
+    },
+	
+	"az0DbSubnet": {
+	  "Type": "AWS::EC2::Subnet",
+	  "Properties": {
+	    "VpcId": { "Ref": "tmpVPC" },
+		"CidrBlock": "10.0.0.0/22",
+		"AvailabilityZone": { "Fn::Select" : [ "0", { "Fn::GetAZs" : "" } ] },
+		"Tags" : [ { "Key": "Name", "Value": "kum-az0-db-Subnet" } ]
+	  }
+	},
+	"az0WebSubnet": {
+	  "Type": "AWS::EC2::Subnet",
+	  "Properties": {
+	    "VpcId": { "Ref": "tmpVPC" },
+		"CidrBlock": "10.0.4.0/23",
+		"AvailabilityZone": { "Fn::Select" : [ "0", { "Fn::GetAZs" : "" } ] },
+		"Tags" : [ { "Key": "Name", "Value": "kum-az0-web-Subnet" } ]
+	  }
+	},
+	"az0SpareSubnet": {
+	  "Type": "AWS::EC2::Subnet",
+	  "Properties": {
+	    "VpcId": { "Ref": "tmpVPC" },
+		"CidrBlock": "10.0.6.0/23",
+		"AvailabilityZone": { "Fn::Select" : [ "0", { "Fn::GetAZs" : "" } ] },
+		"Tags" : [ { "Key": "Name", "Value": "kum-az0-spare-Subnet" } ]
+	  }
+	},
+	
+	"az1DbSubnet": {
+	  "Type": "AWS::EC2::Subnet",
+	  "Properties": {
+	    "VpcId": { "Ref": "tmpVPC" },
+		"CidrBlock": "10.0.8.0/22",
+		"AvailabilityZone": { "Fn::Select" : [ "1", { "Fn::GetAZs" : "" } ] },
+		"Tags" : [ { "Key": "Name", "Value": "kum-az1-db-Subnet" } ]
+	  }
+	},
+	"az1WebSubnet": {
+	  "Type": "AWS::EC2::Subnet",
+	  "Properties": {
+	    "VpcId": { "Ref": "tmpVPC" },
+		"CidrBlock": "10.0.12.0/23",
+		"AvailabilityZone": { "Fn::Select" : [ "1", { "Fn::GetAZs" : "" } ] },
+		"Tags" : [ { "Key": "Name", "Value": "kum-az1-web-Subnet" } ]
+	  }
+	},
+	"az1SpareSubnet": {
+	  "Type": "AWS::EC2::Subnet",
+	  "Properties": {	
+	    "VpcId": { "Ref": "tmpVPC" },
+		"CidrBlock": "10.0.14.0/23",
+		"AvailabilityZone": { "Fn::Select" : [ "1", { "Fn::GetAZs" : "" } ] },
+		"Tags" : [ { "Key": "Name", "Value": "kum-az1-spare-Subnet" } ]
+	  }
+	},
+
+	"routeTbl": {
+	  "Type": "AWS::EC2::RouteTable",
+	  "Properties": {
+	    "VpcId": { "Ref": "tmpVPC" },
+		"Tags" : [ { "Key": "Name", "Value": "kum-routeTbl" } ]
+	  }
+	},
+	
+	"routeForInternet": {
+	  "Type": "AWS::EC2::Route",
+	  "DependsOn": "GatewayToInternet"
+	  "Properties": {
+	    "RouteTableId": { "Ref": "routeTbl" },
+		"DestinationCidrBlock": "0.0.0.0/0",
+		"GatewayId": { "Ref": "tmpVPCIntGateway" }
+	  }
+	},
+	
+	
   }
 }
