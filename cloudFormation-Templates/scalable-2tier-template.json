@@ -110,24 +110,94 @@
 	  }
 	},
 
-	"routeTbl": {
+	"myRouteTbl": {
 	  "Type": "AWS::EC2::RouteTable",
 	  "Properties": {
 	    "VpcId": { "Ref": "tmpVPC" },
-		"Tags" : [ { "Key": "Name", "Value": "kum-routeTbl" } ]
+		"Tags" : [ { "Key": "Name", "Value": "kum-myRouteTbl" } ]
 	  }
 	},
 	
 	"routeForInternet": {
 	  "Type": "AWS::EC2::Route",
-	  "DependsOn": "GatewayToInternet"
+	  "DependsOn": "GatewayToInternet",
 	  "Properties": {
-	    "RouteTableId": { "Ref": "routeTbl" },
+	    "RouteTableId": { "Ref": "myRouteTbl" },
 		"DestinationCidrBlock": "0.0.0.0/0",
 		"GatewayId": { "Ref": "tmpVPCIntGateway" }
 	  }
 	},
 	
+	"az0webSubnetRouteTblAssn": {
+	  "Type": "AWS::EC2::SubnetRouteTableAssociation",
+	  "Properties": {
+	    "SubnetId": { "Ref": "az0webSubnet" },
+		"RouteTableId": { "Ref": "myRouteTbl" }
+	  }
+	},
+	"az1webSubnetRouteTblAssn": {
+	  "Type": "AWS::EC2::SubnetRouteTableAssociation",
+	  "Properties": {
+	    "SubnetId": { "Ref": "az1webSubnet" },
+		"RouteTableId": { "Ref": "myRouteTbl" }
+	  }
+	},
 	
+	"webSecGrp": {
+	  "Type": "AWS::EC2::SecurityGroup",
+	  "Properties": {
+	    "Description": "Security Group for Web servers",
+		"VpcId": { "Ref": "tmpVPC" }
+	  }
+	},
+	"webSecGrpInBoundRule": {
+	  "Type": "AWS::EC2::SecurityGroupIngress",
+	  "Properties": [
+	    {
+	      "IpProtocol": "tcp",
+		  "FromPort": "22",
+		  "ToPort": "22",
+		  "CidrIp": "0.0.0.0/0"
+	    },
+		{
+          "IpProtocol" : "tcp",
+          "FromPort" : "80",
+          "ToPort" : "80",
+          "CidrIp" : "0.0.0.0/0"
+        },
+		{
+          "IpProtocol" : "tcp",
+          "FromPort" : "443",
+          "ToPort" : "443",
+          "CidrIp" : "0.0.0.0/0"
+        }
+	  ],
+	},
+	"dbSecGrp": {
+	  "Type": "AWS::EC2::SecurityGroup",
+	  	"Properties": {
+	    "Description": "Security Group for Database servers",
+		"VpcId": { "Ref": "tmpVPC" }
+	  }
+	},
+	"dbSecGrpInBoundRule": {
+	  "Type": "AWS::EC2::SecurityGroupIngress",
+	  "Properties": [
+	    {
+		  "IpProtocol" : "tcp",
+          "FromPort" : "3306",
+          "ToPort" : "3306",
+		  "SourceSecurityGroupID": { "Ref": "webSecGrp" }
+		}
+	  ]
+	},
+	
+	"dbSubnetGroup": {
+	  "Type": "AWS::EC2::DBSubnetGroup",
+	  "Properties": {
+	    "DBSubnetGroupDescription": "The group of subnets where RDS Instance will be hosted",
+		"SubnetIds": [ {"Ref": "az0DbSubnet"} , {"Ref": "az1DbSubnet"} ]
+	  }
+	}
   }
 }
