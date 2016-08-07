@@ -577,6 +577,7 @@
         },
         "AssociatePublicIpAddress": "true",
         "DeviceIndex": "0",
+		"LoadBalancerName" : [ { "Ref": "webLoadBalancer" } ]
         "Tags": [
           {
             "Key": "Application",
@@ -627,7 +628,7 @@
             {
               "Fn::GetAtt": [
                 "webNode",
-                "PublicIp"
+                "DNSName"
               ]
             }
           ]
