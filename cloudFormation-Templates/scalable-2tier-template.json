@@ -3,9 +3,21 @@
   "Description": "This template will setup a scalable fault tolerant multi-tier web application from scratch",
   "Parameters": {
     "KeyName": {
-      "Description": "The SSH Key to be used for this stack",
+      "Description": "Name of an pre-existing EC2 KeyPair to enable SSH access to the instance",
       "Type": "AWS::EC2::KeyPair::KeyName",
-      "Default": "kum-key"
+      "Default": "kum-key",
+	  "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
+    },
+    "EnvType": {
+      "Description": "Choose the type of Environment",
+      "Default": "test",
+      "Type": "String",
+      "AllowedValues": [
+        "dev",
+        "test",
+        "prod"
+      ],
+      "ConstraintDescription": "Must choose the type of environment"
     }
   },
   "Mappings": {},
@@ -338,13 +350,65 @@
             "Ref": "azBPrivateSubnet"
           }
         ],
-		"Tags": [
+        "Tags": [
           {
             "Key": "Name",
             "Value": "kum-dbSubnetGroup"
           }
         ]
       }
-    }
+    },
+    "dbMySQLCustomParameterGroup": {
+      "Type": "AWS::RDS::DBParameterGroup",
+      "Properties": {
+        "Description": "Custom Parameters for the MySQL DB Instance",
+        "Family": "MySQL5.6",
+        "Parameters": {
+          "general_log": "ON",
+          "time_zone": "Asia/Calcutta",
+          "autocommit": 1
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "kum-dbMySQLCustomParameterGroup"
+          }
+        ]
+      }
+    },
+	
+  "rdsInstance": {
+    "Type": "AWS::RDS::DBInstance",
+    "Properties": {
+      "DBInstanceIdentifier": "rds-mysql-inst01",
+      "DBName": "wpdb01",
+      "Engine": "MySQL",
+      "MasterUsername": "dbuser",
+      "MasterUserPassword": "dbuserpass",
+      "AllocatedStorage": "5",
+      "DBInstanceClass": "db.t2.micro",
+      "VPCSecurityGroups": [ { "Fn::GetAtt": [ "dbSecGrp", "GroupId" ] } ],
+      "DBSubnetGroupName": { "Ref": "dbSubnetGroup" },
+      "DBParameterGroupName": { "Ref": "dbMySQLCustomParameterGroup" },
+      "BackupRetentionPeriod": "3",
+      "Port": "3306",
+      "MultiAZ": "False",
+      "AutoMinorVersionUpgrade": "False",
+      "Tags": [
+        {
+          "Key": "Name",
+          "Value": "kum-rds-MySQL-Db"
+        },
+        {
+          "Key": "Role",
+          "Value": "Primary"
+        }
+      ]
+    },
+	"DependsOn": "dbMySQLCustomParameterGroup",
+    "DeletionPolicy": "Delete"
+  }
   }
 }
+
+
