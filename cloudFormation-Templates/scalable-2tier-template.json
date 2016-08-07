@@ -47,7 +47,7 @@
         }
       }
     },
-    "azADbSubnet": {
+    "azAPrivateSubnet": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "VpcId": {
@@ -65,7 +65,7 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "kum-azA-db-Subnet"
+            "Value": "kum-azA-Private-Subnet"
           }
         ]
       }
@@ -116,7 +116,7 @@
         ]
       }
     },
-    "azBDbSubnet": {
+    "azBPrivateSubnet": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "VpcId": {
@@ -134,7 +134,7 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "kum-azB-db-Subnet"
+            "Value": "kum-azB-Private-Subnet"
           }
         ]
       }
@@ -237,10 +237,16 @@
     "webSecGrp": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "Description": "Security Group for Web servers",
+        "GroupDescription": "Security Group for Web servers",
         "VpcId": {
           "Ref": "tmpVPC"
-        }
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "kum-Web-Security-Group"
+          }
+        ]
       }
     },
     "webSecGrpInBoundRule1": {
@@ -288,10 +294,16 @@
     "dbSecGrp": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "Description": "Security Group for Database servers",
+        "GroupDescription": "Security Group for Database servers",
         "VpcId": {
           "Ref": "tmpVPC"
-        }
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "kum-DB-Security-Group"
+          }
+        ]
       }
     },
     "dbSecGrpInBoundRule": {
@@ -320,10 +332,10 @@
         "DBSubnetGroupDescription": "The group of subnets where RDS Instance will be hosted",
         "SubnetIds": [
           {
-            "Ref": "azADbSubnet"
+            "Ref": "azAPrivateSubnet"
           },
           {
-            "Ref": "azBDbSubnet"
+            "Ref": "azBPrivateSubnet"
           }
         ]
       }
