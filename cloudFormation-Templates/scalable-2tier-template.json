@@ -567,11 +567,7 @@
 	  "EbsOptimized": false,
         "ImageId": "ami-2051294a",
         "InstanceType": "t2.micro",
-        "SecurityGroupIds": [
-          {
-            "Ref": "webSecGrp"
-          }
-        ],
+		"SecurityGroups": [{"Ref": "webSecGrp"}],
         "KeyName": {
           "Ref": "KeyName"
         },
