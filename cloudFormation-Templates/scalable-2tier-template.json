@@ -246,6 +246,21 @@
         }
       }
     },
+    "LoadBalancerSecGrp": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "The Security Group for the Elastic Load Balancers",
+        "VpcId": {
+          "Ref": "tmpVPC"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "kum-Load-Balancer-Security-Group"
+          }
+        ]
+      }
+    },
     "webSecGrp": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
@@ -421,6 +436,204 @@
         "dbSecGrp"
       ],
       "DeletionPolicy": "Delete"
+    },
+    "webLoadBalancer": {
+      "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+      "Properties": {
+        "Subnets": [
+          {
+            "Ref": "azAWebSubnet"
+          },
+          {
+            "Ref": "azBWebSubnet"
+          }
+        ],
+        "LoadBalancerName": "kum-webLoadBalancer",
+        "Listeners": [
+          {
+            "InstancePort": "80",
+            "InstanceProtocol": "HTTP",
+            "LoadBalancerPort": "80",
+            "Protocol": "HTTP"
+          }
+        ],
+        "HealthCheck": {
+          "HealthyThreshold": "2",
+          "Interval": "5",
+          "Target": {
+            "Fn::Join": [
+              "",
+              [
+                "HTTP:",
+                "80",
+                "/"
+              ]
+            ]
+          },
+          "Timeout": "3",
+          "UnhealthyThreshold": "2"
+        },
+        "SecurityGroups": [
+          {
+            "Ref": "webSecGrp"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "kum-webLoadBalancer"
+          }
+        ],
+        "Scheme": "internet-facing"
+      },
+      "DependsOn": "tmpVPCIntGateway"
+    },
+    "webNode": {
+      "Type": "AWS::EC2::Instance",
+      "Metadata": {
+        "Comment": "Webserver running Wordpress Application",
+        "AWS::CloudFormation::Init": {
+          "config": {
+            "packages": {
+              "yum": {
+                "httpd": [],
+                "php": [],
+                "php-mysql": [],
+                "mysql": []
+              }
+            },
+            "sources": {
+              "/var/www/html": "https://wordpress.org/wordpress-4.2.4.tar.gz"
+            },
+            "files": {
+              "/var/www/html/info.php": {
+                "content": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "<?php\n",
+                      "echo '<h1>AWS CloudFormation sample PHP application</h1>\n<hr>$_SERVER['SERVER_PORT']<hr>\n<br> phpinfo() </br>';\n",
+                      "?>\n"
+                    ]
+                  ]
+                },
+                "mode": "000644",
+                "owner": "apache",
+                "group": "apache"
+              },
+              "/tmp/quickConfig": {
+                "content": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "#!/bin/bash -ex \n",
+                      "groupadd www \n",
+                      "cd /var/www/ && tar -zxf latest.tar.gz && rm -rf /var/www/html && mv wordpress /var/www/html \n",
+                      "chown -R root:www /var/www \n",
+                      "chmod 2775 /var/www \n",
+                      "find /var/www -type d -exec chmod 2775 {} + \n",
+                      "find /var/www -type f -exec chmod 0664 {} + \n",
+                      "setsebool -P httpd_can_network_connect=1 \n",
+                      "setsebool httpd_can_network_connect_db on \n",
+                      "systemctl restart httpd"
+                    ]
+                  ]
+                },
+                "mode": "000644",
+                "owner": "apache",
+                "group": "apache"
+              }
+            },
+            "commands": {
+              "01_config": {
+                "command": "/tmp/quickConfig",
+                "cwd": "/var/www"
+              }
+            },
+            "services": {
+              "sysvinit": {
+                "httpd": {
+                  "enabled": "true",
+                  "ensureRunning": "true"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Properties": {
+        "ImageId": "ami-2051294a",
+        "InstanceType": "t2.micro",
+        "SubnetId": {
+          "Ref": "azAWebSubnet"
+        },
+        "SecurityGroupIds": [
+          {
+            "Ref": "webSecGrp"
+          }
+        ],
+        "KeyName": {
+          "Ref": "KeyName"
+        },
+        "AssociatePublicIpAddress": "true",
+        "DeviceIndex": "0",
+        "Tags": [
+          {
+            "Key": "Application",
+            "Value": {
+              "Ref": "AWS::StackId"
+            }
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash -ex\n",
+                "yum update -y aws-cfn-bootstrap\n",
+                "/opt/aws/bin/cfn-init -v --stack ",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                " --resource LaunchConfiguration --region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                "\n",
+                "/opt/aws/bin/cfn-signal -e $? --stack ",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                " --resource AutoScalingGroup --region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                "\n"
+              ]
+            ]
+          }
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "URL": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "http://",
+            {
+              "Fn::GetAtt": [
+                "webNode",
+                "PublicIp"
+              ]
+            }
+          ]
+        ]
+      },
+      "Description": "Newly created application URL"
     }
   }
 }
