@@ -577,7 +577,7 @@
         },
         "AssociatePublicIpAddress": "true",
         "DeviceIndex": "0",
-		"LoadBalancerName" : [ { "Ref": "webLoadBalancer" } ]
+		"LoadBalancerName" : [ { "Ref": "webLoadBalancer" } ],
         "Tags": [
           {
             "Key": "Application",
