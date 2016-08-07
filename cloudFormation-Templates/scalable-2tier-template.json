@@ -31,7 +31,7 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "kum-tmpVPC-Internet-Gateway"
+            "Value": "kum-tmpVPCIntGateway"
           }
         ]
       }
@@ -320,7 +320,7 @@
         },
         "GroupId": {
           "Fn::GetAtt": [
-            "webSecGrp",
+            "dbSecGrp",
             "GroupId"
           ]
         }
@@ -329,13 +329,19 @@
     "dbSubnetGroup": {
       "Type": "AWS::RDS::DBSubnetGroup",
       "Properties": {
-        "DBSubnetGroupDescription": "The group of subnets where RDS Instance will be hosted",
+        "DBSubnetGroupDescription": "The group of subnets where RDS Instance(s) will be hosted",
         "SubnetIds": [
           {
             "Ref": "azAPrivateSubnet"
           },
           {
             "Ref": "azBPrivateSubnet"
+          }
+        ],
+		"Tags": [
+          {
+            "Key": "Name",
+            "Value": "kum-dbSubnetGroup"
           }
         ]
       }
