@@ -488,8 +488,9 @@
       },
       "DependsOn": "tmpVPCIntGateway"
     },
-    "webNode": {
-      "Type": "AWS::EC2::Instance",
+    
+	"webServerLaunchConfig": {
+			"Type": "AWS::AutoScaling::LaunchConfiguration",
       "Metadata": {
         "Comment": "Webserver running Wordpress Application",
         "AWS::CloudFormation::Init": {
@@ -561,12 +562,11 @@
           }
         }
       },
+
       "Properties": {
+	  "EbsOptimized": false,
         "ImageId": "ami-2051294a",
         "InstanceType": "t2.micro",
-        "SubnetId": {
-          "Ref": "azAWebSubnet"
-        },
         "SecurityGroupIds": [
           {
             "Ref": "webSecGrp"
@@ -576,8 +576,6 @@
           "Ref": "KeyName"
         },
         "AssociatePublicIpAddress": "true",
-        "DeviceIndex": "0",
-		"LoadBalancerName" : [ { "Ref": "webLoadBalancer" } ],
         "Tags": [
           {
             "Key": "Application",
@@ -597,7 +595,7 @@
                 {
                   "Ref": "AWS::StackName"
                 },
-                " --resource LaunchConfiguration --region ",
+                " --resource webServerLaunchConfig --region ",
                 {
                   "Ref": "AWS::Region"
                 },
@@ -616,7 +614,25 @@
           }
         }
       }
-    }
+    },
+	
+			"AutoScalingGroup": {
+			"Type": "AWS::AutoScaling::AutoScalingGroup",
+			"Properties": {
+				"LoadBalancerNames": [{"Ref": "webLoadBalancer"}],
+				"LaunchConfigurationName": {"Ref": "webServerLaunchConfig"},
+				"MinSize": "1",
+				"MaxSize": "2",
+				"DesiredCapacity": "1",
+				"VPCZoneIdentifier": [{"Ref": "azAWebSubnet"}, {"Ref": "azBWebSubnet"}]
+			},
+			"CreationPolicy": {
+				"ResourceSignal": {
+					"Timeout": "PT10M"
+				}
+			},
+			"DependsOn": "tmpVPCIntGateway"
+		}
   },
   "Outputs": {
     "URL": {
@@ -627,7 +643,7 @@
             "http://",
             {
               "Fn::GetAtt": [
-                "webNode",
+                "webLoadBalancer",
                 "DNSName"
               ]
             }
