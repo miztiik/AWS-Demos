@@ -488,9 +488,8 @@
       },
       "DependsOn": "tmpVPCIntGateway"
     },
-    
-	"webServerLaunchConfig": {
-			"Type": "AWS::AutoScaling::LaunchConfiguration",
+    "webServerLaunchConfig": {
+      "Type": "AWS::AutoScaling::LaunchConfiguration",
       "Metadata": {
         "Comment": "Webserver running Wordpress Application",
         "AWS::CloudFormation::Init": {
@@ -562,24 +561,19 @@
           }
         }
       },
-
       "Properties": {
-	  "EbsOptimized": false,
+        "EbsOptimized": false,
         "ImageId": "ami-2051294a",
         "InstanceType": "t2.micro",
-		"SecurityGroups": [{"Ref": "webSecGrp"}],
+        "SecurityGroups": [
+          {
+            "Ref": "webSecGrp"
+          }
+        ],
         "KeyName": {
           "Ref": "KeyName"
         },
         "AssociatePublicIpAddress": "true",
-        "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          }
-        ],
         "UserData": {
           "Fn::Base64": {
             "Fn::Join": [
@@ -611,24 +605,36 @@
         }
       }
     },
-	
-			"AutoScalingGroup": {
-			"Type": "AWS::AutoScaling::AutoScalingGroup",
-			"Properties": {
-				"LoadBalancerNames": [{"Ref": "webLoadBalancer"}],
-				"LaunchConfigurationName": {"Ref": "webServerLaunchConfig"},
-				"MinSize": "1",
-				"MaxSize": "2",
-				"DesiredCapacity": "1",
-				"VPCZoneIdentifier": [{"Ref": "azAWebSubnet"}, {"Ref": "azBWebSubnet"}]
-			},
-			"CreationPolicy": {
-				"ResourceSignal": {
-					"Timeout": "PT10M"
-				}
-			},
-			"DependsOn": "tmpVPCIntGateway"
-		}
+    "AutoScalingGroup": {
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Properties": {
+        "LoadBalancerNames": [
+          {
+            "Ref": "webLoadBalancer"
+          }
+        ],
+        "LaunchConfigurationName": {
+          "Ref": "webServerLaunchConfig"
+        },
+        "MinSize": "1",
+        "MaxSize": "2",
+        "DesiredCapacity": "1",
+        "VPCZoneIdentifier": [
+          {
+            "Ref": "azAWebSubnet"
+          },
+          {
+            "Ref": "azBWebSubnet"
+          }
+        ]
+      },
+      "CreationPolicy": {
+        "ResourceSignal": {
+          "Timeout": "PT10M"
+        }
+      },
+      "DependsOn": "tmpVPCIntGateway"
+    }
   },
   "Outputs": {
     "URL": {
