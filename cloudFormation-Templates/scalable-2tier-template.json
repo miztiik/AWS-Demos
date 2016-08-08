@@ -280,8 +280,9 @@
       "Type": "AWS::EC2::SecurityGroupIngress",
       "Properties": {
         "IpProtocol": "tcp",
-        "FromPort": "0",
+        "FromPort": "22",
         "ToPort": "22",
+        "CidrIp": "0.0.0.0/0",
         "GroupId": {
           "Fn::GetAtt": [
             "webSecGrp",
@@ -294,8 +295,9 @@
       "Type": "AWS::EC2::SecurityGroupIngress",
       "Properties": {
         "IpProtocol": "tcp",
-        "FromPort": "0",
+        "FromPort": "80",
         "ToPort": "80",
+        "CidrIp": "0.0.0.0/0",
         "GroupId": {
           "Fn::GetAtt": [
             "webSecGrp",
@@ -308,8 +310,9 @@
       "Type": "AWS::EC2::SecurityGroupIngress",
       "Properties": {
         "IpProtocol": "tcp",
-        "FromPort": "0",
+        "FromPort": "443",
         "ToPort": "443",
+        "CidrIp": "0.0.0.0/0",
         "GroupId": {
           "Fn::GetAtt": [
             "webSecGrp",
@@ -493,7 +496,10 @@
       "Metadata": {
         "Comment": "Webserver running Wordpress Application",
         "AWS::CloudFormation::Init": {
-          "config": {
+		  "configSets" : {
+            "wp_install_configure" : [ "install_wordpress" ]
+          },
+          "install_wordpress": {
             "packages": {
               "yum": {
                 "httpd": [],
@@ -503,7 +509,7 @@
               }
             },
             "sources": {
-              "/var/www/html": "https://wordpress.org/wordpress-4.2.4.tar.gz"
+              "/var/www/html": "https://wordpress.org/latest.tar.gz"
             },
             "files": {
               "/var/www/html/info.php": {
@@ -528,7 +534,6 @@
                     [
                       "#!/bin/bash -ex \n",
                       "groupadd www \n",
-                      "cd /var/www/ && tar -zxf latest.tar.gz && rm -rf /var/www/html && mv wordpress /var/www/html \n",
                       "chown -R root:www /var/www \n",
                       "chmod 2775 /var/www \n",
                       "find /var/www -type d -exec chmod 2775 {} + \n",
@@ -563,7 +568,7 @@
       },
       "Properties": {
         "EbsOptimized": false,
-        "ImageId": "ami-2051294a",
+        "ImageId": "ami-6869aa05",
         "InstanceType": "t2.micro",
         "SecurityGroups": [
           {
@@ -579,9 +584,10 @@
             "Fn::Join": [
               "",
               [
-                "#!/bin/bash -ex\n",
-                "yum update -y aws-cfn-bootstrap\n",
-                "/opt/aws/bin/cfn-init -v --stack ",
+                "#!/bin/bash -ex \n",
+				"# Install the AWS CloudFormation helper scripts and then run the cfn-init helper script  \n",
+				"yum update -y aws-cfn-bootstrap \n",
+                "/opt/aws/bin/cfn-init -v --configsets wp_install_configure --stack ",
                 {
                   "Ref": "AWS::StackName"
                 },
@@ -618,7 +624,7 @@
         },
         "MinSize": "1",
         "MaxSize": "2",
-        "DesiredCapacity": "1",
+        "DesiredCapacity": "2",
         "VPCZoneIdentifier": [
           {
             "Ref": "azAWebSubnet"
@@ -630,7 +636,7 @@
       },
       "CreationPolicy": {
         "ResourceSignal": {
-          "Timeout": "PT10M"
+          "Timeout": "PT15M"
         }
       },
       "DependsOn": "tmpVPCIntGateway"
@@ -653,6 +659,15 @@
         ]
       },
       "Description": "Newly created application URL"
+    },
+    "RDSDatabaseEndpoint": {
+      "Description": "RDS DB Endpoint Details",
+      "Value": {
+        "Fn::GetAtt": [
+          "rdsInstance",
+          "Endpoint.Address"
+        ]
+      }
     }
   }
 }
