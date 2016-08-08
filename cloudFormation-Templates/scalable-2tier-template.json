@@ -462,7 +462,7 @@
         ],
         "HealthCheck": {
           "HealthyThreshold": "2",
-          "Interval": "5",
+          "Interval": "30",
           "Target": {
             "Fn::Join": [
               "",
@@ -473,8 +473,8 @@
               ]
             ]
           },
-          "Timeout": "3",
-          "UnhealthyThreshold": "2"
+          "Timeout": "5",
+          "UnhealthyThreshold": "5"
         },
         "SecurityGroups": [
           {
@@ -518,9 +518,7 @@
                     "",
                     [
                       "<?php \n",
-                      "<h1> AWS CloudFormation sample PHP application </h1> \n",
-					  "<hr> 'The server hostname is, ' $_SERVER['SERVER_PORT']<hr> \n",
-					  "<br> phpinfo(); </br> \n",
+					  "phpinfo(); \n",
                       "?> \n"
                     ]
                   ]
@@ -540,8 +538,9 @@
                       "chmod 2775 /var/www \n",
                       "find /var/www -type d -exec chmod 2775 {} + \n",
                       "find /var/www -type f -exec chmod 0664 {} + \n",
-                      "setsebool -P httpd_can_network_connect=1 \n",
-                      "setsebool httpd_can_network_connect_db on \n",
+                      "# Configure SELinux to allow make network connection to database \n",
+                      "# setsebool -P httpd_can_network_connect=1 \n",
+                      "# setsebool httpd_can_network_connect_db on \n",
                       "systemctl restart httpd"
                     ]
                   ]
