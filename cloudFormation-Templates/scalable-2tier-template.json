@@ -517,9 +517,11 @@
                   "Fn::Join": [
                     "",
                     [
-                      "<?php\n",
-                      "echo '<h1>AWS CloudFormation sample PHP application</h1>\n<hr>$_SERVER['SERVER_PORT']<hr>\n<br> phpinfo() </br>';\n",
-                      "?>\n"
+                      "<?php \n",
+                      "<h1> AWS CloudFormation sample PHP application </h1> \n",
+					  "<hr> 'The server hostname is, ' $_SERVER['SERVER_PORT']<hr> \n",
+					  "<br> phpinfo(); </br> \n",
+                      "?> \n"
                     ]
                   ]
                 },
@@ -544,7 +546,7 @@
                     ]
                   ]
                 },
-                "mode": "000644",
+                "mode": "000744",
                 "owner": "apache",
                 "group": "apache"
               }
