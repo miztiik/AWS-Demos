@@ -375,299 +375,86 @@
           }
         ]
       }
-    },
-    "dbMySQLCustomParameterGroup": {
-      "Type": "AWS::RDS::DBParameterGroup",
-      "Properties": {
-        "Description": "Custom Parameters for the MySQL DB Instance",
-        "Family": "MySQL5.6",
-        "Parameters": {
-          "general_log": "ON",
-          "time_zone": "Asia/Calcutta",
-          "autocommit": 1
-        },
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "kum-dbMySQLCustomParameterGroup"
-          }
-        ]
-      }
-    },
-    "rdsInstance": {
-      "Type": "AWS::RDS::DBInstance",
-      "Properties": {
-        "DBInstanceIdentifier": "rds-mysql-inst01",
-        "DBName": "wpdb01",
-        "Engine": "MySQL",
-        "MasterUsername": "dbuser",
-        "MasterUserPassword": "dbuserpass",
-        "AllocatedStorage": "5",
-        "DBInstanceClass": "db.t2.micro",
-        "VPCSecurityGroups": [
-          {
-            "Fn::GetAtt": [
-              "dbSecGrp",
-              "GroupId"
-            ]
-          }
-        ],
-        "DBSubnetGroupName": {
-          "Ref": "dbSubnetGroup"
-        },
-        "DBParameterGroupName": {
-          "Ref": "dbMySQLCustomParameterGroup"
-        },
-        "BackupRetentionPeriod": "3",
-        "Port": "3306",
-        "MultiAZ": "False",
-        "AutoMinorVersionUpgrade": "False",
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "kum-rds-MySQL-Db"
-          },
-          {
-            "Key": "Role",
-            "Value": "Primary"
-          }
-        ]
-      },
-      "DependsOn": [
-        "dbMySQLCustomParameterGroup",
-        "dbSubnetGroup",
-        "dbSecGrp"
-      ],
-      "DeletionPolicy": "Delete"
-    },
-    "webLoadBalancer": {
-      "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
-      "Properties": {
-        "Subnets": [
-          {
-            "Ref": "azAWebSubnet"
-          },
-          {
-            "Ref": "azBWebSubnet"
-          }
-        ],
-        "LoadBalancerName": "kum-webLoadBalancer",
-        "Listeners": [
-          {
-            "InstancePort": "80",
-            "InstanceProtocol": "HTTP",
-            "LoadBalancerPort": "80",
-            "Protocol": "HTTP"
-          }
-        ],
-        "HealthCheck": {
-          "HealthyThreshold": "2",
-          "Interval": "30",
-          "Target": {
-            "Fn::Join": [
-              "",
-              [
-                "HTTP:",
-                "80",
-                "/"
-              ]
-            ]
-          },
-          "Timeout": "5",
-          "UnhealthyThreshold": "5"
-        },
-        "SecurityGroups": [
-          {
-            "Ref": "webSecGrp"
-          }
-        ],
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "kum-webLoadBalancer"
-          }
-        ],
-        "Scheme": "internet-facing"
-      },
-      "DependsOn": "tmpVPCIntGateway"
-    },
-    "webServerLaunchConfig": {
-      "Type": "AWS::AutoScaling::LaunchConfiguration",
-      "Metadata": {
-        "Comment": "Webserver running Wordpress Application",
-        "AWS::CloudFormation::Init": {
-		  "configSets" : {
-            "wp_install_configure" : [ "install_wordpress" ]
-          },
-          "install_wordpress": {
-            "packages": {
-              "yum": {
-                "httpd": [],
-                "php": [],
-                "php-mysql": [],
-                "mysql": []
-              }
-            },
-            "sources": {
-              "/var/www/html": "https://wordpress.org/latest.tar.gz"
-            },
-            "files": {
-              "/var/www/html/info.php": {
-                "content": {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "<?php \n",
-					  "phpinfo(); \n",
-                      "?> \n"
-                    ]
-                  ]
-                },
-                "mode": "000644",
-                "owner": "apache",
-                "group": "apache"
-              },
-              "/tmp/quickConfig": {
-                "content": {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "#!/bin/bash -ex \n",
-                      "groupadd www \n",
-                      "chown -R root:www /var/www \n",
-                      "chmod 2775 /var/www \n",
-                      "find /var/www -type d -exec chmod 2775 {} + \n",
-                      "find /var/www -type f -exec chmod 0664 {} + \n",
-                      "# Configure SELinux to allow make network connection to database \n",
-                      "# setsebool -P httpd_can_network_connect=1 \n",
-                      "# setsebool httpd_can_network_connect_db on \n"
-                    ]
-                  ]
-                },
-                "mode": "000744",
-                "owner": "apache",
-                "group": "apache"
-              }
-            },
-            "commands": {
-              "01_config": {
-                "command": "/tmp/quickConfig",
-                "cwd": "/var/www"
-              }
-            },
-            "services": {
-              "sysvinit": {
-                "httpd": {
-                  "enabled": "true",
-                  "ensureRunning": "true"
-                }
-              }
-            }
-          }
-        }
-      },
-      "Properties": {
-        "EbsOptimized": false,
-        "ImageId": "ami-6869aa05",
-        "InstanceType": "t2.micro",
-        "SecurityGroups": [
-          {
-            "Ref": "webSecGrp"
-          }
-        ],
-        "KeyName": {
-          "Ref": "KeyName"
-        },
-        "AssociatePublicIpAddress": "true",
-        "UserData": {
-          "Fn::Base64": {
-            "Fn::Join": [
-              "",
-              [
-                "#!/bin/bash -ex \n",
-				"# Install the AWS CloudFormation helper scripts and then run the cfn-init helper script  \n",
-				"yum update -y aws-cfn-bootstrap \n",
-                "/opt/aws/bin/cfn-init -v --configsets wp_install_configure --stack ",
-                {
-                  "Ref": "AWS::StackName"
-                },
-                " --resource webServerLaunchConfig --region ",
-                {
-                  "Ref": "AWS::Region"
-                },
-                "\n",
-                "/opt/aws/bin/cfn-signal -e $? --stack ",
-                {
-                  "Ref": "AWS::StackName"
-                },
-                " --resource AutoScalingGroup --region ",
-                {
-                  "Ref": "AWS::Region"
-                },
-                "\n"
-              ]
-            ]
-          }
-        }
-      }
-    },
-    "AutoScalingGroup": {
-      "Type": "AWS::AutoScaling::AutoScalingGroup",
-      "Properties": {
-        "LoadBalancerNames": [
-          {
-            "Ref": "webLoadBalancer"
-          }
-        ],
-        "LaunchConfigurationName": {
-          "Ref": "webServerLaunchConfig"
-        },
-        "MinSize": "1",
-        "MaxSize": "2",
-        "DesiredCapacity": "2",
-        "VPCZoneIdentifier": [
-          {
-            "Ref": "azAWebSubnet"
-          },
-          {
-            "Ref": "azBWebSubnet"
-          }
-        ]
-      },
-      "CreationPolicy": {
-        "ResourceSignal": {
-          "Timeout": "PT15M"
-        }
-      },
-      "DependsOn": "tmpVPCIntGateway"
     }
   },
   "Outputs": {
-    "URL": {
+    "KeyName": {
       "Value": {
-        "Fn::Join": [
-          "",
-          [
-            "http://",
-            {
-              "Fn::GetAtt": [
-                "webLoadBalancer",
-                "DNSName"
-              ]
-            }
-          ]
-        ]
+        "Ref": "KeyName"
       },
-      "Description": "Newly created application URL"
+      "Description": "The SSH Keyname to be used,"
     },
-    "RDSDatabaseEndpoint": {
-      "Description": "RDS DB Endpoint Details",
+    "vpcID": {
       "Value": {
-        "Fn::GetAtt": [
-          "rdsInstance",
-          "Endpoint.Address"
-        ]
+        "Ref": "tmpVPC"
+      },
+      "Description": "The VPC ID for the network stack"
+    },
+    "tmpVPCIntGateway": {
+      "Value": {
+        "Ref": "tmpVPCIntGateway"
+      },
+      "Description": "The Internet Gateway for the stack"
+    },
+    "azAPrivateSubnet": {
+      "Value": {
+        "Ref": "azAPrivateSubnet"
+      },
+      "Description": "The private subnet in AZ B"
+    },
+    "azAWebSubnet": {
+      "Value": {
+        "Ref": "azBWebSubnet"
+      },
+      "Description": "The subnet for web facing instances in AZ A"
+    },
+    "azASpareSubnet": {
+      "Value": {
+        "Ref": "azASpareSubnet"
+      },
+      "Description": "The spare subnet in AZ B"
+    },
+    "azBPrivateSubnet": {
+      "Description": "The private subnet in AZ B",
+      "Value": {
+        "Ref": "azBPrivateSubnet"
       }
+    },
+    "azBWebSubnet": {
+      "Value": {
+        "Ref": "azAWebSubnet"
+      },
+      "Description": "The subnet for web facing instances in AZ B"
+    },
+    "azBSpareSubnet": {
+      "Value": {
+        "Ref": "azBSpareSubnet"
+      },
+      "Description": "The spare subnet in AZ B"
+    },
+    "LoadBalancerSecGrp": {
+      "Value": {
+        "Ref": "LoadBalancerSecGrp"
+      },
+      "Description": "The security group for load balancers"
+    },
+    "webSecGrp": {
+      "Value": {
+        "Ref": "webSecGrp"
+      },
+      "Description": "The security group for web facing instances"
+    },
+    "dbSecGrp": {
+      "Value": {
+        "Ref": "dbSecGrp"
+      },
+      "Description": "The security group for RDS / Database instances"
+    },
+    "dbSubnetGroup": {
+      "Value": {
+        "Ref": "dbSubnetGroup"
+      },
+      "Description": "The subnet group for RDS / Database instances"
     }
   }
 }
