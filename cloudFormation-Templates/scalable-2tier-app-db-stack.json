@@ -141,10 +141,11 @@
         "AWS::CloudFormation::Init": {
           "configSets": {
             "wp_install_configure": [
-              "install_wordpress"
+              "install-wordpress",
+			  "install-chef-client"
             ]
           },
-          "install_wordpress": {
+          "install-wordpress": {
             "packages": {
               "yum": {
                 "httpd": [],
@@ -153,6 +154,17 @@
                 "mysql": []
               }
             },
+			"install-chef-client": {
+            "packages": {
+              "rubygems": {
+                "chef": [
+                  "10.14.2"
+                ],
+                "ohai": [
+                  "0.6.4"
+                ]
+              }
+			},
             "sources": {
               "/var/www/html": "https://wordpress.org/latest.tar.gz"
             },
@@ -317,6 +329,24 @@
       "Description": "Newly created application URL"
     },
     "RDSDatabaseEndpoint": {
+      "Description": "RDS DB Endpoint Details",
+      "Value": {
+        "Fn::GetAtt": [
+          "rdsInstance",
+          "Endpoint.Address"
+        ]
+      }
+    },
+	"RDSDatabaseEndpoint": {
+      "Description": "RDS DB Endpoint Details",
+      "Value": {
+        "Fn::GetAtt": [
+          "rdsInstance",
+          "Endpoint.Address"
+        ]
+      }
+    },
+	"RDSDatabaseEndpoint": {
       "Description": "RDS DB Endpoint Details",
       "Value": {
         "Fn::GetAtt": [
