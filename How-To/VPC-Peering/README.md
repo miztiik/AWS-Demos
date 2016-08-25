@@ -9,6 +9,7 @@
   - pvtVPC-Subnet01 - 10.0.2.0/25
   - pvtVPC-Subnet02 - 10.0.2.128/25
   
+![alt tag](https://github.com/miztiik/AWS-Demos/blob/master/img/VPC-Peering.png)
 
 ### Create our VPCs
 
