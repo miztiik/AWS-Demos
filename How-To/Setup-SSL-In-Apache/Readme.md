@@ -23,6 +23,9 @@ The following EC2 Instance attributes are to be pre-determined before executing 
   - `ami-cdbdd7a2` is the latest ami for Redhat Linux in Region:`ap-south-1`
   - _Ensure you have the internet gateway and security group setup & Network ACL set properly for allowing TCP traffic through port SSH - 22, HTTP - 80 & HTTPS - 443_
 
+`mod_ssl` is needed for using SSL Certificates. `mod_ssl` installation will create the required configuration file `/etc/httd/conf.d/ssl.conf`. For this file to be loaded, and hence for mod_ssl to work, you must have the statement Include conf.d/*.conf in the /etc/httpd/conf/httpd.conf file.
+>_This statement is included by default in the default Apache HTTP Server configuration file._
+
 ```sh
 # Setting the Region
 prefAZ=ap-south-1
@@ -31,7 +34,7 @@ export AWS_DEFAULT_REGION="$prefAZ"
 # Setup the command to run at boot time
 cat > userDataScript << "EOF"
 #!/bin/bash
-yum install -y httpd mod_ssl
+yum install -y httpd mod_ssl openssl
 service httpd start
 chkconfig httpd on
 groupadd www
@@ -125,13 +128,42 @@ Email Address []:none@none.com
 ### Move your Key file to:
  `mv mystique.key /etc/pki/tls/private/mystique.key`
 
+### Configure Apache to user our certificates
+Find the below entries in the file `/etc/httd/conf.d/ssl.conf`, and update them as shown below
+```sh
+SSLCertificateFile /etc/httpd/conf/ssl.crt/server.crt
+SSLCertificateKeyFile /etc/httpd/conf/ssl.key/server.key
+```
+
 ## Restart Webserver
+Now we have generated the certificates and installed them in ou
 ```sh
 systemctl restart httpd
 ```
 
-## Lets check our webserver using `curl`
-###### You should actually check it from a browser
+## Testing SSL Protocols
+###### You should _really_ check it from a browser
+
+Incase you want to play around in the commandline
+To check which versions of SSL are enabled or disabled, make use of the following command. 
+`openssl s_client -connect hostname:port -protocol`
+```sh
+openssl s_client -connect hostname:port -protocol
+
+~]$ openssl s_client -connect localhost:443 -tls1_2
+CONNECTED(00000003)
+depth=0 C = --, ST = SomeState, L = SomeCity, O = SomeOrganization, OU = SomeOrganizationalUnit, CN = localhost.localdomain, emailAddress = root@localhost.localdomain
+output omitted
+New, TLSv1/SSLv3, Cipher is ECDHE-RSA-AES256-GCM-SHA384
+Server public key is 2048 bit
+Secure Renegotiation IS supported
+Compression: NONE
+Expansion: NONE
+SSL-Session:
+    Protocol  : TLSv1.2
+output truncated
+```
+_The above output indicates that no failure of the handshake occurred and a set of ciphers was negotiated._
 
 #### curl the localhost
 ```sh
