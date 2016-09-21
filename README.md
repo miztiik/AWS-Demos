@@ -3,7 +3,7 @@
 There are two parts to the setup,
 - **Part 1** - Setting up the network infrastructure (VPC, Subnets, Security Groups)
 - **Part 2** - Create & Configure the Database, Web & Load Balancer Instances
-
+![Fig 1 : Web-App-DB (3 Tier) - Reference Architecture Context](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/img/web-App-DB-Ref-Arch.png)
 Assuming you have already setup your AWS CLI for Region `US East (N. Virginia)`. Lets move forward;
 
 # Part 1 - Create VPC, Subnet, Security Group
