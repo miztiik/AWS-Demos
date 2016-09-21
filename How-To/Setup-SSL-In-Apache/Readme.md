@@ -16,6 +16,53 @@ _This article is aimed for people looking to create and use self signed certific
   - Thats it.
 
 
+## Setup the Webserver
+## Install Your Self Signed Certificate in your server
+
+### Launch an EC2 Instance
+The following attributes are to be pre-determined before executing the script
+  - `userdata` Script to setup our webserver as an EC2 Instance running Apache HTTP server on Redhat Linux
+  - `ami-cdbdd7a2` is the latest ami for Redhat Linux in Region:`ap-south-1`
+  - _Ensure you have the internet gateway and security group setup & Network ACL set properly for allowing TCP traffic through port SSH - 22, HTTP - 80 & HTTPS - 443_
+
+```sh
+# Setting the Region
+prefAZ=ap-south-1
+export AWS_DEFAULT_REGION="$prefAZ"
+
+# Setup the command to run at boot time
+cat > userDataScript << "EOF"
+#!/bin/bash
+yum install -y httpd mod_ssl
+service httpd start
+chkconfig httpd on
+groupadd www
+usermod -a -G www ec2-user
+chown -R root:www /var/www
+chmod 2775 /var/www
+find /var/www -type d -exec chmod 2775 {} +
+find /var/www -type f -exec chmod 0664 {} +
+echo "Lets rock the HTTPS World; Just give me a lever long enough" > /var/www/html/index.html
+EOF
+```
+
+```sh
+instanceID=$(aws ec2 run-instances \
+           --image-id ami-cdbdd7a2 \
+           --count 1 \
+           --instance-type t2.micro \
+           --key-name lms-key \
+           --user-data "$userDataScript" \
+           --associate-public-ip-address \
+           --query 'Instances[0].InstanceId' \
+           --output text)
+
+instanceUrl=$(aws ec2 describe-instances \
+            --instance-ids "$instanceID" \
+            --query 'Reservations[0].Instances[0].PublicDnsName' \
+            --output text)
+```
+
 ## Generate a Private Key
 
 We will be using Apache to generate our "Generate Your Apache "Self Signed Certificate", If If `openssl` is not installed, run `yum install -y openssl`. This key is a 2048 bit RSA key and stored in a PEM format so that it is readable as ASCII text.
@@ -72,53 +119,6 @@ Email Address []:none@none.com
 [root@ip-10-0-5-105 tmp]# ls -l mystique*
 -rw-r--r--. 1 root root 1505 Sep 20 14:24 mystique.crt
 -rw-r--r--. 1 root root 1679 Sep 20 14:14 mystique.key
-```
-
-## Install Your Self Signed Certificate in your server
-
-### Launch an EC2 Instance
-
-#### Script to setup our webserver as an EC2 Instance running Apache HTTP server on Redhat Linux
-
-###### `ami-cdbdd7a2` is the latest ami for Redhat Linux in Region:`ap-south-1`
-###### _Ensure you have the internet gateway and security group setup properly for port SSH - 22, HTTP - 80 & HTTPS - 443 access_
-
-```sh
-# Setting the Region
-prefAZ=ap-south-1
-export AWS_DEFAULT_REGION="$prefAZ"
-
-# Setup the command to run at boot time
-cat > userDataScript << "EOF"
-#!/bin/bash
-yum install -y httpd mod_ssl
-service httpd start
-chkconfig httpd on
-groupadd www
-usermod -a -G www ec2-user
-chown -R root:www /var/www
-chmod 2775 /var/www
-find /var/www -type d -exec chmod 2775 {} +
-find /var/www -type f -exec chmod 0664 {} +
-echo "Lets rock the HTTPS World; Just give me a lever long enough" > /var/www/html/index.html
-EOF
-```
-
-```sh
-instanceID=$(aws ec2 run-instances \
-           --image-id ami-cdbdd7a2 \
-           --count 1 \
-           --instance-type t2.micro \
-           --key-name lms-key \
-           --user-data "$userDataScript" \
-           --associate-public-ip-address \
-           --query 'Instances[0].InstanceId' \
-           --output text)
-
-instanceUrl=$(aws ec2 describe-instances \
-            --instance-ids "$instanceID" \
-            --query 'Reservations[0].Instances[0].PublicDnsName' \
-            --output text)
 ```
 
 ### Move your certificate file to 
