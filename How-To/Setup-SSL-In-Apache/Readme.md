@@ -20,11 +20,11 @@ _This article is aimed for people looking to create and use self signed certific
 
 The following EC2 Instance attributes are to be pre-determined before executing the script
   - `userdata` Script to setup our webserver as an EC2 Instance running Apache HTTP server on Redhat Linux
+    - `mod_ssl` package is needed for using SSL Certificates in your webserver.  `mod_ssl` installation will create the required configuration file `/etc/httd/conf.d/ssl.conf`. For this file to be loaded, and hence for mod_ssl to work, you must have the statement `Include conf.d/*.conf` in the `/etc/httpd/conf/httpd.conf` file.
+    - >_This statement is included by default in the default Apache HTTP Server configuration file._
   - `ami-cdbdd7a2` is the latest ami for Redhat Linux in Region:`ap-south-1`
-  - _Ensure you have the internet gateway and security group setup & Network ACL set properly for allowing TCP traffic through port SSH - 22, HTTP - 80 & HTTPS - 443_
+  - Ensure you have the internet gateway and security group setup & Network ACL set properly for allowing TCP traffic through port `SSH - 22, HTTP - 80 & HTTPS - 443`
 
-`mod_ssl` is needed for using SSL Certificates. `mod_ssl` installation will create the required configuration file `/etc/httd/conf.d/ssl.conf`. For this file to be loaded, and hence for mod_ssl to work, you must have the statement Include conf.d/*.conf in the /etc/httpd/conf/httpd.conf file.
->_This statement is included by default in the default Apache HTTP Server configuration file._
 
 ```sh
 # Setting the Region
@@ -90,8 +90,7 @@ openssl req -days 365 -new -key mystique.key -x509 -out mystique.crt
 ```
 
 You will be prompted for,
- - `Organizational information and a common name. The common name should be the fully qualified domain name for the site you are securing. 
- You can leave the following blank
+  - `Organizational information and a common name` : The common name should be the fully qualified domain name for the site you are securing.
   - `E-Mail address`
   - `Challenge password`
   - `Company name`
@@ -143,9 +142,8 @@ systemctl restart httpd
 
 ## Testing SSL Protocols
 ###### You should _really_ check it from a browser
-
-Incase you want to play around in the commandline
-To check which versions of SSL are enabled or disabled, make use of the following command. 
+![alt tag](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/img/home-made-ssl.png)
+Incase you want to play around in the commandline, To check which versions of SSL are enabled or disabled, make use of the following command. 
 `openssl s_client -connect hostname:port -protocol`
 ```sh
 openssl s_client -connect hostname:port -protocol
