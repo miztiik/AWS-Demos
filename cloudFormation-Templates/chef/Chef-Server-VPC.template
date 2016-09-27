@@ -1,0 +1,166 @@
+{
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    "Description"              : "Step 2 of 3: Create the VPC infrastructure for the Chef Server Quick Start.",
+    "Parameters"               : {
+        "KeyPairName" : {
+            "Description" : "Public/private key pair",
+            "Type"        : "AWS::EC2::KeyPair::KeyName"
+        },
+        "SubnetCIDR"  : {
+            "Description" : "CIDR Block for the Public Subnet",
+            "Type"        : "String",
+            "Default"     : "10.0.0.0/19",
+            "AllowedPattern" : "[a-zA-Z0-9]+\\..+"
+        },
+        "VPCCIDR"         : {
+            "Description" : "CIDR Block for the VPC",
+            "Type"        : "String",
+            "Default"     : "10.0.0.0/16",
+            "AllowedPattern" : "[a-zA-Z0-9]+\\..+"
+        }
+    },
+    "Resources"                : {
+        "VPC" : {
+            "Type" : "AWS::EC2::VPC",
+            "Properties" : {
+                "CidrBlock" : {
+                    "Ref" : "VPCCIDR"
+                },
+				"EnableDnsHostnames" : "true",
+                "Tags"      : [
+                    {
+                        "Key" : "Application",
+                        "Value" : {
+                            "Ref" : "AWS::StackName"
+                        }
+                    },
+                    {
+                        "Key" : "Network",
+                        "Value" : "Public"
+                    }
+                ]
+            }
+        },
+        "PublicSubnet" : {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "VpcId" : {
+                    "Ref" : "VPC"
+                },
+                "CidrBlock" : {
+                    "Ref" : "SubnetCIDR"
+                },
+				"MapPublicIpOnLaunch" : "true",
+                "AvailabilityZone" : {
+                    "Fn::Select" : [
+                        0,
+                        {
+                            "Fn::GetAZs" : ""
+                        }
+                    ]
+                },
+                "Tags"             : [
+                    {
+                        "Key" : "Application",
+                        "Value" : {
+                            "Ref" : "AWS::StackName"
+                        }
+                    },
+                    {
+                        "Key" : "Network",
+                        "Value" : "Public"
+                    },
+                    {
+                        "Key" : "Role",
+                        "Value" : "Public Subnet"
+                    }
+                ]
+            }
+        },
+        "InternetGateway" : {
+            "Type" : "AWS::EC2::InternetGateway",
+            "Properties" : {
+                "Tags" : [
+                    {
+                        "Key" : "Application",
+                        "Value" : {
+                            "Ref" : "AWS::StackName"
+                        }
+                    },
+                    {
+                        "Key" : "Network",
+                        "Value" : "Public"
+                    }
+                ]
+            }
+        },
+        "AttachGateway"   : {
+            "Type" : "AWS::EC2::VPCGatewayAttachment",
+            "Properties" : {
+                "VpcId" : {
+                    "Ref" : "VPC"
+                },
+                "InternetGatewayId" : {
+                    "Ref" : "InternetGateway"
+                }
+            }
+        },
+        "PublicRouteTable" : {
+            "Type" : "AWS::EC2::RouteTable",
+            "Properties" : {
+                "VpcId" : {
+                    "Ref" : "VPC"
+                },
+                "Tags"  : [
+                    {
+                        "Key" : "Application",
+                        "Value" : {
+                            "Ref" : "AWS::StackName"
+                        }
+                    },
+                    {
+                        "Key" : "Network",
+                        "Value" : "Public Subnet"
+                    }
+                ]
+            }
+        },
+        "PublicRoute"      : {
+            "Type" : "AWS::EC2::Route",
+            "Properties" : {
+                "RouteTableId" : {
+                    "Ref" : "PublicRouteTable"
+                },
+                "DestinationCidrBlock" : "0.0.0.0/0",
+                "GatewayId"            : {
+                    "Ref" : "InternetGateway"
+                }
+            }
+        },
+        "PublicSubnetRouteTableAssociation" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "SubnetId" : {
+                    "Ref" : "PublicSubnet"
+                },
+                "RouteTableId" : {
+                    "Ref" : "PublicRouteTable"
+                }
+            }
+        }
+    },
+    "Outputs"                  : {
+        "VPC" : {
+            "Value" : {
+                "Ref" : "VPC"
+            },
+            "Description" : "VPC ID"
+        },
+        "SubnetId"        : {
+            "Value" : {
+                "Ref" : "PublicSubnet"
+            },
+            "Description" : "Subnet ID for the public subnet"
+        }
+    }
+}

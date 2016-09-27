@@ -1,0 +1,656 @@
+{
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    "Description"              : "Step 3 of 3: Create the Amazon EC2 instances for the Chef Server Quick Start.",
+    "Parameters"               : {
+        "KeyPairName" : {
+            "Description" : "Public/private key pair",
+            "Type"        : "AWS::EC2::KeyPair::KeyName"
+        },
+        "SubnetId"    : {
+            "Description" : "VPC Subnet ID for EC2 Instances",
+            "Type"        : "AWS::EC2::Subnet::Id"
+        },
+        "VPC"    : {
+            "Description" : "VPC Id",
+            "Type"        : "AWS::EC2::VPC::Id"
+        },
+        "RemoteAdminCIDR" : {
+            "Description" : "CIDR Block or IP for SSH and RDP access",
+            "Type"        : "String",
+            "Default"     : "0.0.0.0/0",
+            "AllowedPattern" : "[a-zA-Z0-9]+\\..+"
+        },
+        "AdminPassword" : {
+            "Description" : "Password for the 'chefadmin' account used to sign into the Chef Management Console",
+            "Type"        : "String",
+	    "NoEcho"         : "True"
+        },
+        "AdminEmailAddress" : {
+            "Description" : "Email address for Chef Administrator",
+            "Type"        : "String",
+            "Default"     : "admin@localhost.internal"
+        },
+        "ChefNodes" : {
+            "Description" : "Select the number of nodes you want to support.",
+            "AllowedValues" : [
+                "5",
+				"25",
+				"100",
+				"150",
+				"200",
+				"250"
+            ],
+            "Type"        : "String",
+            "Default"     : "5"
+        },
+        "IncludeDemoInstances"      : {
+            "Description" : "Set this value to 'true' to include a Chef workstation and demo node. For Chef Server only, set to 'false'",
+            "AllowedValues" : [
+                "true",
+                "false"
+            ],
+            "Type"          : "String",
+            "Default"       : "true"
+        },
+        "VPCCIDR"         : {
+            "Description" : "CIDR Block for the VPC",
+            "Type"        : "String",
+            "Default"     : "10.0.0.0/16",
+            "AllowedPattern" : "[a-zA-Z0-9]+\\..+"
+        }
+    },
+    "Conditions"               : {
+        "DemoInstances" : {
+            "Fn::Equals" : [
+                {
+                    "Ref" : "IncludeDemoInstances"
+                },
+                "true"
+            ]
+        }
+    },
+    "Mappings"                 : {
+        "ChefAMI" : {
+			"eu-west-1" : {
+				"5" : "ami-c0b91cb3",
+				"25" : "ami-bd8520ce",
+				"50" : "ami-a18421d2",
+				"100" : "ami-dbb91ca8",
+				"150" : "ami-d0b81da3",
+				"200" : "ami-9d8520ee",
+				"250" : "ami-bb8025c8"
+			},
+			"ap-southeast-1" : {
+				"5" : "ami-41de1f22",
+				"25" : "ami-4fde1f2c",
+				"50" : "ami-f7dc1d94",
+				"100" : "ami-1fdc1d7c",
+				"150" : "ami-1bdf1e78",
+				"200" : "ami-18dc1d7b",
+				"250" : "ami-09e1206a"
+			},
+			"ap-southeast-2" : {
+				"5" : "ami-ab9ac3c8",
+				"25" : "ami-869dc4e5",
+				"50" : "ami-c89cc5ab",
+				"100" : "ami-879dc4e4",
+				"150" : "ami-a498c1c7",
+				"200" : "ami-a69ac3c5",
+				"250" : "ami-fb91c898"
+			},
+			"eu-central-1" : {
+				"5" : "ami-80fdefec",
+				"25" : "ami-7afcee16",
+				"50" : "ami-c0fceeac",
+				"100" : "ami-45fcee29",
+				"150" : "ami-cbffeda7",
+				"200" : "ami-befdefd2",
+				"250" : "ami-2bffed47"
+			},
+			"ap-northeast-1" : {
+				"5" : "ami-3137155f",
+				"25" : "ami-1c311372",
+				"50" : "ami-d13012bf",
+				"100" : "ami-6d301203",
+				"150" : "ami-1c301272",
+				"200" : "ami-0b371565",
+				"250" : "ami-d63614b8"
+			},
+            "us-east-1" : {
+                "5" : "ami-812d6aeb",
+				"25" : "ami-292e6943",
+				"50" : "ami-802d6aea",
+				"100" : "ami-3e2f6854",
+				"150" : "ami-022d6a68",
+				"200" : "ami-0d296e67",
+				"250" : "ami-4037702a"
+            },
+			"sa-east-1" : {
+				"5" : "ami-55cd4839",
+				"25" : "ami-98cb4ef4",
+				"50" : "ami-aec247c2",
+				"100" : "ami-57cd483b",
+				"150" : "ami-92cf4afe",
+				"200" : "ami-adc144c1",
+				"250" : "ami-69c84d05"
+			},
+			"us-west-1" : {
+				"5" : "ami-193c5579",
+				"25" : "ami-e13f5681",
+				"50" : "ami-e43f5684",
+				"100" : "ami-d73f56b7",
+				"150" : "ami-e23f5682",
+				"200" : "ami-ea31588a",
+				"250" : "ami-173b5277"
+			},
+			"us-west-2" : {
+				"5" : "ami-e5e5f584",
+				"25" : "ami-dbffefba",
+				"50" : "ami-24e1f145",
+				"100" : "ami-c5e4f4a4",
+				"150" : "ami-0de3f36c",
+				"200" : "ami-c9e3f3a8",
+				"250" : "ami-4be2f22a"
+			}
+        },
+        "WIN2012R2AMI"    : {
+            "ap-northeast-1" : {
+                "64" : "ami-57282639"
+            },
+            "ap-southeast-1" : {
+                "64" : "ami-f8478f9b"
+            },
+            "ap-southeast-2" : {
+                "64" : "ami-1af6d779"
+            },
+            "eu-central-1" : {
+                "64" : "ami-1135d17e"
+            },
+            "eu-west-1" : {
+                "64" : "ami-c6972fb5"
+            },
+            "sa-east-1" : {
+                "64" : "ami-bdf974d1"
+            },
+            "us-east-1" : {
+                "64" : "ami-3d787d57"
+            },
+            "us-west-1" : {
+                "64" : "ami-df4437bf"
+            },
+            "us-west-2" : {
+                "64" : "ami-1719f677"
+            }
+        },
+        "Ubuntu1404AMI"    : {
+            "us-east-1" : {
+                "64" : "ami-d05e75b8"
+            },
+            "us-west-2" : {
+                "64" : "ami-5189a661"
+            },
+            "us-west-1" : {
+                "64" : "ami-df6a8b9b"
+            },
+            "eu-west-1" : {
+                "64" : "ami-47a23a30"
+            },
+            "eu-central-1" : {
+                "64" : "ami-accff2b1"
+            },
+            "ap-southeast-1" : {
+                "64" : "ami-96f1c1c4"
+            },
+            "ap-northeast-1" : {
+                "64" : "ami-936d9d93"
+            },
+            "sa-east-1"      : {
+                "64" : "ami-02952d6e"
+            },
+            "ap-southeast-2" : {
+                "64" : "ami-4d883350"
+            }
+        }
+    },
+    "Resources"                : {
+        "ChefServerEIP" : {
+            "Type" : "AWS::EC2::EIP",
+            "Properties" : {
+                "Domain" : "vpc",
+                "InstanceId" : {
+                    "Ref" : "ChefServer"
+                }
+            }
+        },
+        "WaitForChefServerInstall" : {
+            "Type" : "AWS::CloudFormation::WaitCondition",
+            "DependsOn" : "ChefServer",
+            "Properties" : {
+                "Handle" : {
+                    "Ref" : "WaitForChefServerWaitHandle"
+                },
+                "Timeout" : "2700"
+            }
+        },
+        "WaitForChefServerWaitHandle" : {
+            "Type" : "AWS::CloudFormation::WaitConditionHandle",
+            "Properties" : {
+            }
+        },
+        "ChefServer"                  : {
+            "Type" : "AWS::EC2::Instance",
+            "Properties" : {
+                "ImageId" : {
+                    "Fn::FindInMap" : [
+                        "ChefAMI",
+                        {
+                            "Ref" : "AWS::Region"
+                        },
+                        {"Ref" : "ChefNodes"}
+                    ]
+                },
+                "InstanceType" : "t2.medium",
+                "SubnetId"     : {
+                    "Ref" : "SubnetId"
+                },
+                "Tags"         : [
+                    {
+                        "Key" : "Name",
+                        "Value" : "ChefServer"
+                    }
+                ],
+                "BlockDeviceMappings" : [
+                    {
+                        "DeviceName" : "/dev/sda1",
+                        "Ebs"        : {
+                            "VolumeSize" : "50",
+                            "VolumeType" : "gp2"
+                        }
+                    }
+                ],
+                "SecurityGroupIds"    : [
+                    {
+                        "Ref" : "ChefServerSecurityGroup"
+                    }
+                ],
+                "KeyName"             : {
+                    "Ref" : "KeyPairName"
+                },
+                "UserData"            : {
+                    "Fn::Base64" : {
+                        "Fn::Join" : [
+                            "",
+                            [
+                                "#!/bin/bash\n",
+                                "chef-server-ctl marketplace-setup -u chefadmin -f chefadmin -l p -e ",
+                                {
+                                    "Ref" : "AdminEmailAddress"
+                                },								
+								" -o aws -p ",
+                                {
+                                    "Ref" : "AdminPassword"
+                                },								
+								" -y",
+                                "\n",
+                                "curl -X PUT -H 'Content-Type:' --data-binary '{\"Status\" : \"SUCCESS\",\"Reason\" : \"Configuration Complete\",\"UniqueId\" : \"ChefServer\", \"Data\" : \"Done\"}' \"",
+                                {
+                                    "Ref" : "WaitForChefServerWaitHandle"
+                                },
+								"\"",
+                                "\n"
+                            ]
+                        ]
+                    }
+                }
+            }
+        },
+        "ChefWorkStation"             : {
+            "Type" : "AWS::EC2::Instance",
+            "Condition" : "DemoInstances",
+            "Metadata" : {
+                "AWS::CloudFormation::Init" : {
+                    "configSets" : {
+                        "config" : [
+                            "setup"
+                        ]
+                    },
+                    "setup"      : {
+                        "files" : {
+                            "c:\\cfn\\cfn-hup.conf" : {
+                                "content" : {
+                                    "Fn::Join" : [
+                                        "",
+                                        [
+                                            "[main]\n",
+                                            "stack=",
+                                            {
+                                                "Ref" : "AWS::StackId"
+                                            },
+                                            "\n",
+                                            "region=",
+                                            {
+                                                "Ref" : "AWS::Region"
+                                            },
+                                            "\n"
+                                        ]
+                                    ]
+                                }
+                            },
+                            "c:\\cfn\\hooks.d\\cfn-auto-reloader.conf" : {
+                                "content" : {
+                                    "Fn::Join" : [
+                                        "",
+                                        [
+                                            "[cfn-auto-reloader-hook]\n",
+                                            "triggers=post.update\n",
+                                            "path=Resources.ChefWorkStation.Metadata.AWS::CloudFormation::Init\n",
+                                            "action=cfn-init.exe -v -s ",
+                                            {
+                                                "Ref" : "AWS::StackId"
+                                            },
+                                            " -r ChefWorkStation",
+                                            " --region ",
+                                            {
+                                                "Ref" : "AWS::Region"
+                                            },
+                                            "\n"
+                                        ]
+                                    ]
+                                }
+                            },
+                            "c:\\cfn\\scripts\\Unzip-Archive.ps1"      : {
+                                "source" : "https://s3.amazonaws.com/quickstart-reference/chef/chef-server/latest/microsoft-utilities/scripts/Unzip-Archive.ps1"
+                            },
+                            "c:\\cfn\\modules\\AWSQuickStart.zip"      : {
+                                "source" : "https://s3.amazonaws.com/quickstart-reference/chef/chef-server/latest/microsoft-utilities/modules/AWSQuickStart.zip"
+                            },
+                            "c:\\cfn\\downloads\\chefdk-0.9.0-1-x86.msi"      : {
+                                "source" : "https://opscode-omnibus-packages.s3.amazonaws.com/windows/2008r2/i386/chefdk-0.9.0-1-x86.msi"
+                            },
+                            "c:\\cfn\\downloads\\Git-2.6.2-64-bit.exe"      : {
+                                "source" : "https://github.com/git-for-windows/git/releases/download/v2.6.2.windows.1/Git-2.6.2-64-bit.exe"
+                            },
+                            "c:\\cfn\\scripts\\git.inf"      : {
+                                "source" : "https://s3.amazonaws.com/quickstart-reference/chef/chef-server/latest/scripts/git.inf"
+                            },
+							"c:\\cfn\\downloads\\default.rb"      : {
+                                "source" : "https://s3.amazonaws.com/quickstart-reference/chef/chef-server/latest/scripts/default.rb"
+                            },
+							"c:\\cfn\\scripts\\New-LocalAdministrator.ps1"      : {
+                                "source" : "https://s3.amazonaws.com/quickstart-reference/chef/chef-server/latest/microsoft-utilities/scripts/New-LocalAdministrator.ps1"
+                            },
+							"c:\\cfn\\downloads\\index.html"      : {
+                                "source" : "https://s3.amazonaws.com/quickstart-reference/chef/chef-server/latest/scripts/index.html"
+                            },
+							"c:\\cfn\\downloads\\Win8.1AndW2K12R2-KB3066437-x64.msu"      : {
+                                "source" : "https://download.microsoft.com/download/3/F/D/3FD04B49-26F9-4D9A-8C34-4533B9D5B020/Win8.1AndW2K12R2-KB3066437-x64.msu"
+                            },
+                            "c:/tools/ewmp.cmd"                         : {
+                                "content" : "@ECHO OFF\nFOR /F \"tokens=3,*\" %%a IN ('REG QUERY \"HKLM\\System\\CurrentControlSet\\Control\\Session Manager\\Environment\" /v PATH') DO PATH %%a%%b\n%*"
+                            }
+                        },
+                        "commands" : {
+                            "a-set-execution-policy" : {
+                                "command" : "powershell.exe -command Set-ExecutionPolicy RemoteSigned -Force",
+                                "waitAfterCompletion" : "0"
+                            },
+                            "b-unpack-quickstart-module" : {
+                                "command" : "powershell.exe -command c:\\cfn\\scripts\\Unzip-Archive.ps1 -Source c:\\cfn\\modules\\AWSQuickStart.zip -Destination C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules\\",
+                                "waitAfterCompletion" : "0"
+                            },
+                            "c-init-quickstart-module"   : {
+                                "command" : "powershell.exe -command New-AWSQuickStartWaitHandle -Handle ChefWorkStation",
+                                "waitAfterCompletion" : "0"
+                            },
+                            "d-install-chefdk" : {
+                                "command" : "powershell.exe -command Start-Process msiexec.exe '/i C:\\cfn\\downloads\\chefdk-0.9.0-1-x86.msi /qn' -NoNewWindow -Wait",
+                                "waitAfterCompletion" : "0"
+                            },
+                            "e-install-git" : {
+                                "command" : "powershell.exe -command Start-Process c:\\cfn\\downloads\\Git-2.6.2-64-bit.exe '/VERYSILENT /LOADINF=c:\\cfn\\scripts\\git.inf' -NoNewWindow -Wait",
+                                "waitAfterCompletion" : "0"
+                            },
+                            "f-install-wmf5" : {
+                                "command" : "wusa.exe c:\\cfn\\downloads\\Win8.1AndW2K12R2-KB3066437-x64.msu /quiet /forcerestart",
+                                "waitAfterCompletion" : "forever"
+                            },
+                            "g-install-chocolatey" : {
+                                "command" : "powershell -Command \"Invoke-Expression ((New-Object Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))\""
+                            },
+                            "h-install-notepad"    : {
+                                "command" : "c:\\tools\\ewmp.cmd choco install notepadplusplus.install --force -y"
+                            },
+                            "i-install-chrome"     : {
+                                "command" : "c:\\tools\\ewmp.cmd choco install googlechrome --force -y"
+                            },
+                            "j-new-admin" : {
+                                "command" : {
+                                    "Fn::Join" : [
+                                        "",
+                                        [
+                                            "powershell.exe -command c:\\cfn\\scripts\\New-LocalAdministrator.ps1 -Name chefadmin -Password ",
+											{
+												"Ref" : "AdminPassword"
+											}
+                                        ]
+                                    ]
+                                },
+                                "waitAfterCompletion" : "0"
+                            },
+                            "k-send-signal" : {
+                                "command" : "powershell.exe -command Write-AWSQuickStartStatus",
+                                "waitAfterCompletion" : "0"
+                            }
+                        },
+                        "services" : {
+                            "windows" : {
+                                "cfn-hup" : {
+                                    "enabled" : "true",
+                                    "ensureRunning" : "true",
+                                    "files"         : [
+                                        "c:\\cfn\\cfn-hup.conf",
+                                        "c:\\cfn\\hooks.d\\cfn-auto-reloader.conf"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "Properties" : {
+                "ImageId" : {
+                    "Fn::FindInMap" : [
+                        "WIN2012R2AMI",
+                        {
+                            "Ref" : "AWS::Region"
+                        },
+                        "64"
+                    ]
+                },
+                "InstanceType" : "t2.medium",
+                "SubnetId"     : {
+                    "Ref" : "SubnetId"
+                },
+                "Tags"         : [
+                    {
+                        "Key" : "Name",
+                        "Value" : "ChefWorkStation"
+                    }
+                ],
+                "BlockDeviceMappings" : [
+                    {
+                        "DeviceName" : "/dev/sda1",
+                        "Ebs"        : {
+                            "VolumeSize" : "50",
+                            "VolumeType" : "gp2"
+                        }
+                    }
+                ],
+                "SecurityGroupIds"    : [
+                    {
+                        "Ref" : "ChefWorkStationSecurityGroup"
+                    }
+                ],
+                "KeyName"             : {
+                    "Ref" : "KeyPairName"
+                },
+                "UserData"            : {
+                    "Fn::Base64" : {
+                        "Fn::Join" : [
+                            "",
+                            [
+                                "<script>\n",
+                                "cfn-init.exe -v -c config -s ",
+                                {
+                                    "Ref" : "AWS::StackId"
+                                },
+                                " -r ChefWorkStation",
+                                " --region ",
+                                {
+                                    "Ref" : "AWS::Region"
+                                },
+                                "\n",
+                                "</script>\n"
+                            ]
+                        ]
+                    }
+                }
+            },
+            "CreationPolicy" : {
+                "ResourceSignal" : {
+                    "Count" : "1",
+                    "Timeout" : "PT30M"
+                }
+            }
+        },
+        "ChefNode"                                : {
+            "Type" : "AWS::EC2::Instance",
+            "Properties" : {
+                "ImageId" : {
+                    "Fn::FindInMap" : [
+                        "Ubuntu1404AMI",
+                        {
+                            "Ref" : "AWS::Region"
+                        },
+                        "64"
+                    ]
+                },
+                "InstanceType" : "t2.medium",
+                "SubnetId"     : {
+                    "Ref" : "SubnetId"
+                },
+                "Tags"         : [
+                    {
+                        "Key" : "Name",
+                        "Value" : "NODE"
+                    }
+                ],
+                "SecurityGroupIds" : [
+                    {
+                        "Ref" : "ChefNodeSecurityGroup"
+                    }
+                ],
+                "KeyName"          : {
+                    "Ref" : "KeyPairName"
+                }
+            }
+        },
+        "ChefServerSecurityGroup"           : {
+            "Type" : "AWS::EC2::SecurityGroup",
+            "Properties" : {
+                "GroupDescription" : "Enables SSH and HTTPS access to the Chef Server",
+                "VpcId"            : {
+                    "Ref" : "VPC"
+                },
+                "SecurityGroupIngress" : [
+                    {
+                        "IpProtocol" : "tcp",
+                        "FromPort"   : "22",
+                        "ToPort"     : "22",
+                        "CidrIp"     : {
+                            "Ref" : "RemoteAdminCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol" : "tcp",
+                        "FromPort"   : "443",
+                        "ToPort"     : "443",
+                        "CidrIp"     : "0.0.0.0/0"
+                    }
+                ]
+            }
+        },
+        "ChefWorkStationSecurityGroup"           : {
+            "Type" : "AWS::EC2::SecurityGroup",
+            "Properties" : {
+                "GroupDescription" : "Enables RDP Access to the Chef WorkStation",
+                "VpcId"            : {
+                    "Ref" : "VPC"
+                },
+                "SecurityGroupIngress" : [
+                    {
+                        "IpProtocol" : "tcp",
+                        "FromPort"   : "3389",
+                        "ToPort"     : "3389",
+                        "CidrIp"     : {
+                            "Ref" : "RemoteAdminCIDR"
+                        }
+                    }
+                ]
+            }
+        },
+        "ChefNodeSecurityGroup"           : {
+            "Type" : "AWS::EC2::SecurityGroup",
+            "Properties" : {
+                "GroupDescription" : "Enables SSH and HTTP Access to the Chef Node",
+                "VpcId"            : {
+                    "Ref" : "VPC"
+                },
+                "SecurityGroupIngress" : [
+                    {
+                        "IpProtocol" : "tcp",
+                        "FromPort"   : "22",
+                        "ToPort"     : "22",
+                        "CidrIp"     : {
+                            "Ref" : "RemoteAdminCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol" : "tcp",
+                        "FromPort"   : "22",
+                        "ToPort"     : "22",
+                        "CidrIp"     : {
+                            "Ref" : "VPCCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol" : "tcp",
+                        "FromPort"   : "80",
+                        "ToPort"     : "80",
+                        "CidrIp"     : "0.0.0.0/0"
+                    }
+                ]
+            }
+        }
+    },
+    "Outputs"                  : {
+        "ChefServerDnsName" : {
+            "Value" : {
+                "Fn::GetAtt" : [
+                    "ChefServer",
+                    "PublicDnsName"
+                ]
+            },
+            "Description" : "Public DNS Name for the Chef Server"
+        },
+		"ChefWorkStationDnsName" : {
+            "Value" : {
+                "Fn::GetAtt" : [
+                    "ChefWorkStation",
+                    "PublicDnsName"
+                ]
+            },
+            "Description" : "Public DNS Name for the Chef WorkStation"
+        }
+    }
+}

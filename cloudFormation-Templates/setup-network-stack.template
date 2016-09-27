@@ -1,13 +1,7 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "This template will setup a scalable fault tolerant multi-tier web application from scratch",
+  "Description": "This template will setup up a network stack. VPC - 10.0.0.0/20 and  three subnets - Private , Public & Spare  and Internet Gateway",
   "Parameters": {
-    "KeyName": {
-      "Description": "Name of an pre-existing EC2 KeyPair to enable SSH access to the instance",
-      "Type": "AWS::EC2::KeyPair::KeyName",
-      "Default": "kum-key",
-      "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
-    },
     "EnvType": {
       "Description": "Choose the type of Environment",
       "Default": "test",
@@ -22,7 +16,7 @@
   },
   "Mappings": {},
   "Resources": {
-    "tmpVPC": {
+    "lmsVPC": {
       "Type": "AWS::EC2::VPC",
       "Properties": {
         "CidrBlock": "10.0.0.0/20",
@@ -32,18 +26,18 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "kum-tmpVPC"
+            "Value": "lmsVPC"
           }
         ]
       }
     },
-    "tmpVPCIntGateway": {
+    "lmsVPCIntGateway": {
       "Type": "AWS::EC2::InternetGateway",
       "Properties": {
         "Tags": [
           {
             "Key": "Name",
-            "Value": "kum-tmpVPCIntGateway"
+            "Value": "lmsVPCIntGateway"
           }
         ]
       }
@@ -52,10 +46,10 @@
       "Type": "AWS::EC2::VPCGatewayAttachment",
       "Properties": {
         "VpcId": {
-          "Ref": "tmpVPC"
+          "Ref": "lmsVPC"
         },
         "InternetGatewayId": {
-          "Ref": "tmpVPCIntGateway"
+          "Ref": "lmsVPCIntGateway"
         }
       }
     },
@@ -63,7 +57,7 @@
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "VpcId": {
-          "Ref": "tmpVPC"
+          "Ref": "lmsVPC"
         },
         "CidrBlock": "10.0.0.0/22",
         "AvailabilityZone": {
@@ -77,7 +71,7 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "kum-azA-Private-Subnet"
+            "Value": "azA-Private-Subnet"
           }
         ]
       }
@@ -86,7 +80,7 @@
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "VpcId": {
-          "Ref": "tmpVPC"
+          "Ref": "lmsVPC"
         },
         "CidrBlock": "10.0.4.0/23",
         "AvailabilityZone": {
@@ -100,7 +94,7 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "kum-azA-web-Subnet"
+            "Value": "azA-web-Subnet"
           }
         ]
       }
@@ -109,7 +103,7 @@
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "VpcId": {
-          "Ref": "tmpVPC"
+          "Ref": "lmsVPC"
         },
         "CidrBlock": "10.0.6.0/23",
         "AvailabilityZone": {
@@ -123,7 +117,7 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "kum-azA-spare-Subnet"
+            "Value": "azA-spare-Subnet"
           }
         ]
       }
@@ -132,7 +126,7 @@
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "VpcId": {
-          "Ref": "tmpVPC"
+          "Ref": "lmsVPC"
         },
         "CidrBlock": "10.0.8.0/22",
         "AvailabilityZone": {
@@ -146,7 +140,7 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "kum-azB-Private-Subnet"
+            "Value": "azB-Private-Subnet"
           }
         ]
       }
@@ -155,7 +149,7 @@
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "VpcId": {
-          "Ref": "tmpVPC"
+          "Ref": "lmsVPC"
         },
         "CidrBlock": "10.0.12.0/23",
         "AvailabilityZone": {
@@ -169,7 +163,7 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "kum-azB-web-Subnet"
+            "Value": "azB-web-Subnet"
           }
         ]
       }
@@ -178,7 +172,7 @@
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "VpcId": {
-          "Ref": "tmpVPC"
+          "Ref": "lmsVPC"
         },
         "CidrBlock": "10.0.14.0/23",
         "AvailabilityZone": {
@@ -192,7 +186,7 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "kum-azB-spare-Subnet"
+            "Value": "azB-spare-Subnet"
           }
         ]
       }
@@ -201,26 +195,26 @@
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
         "VpcId": {
-          "Ref": "tmpVPC"
+          "Ref": "lmsVPC"
         },
         "Tags": [
           {
             "Key": "Name",
-            "Value": "kum-myRouteTbl"
+            "Value": "myRouteTbl"
           }
         ]
       }
     },
     "PublicRoute": {
       "Type": "AWS::EC2::Route",
-      "DependsOn": "tmpVPCIntGateway",
+      "DependsOn": "lmsVPCIntGateway",
       "Properties": {
         "RouteTableId": {
           "Ref": "myRouteTbl"
         },
         "DestinationCidrBlock": "0.0.0.0/0",
         "GatewayId": {
-          "Ref": "tmpVPCIntGateway"
+          "Ref": "lmsVPCIntGateway"
         }
       }
     },
@@ -251,12 +245,12 @@
       "Properties": {
         "GroupDescription": "The Security Group for the Elastic Load Balancers",
         "VpcId": {
-          "Ref": "tmpVPC"
+          "Ref": "lmsVPC"
         },
         "Tags": [
           {
             "Key": "Name",
-            "Value": "kum-Load-Balancer-Security-Group"
+            "Value": "Load-Balancer-Security-Group"
           }
         ]
       }
@@ -266,12 +260,12 @@
       "Properties": {
         "GroupDescription": "Security Group for Web servers",
         "VpcId": {
-          "Ref": "tmpVPC"
+          "Ref": "lmsVPC"
         },
         "Tags": [
           {
             "Key": "Name",
-            "Value": "kum-Web-Security-Group"
+            "Value": "Web-Security-Group"
           }
         ]
       }
@@ -326,12 +320,12 @@
       "Properties": {
         "GroupDescription": "Security Group for Database servers",
         "VpcId": {
-          "Ref": "tmpVPC"
+          "Ref": "lmsVPC"
         },
         "Tags": [
           {
             "Key": "Name",
-            "Value": "kum-DB-Security-Group"
+            "Value": "DB-Security-Group"
           }
         ]
       }
@@ -371,66 +365,18 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "kum-dbSubnetGroup"
+            "Value": "dbSubnetGroup"
           }
         ]
       }
     }
   },
   "Outputs": {
-    "KeyName": {
-      "Value": {
-        "Ref": "KeyName"
-      },
-      "Description": "The SSH Keyname to be used,"
-    },
     "vpcID": {
       "Value": {
-        "Ref": "tmpVPC"
+        "Ref": "lmsVPC"
       },
       "Description": "The VPC ID for the network stack"
-    },
-    "tmpVPCIntGateway": {
-      "Value": {
-        "Ref": "tmpVPCIntGateway"
-      },
-      "Description": "The Internet Gateway for the stack"
-    },
-    "azAPrivateSubnet": {
-      "Value": {
-        "Ref": "azAPrivateSubnet"
-      },
-      "Description": "The private subnet in AZ B"
-    },
-    "azAWebSubnet": {
-      "Value": {
-        "Ref": "azBWebSubnet"
-      },
-      "Description": "The subnet for web facing instances in AZ A"
-    },
-    "azASpareSubnet": {
-      "Value": {
-        "Ref": "azASpareSubnet"
-      },
-      "Description": "The spare subnet in AZ B"
-    },
-    "azBPrivateSubnet": {
-      "Description": "The private subnet in AZ B",
-      "Value": {
-        "Ref": "azBPrivateSubnet"
-      }
-    },
-    "azBWebSubnet": {
-      "Value": {
-        "Ref": "azAWebSubnet"
-      },
-      "Description": "The subnet for web facing instances in AZ B"
-    },
-    "azBSpareSubnet": {
-      "Value": {
-        "Ref": "azBSpareSubnet"
-      },
-      "Description": "The spare subnet in AZ B"
     },
     "LoadBalancerSecGrp": {
       "Value": {

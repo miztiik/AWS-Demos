@@ -1,0 +1,120 @@
+{
+    "AWSTemplateFormatVersion" : "2010-09-09",
+    "Description"              : "(0015) - Step 1 of 3: This template deploys the AWS Chef Server Quick Start. ***NOTE*** You must subscribe to the Chef Server AMI from the AWS Marketplace before you launch this template. See the deployment guide at http://aws.amazon.com/quickstart for details. This template creates Amazon EC2 instances and related resources. You will be billed for the AWS resources used if you create a stack from this template.",
+    "Parameters"               : {
+        "KeyPairName" : {
+            "Description" : "Public/private key pair",
+            "Type"        : "AWS::EC2::KeyPair::KeyName"
+        },
+        "SubnetCIDR"  : {
+            "Description" : "CIDR Block for the Public Subnet",
+            "Type"        : "String",
+            "Default"     : "10.0.0.0/19",
+            "AllowedPattern" : "[a-zA-Z0-9]+\\..+"
+        },
+        "AdminPassword" : {
+            "Description" : "Password for the 'chefadmin' account used to sign into the Chef Management Console",
+            "Type"        : "String",
+            "NoEcho"      : "True"
+        },
+        "AdminEmailAddress" : {
+            "Description" : "Email address for Chef Administrator",
+            "Type"        : "String",
+            "Default"     : "admin@localhost.internal"
+        },
+        "ChefNodes" : {
+            "Description" : "Select the number of nodes you want to support.",
+            "AllowedValues" : [
+                "5",
+				"25",
+				"100",
+				"150",
+				"200",
+				"250"
+            ],
+            "Type"        : "String",
+            "Default"     : "5"
+        },
+        "RemoteAdminCIDR" : {
+            "Description" : "CIDR Block or IP for SSH or RDP access",
+            "Type"        : "String",
+            "Default"     : "0.0.0.0/0",
+            "AllowedPattern" : "[a-zA-Z0-9]+\\..+"
+        },
+        "VPCCIDR"         : {
+            "Description" : "CIDR Block for the VPC",
+            "Type"        : "String",
+            "Default"     : "10.0.0.0/16",
+            "AllowedPattern" : "[a-zA-Z0-9]+\\..+"
+        },
+        "IncludeDemoInstances"  : {
+            "Description" : "Set this value to 'true' to include a Chef workstation and demo node. For Chef Server only, set to 'false'",
+            "AllowedValues" : [
+                "true",
+                "false"
+            ],
+            "Type"          : "String",
+            "Default"       : "true"
+        }
+    },
+    "Resources"                : {
+        "VPCStack" : {
+            "Type" : "AWS::CloudFormation::Stack",
+            "Properties" : {
+                "TemplateURL" : "https://s3.amazonaws.com/quickstart-reference/chef/chef-server/latest/templates/Chef-Server-VPC.template",
+                "Parameters"  : {
+                    "KeyPairName" : {
+                        "Ref" : "KeyPairName"
+                    },
+                    "SubnetCIDR"  : {
+                        "Ref" : "SubnetCIDR"
+                    },
+                    "VPCCIDR"         : {
+                        "Ref" : "VPCCIDR"
+                    }
+                }
+            }
+        },
+        "InstanceStack" : {
+            "Type" : "AWS::CloudFormation::Stack",
+            "Properties" : {
+                "TemplateURL" : "https://s3.amazonaws.com/quickstart-reference/chef/chef-server/latest/templates/Chef-Server-Instances.template",
+                "Parameters"  : {
+                    "KeyPairName" : {
+                        "Ref" : "KeyPairName"
+                    },
+                    "SubnetId"    : {
+                        "Fn::GetAtt" : [
+                            "VPCStack",
+                            "Outputs.SubnetId"
+                        ]
+                    },
+                    "VPC"    : {
+                        "Fn::GetAtt" : [
+                            "VPCStack",
+                            "Outputs.VPC"
+                        ]
+                    },
+                    "IncludeDemoInstances" : {
+                        "Ref" : "IncludeDemoInstances"
+                    },
+                    "RemoteAdminCIDR" : {
+                        "Ref" : "RemoteAdminCIDR"
+                    },
+                    "AdminPassword" : {
+                        "Ref" : "AdminPassword"
+                    },
+                    "AdminEmailAddress" : {
+                        "Ref" : "AdminEmailAddress"
+                    },
+                    "ChefNodes" : {
+                        "Ref" : "ChefNodes"
+                    },
+                    "VPCCIDR" : {
+                        "Ref" : "VPCCIDR"
+                    }
+                }
+            }
+        }
+    }
+}
