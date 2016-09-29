@@ -67,11 +67,11 @@ Various Sendmail configuration files are installed in the `/etc/mail/` directory
 
 
 
- - `access` — Specifies which systems can use Sendmail for outbound email.
- - `domaintable` — Specifies domain name mapping.
- - `local-host-names` — Specifies aliases for the host.
- - `mailertable` — Specifies instructions that override routing for particular domains.
- - `virtusertable` — Specifies a domain-specific form of aliasing, allowing multiple virtual domains to be hosted on one machine.
+ - `access` : Specifies which systems can use Sendmail for outbound email.
+ - `domaintable` : Specifies domain name mapping.
+ - `local-host-names` : Specifies aliases for the host.
+ - `mailertable` : Specifies instructions that override routing for particular domains.
+ - `virtusertable` : Specifies a domain-specific form of aliasing, allowing multiple virtual domains to be hosted on one machine.
 
 Several of the configuration files in `/etc/mail/`, such as access, domaintable, mailertable and virtusertable, must actually store their information in database files before Sendmail can use any configuration changes. 
 
