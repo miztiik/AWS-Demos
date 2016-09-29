@@ -63,16 +63,19 @@ or
 yum -y install m4
 ```
 
-Various Sendmail configuration files are installed in the /etc/mail/ directory including:
- -`access` — Specifies which systems can use Sendmail for outbound email.
- -`domaintable` — Specifies domain name mapping.
- -`local-host-names` — Specifies aliases for the host.
- -`mailertable` — Specifies instructions that override routing for particular domains.
- -`virtusertable` — Specifies a domain-specific form of aliasing, allowing multiple virtual domains to be hosted on one machine.
+Various Sendmail configuration files are installed in the `/etc/mail/` directory including:
+
+
+
+ - `access` — Specifies which systems can use Sendmail for outbound email.
+ - `domaintable` — Specifies domain name mapping.
+ - `local-host-names` — Specifies aliases for the host.
+ - `mailertable` — Specifies instructions that override routing for particular domains.
+ - `virtusertable` — Specifies a domain-specific form of aliasing, allowing multiple virtual domains to be hosted on one machine.
 
 Several of the configuration files in `/etc/mail/`, such as access, domaintable, mailertable and virtusertable, must actually store their information in database files before Sendmail can use any configuration changes. 
 
-For example, to have all emails addressed to the example.com domain delivered to bob@other-example.com, add the following line to the virtusertable file:
+For example, to have all emails addressed to the _example.com_ domain delivered to _bob@other-example.com_, add the following line to the virtusertable file:
 ```sh
 @example.com bob@other-example.com
 ```
@@ -89,7 +92,7 @@ echo "Mail from server:`uname -n`" | sendmail -v user@example.com
 ```
 _or_ a more detailed example
 ```sh
-[server]$ /usr/sbin/sendmail youremail@example.com
+[server01]$ /usr/sbin/sendmail youremail@example.com
 To: differentemail@example.com
 From: ayouremail@example.com
 Subject: Test Send Mail
