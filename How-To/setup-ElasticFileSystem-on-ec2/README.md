@@ -34,6 +34,24 @@ aws ec2 create-tags --resources "$pubVPCID" --tags 'Key=Name,Value=pubVPC'
 ### Enable DNS & Hostname support for our `pubVPC`
 aws ec2 modify-vpc-attribute --vpc-id "$pubVPCID" --enable-dns-support "{\"Value\":true}"
 aws ec2 modify-vpc-attribute --vpc-id "$pubVPCID" --enable-dns-hostnames "{\"Value\":true}"
+
+### Create an internet gateway and assign it our public VPC
+internetGatewayId=$(aws ec2 create-internet-gateway \
+                  --query 'InternetGateway.InternetGatewayId' \
+                  --output text)
+aws ec2 attach-internet-gateway --internet-gateway-id "$internetGatewayId" --vpc-id "$pubVPCID"
+aws ec2 create-tags --resources $internetGatewayId --tags 'Key=Name,Value=pubVPC-Internet-Gateway'
 ```
 
+### Create the subnets
+Lets create two subnets each in different availability zones within the same region. This allows us to test the NFS mount across availability zones.
+```sh
+### Create the subnets for to spread the instances across multiple AZs
+pubVPC_Subnet01ID=$(aws ec2 create-subnet --vpc-id "$pubVPCID" --cidr-block 10.0.1.0/25 --availability-zone us-east-1a --query 'Subnet.SubnetId' --output text)
+pubVPC_Subnet02ID=$(aws ec2 create-subnet --vpc-id "$pubVPCID" --cidr-block 10.0.1.128/25 --availability-zone us-east-1b --query 'Subnet.SubnetId' --output text)
+
+#### Tag the subnet ID's
+aws ec2 create-tags --resources "$pubVPC_Subnet01ID" --tags 'Key=Name,Value=pubVPC_Subnet01-east-1a'
+aws ec2 create-tags --resources "$pubVPC_Subnet02ID" --tags 'Key=Name,Value=pubVPC_Subnet02-east-1b'
+```
 & Create two security groups
