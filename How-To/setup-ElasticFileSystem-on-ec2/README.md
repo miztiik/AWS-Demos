@@ -14,6 +14,8 @@ In this walkthrough, you will create the following resources:
  - Amazon EFS resources:
    - A file system.
    - A mount target for your file system - To mount your file system on an EC2 instance you need to create a mount target in your VPC. You can create one mount target in each of the Availability Zones in your VPC. 
+
+
 ## Creating EC2 Resources
 
 ### Create the VPC
@@ -54,4 +56,21 @@ pubVPC_Subnet02ID=$(aws ec2 create-subnet --vpc-id "$pubVPCID" --cidr-block 10.0
 aws ec2 create-tags --resources "$pubVPC_Subnet01ID" --tags 'Key=Name,Value=pubVPC_Subnet01-east-1a'
 aws ec2 create-tags --resources "$pubVPC_Subnet02ID" --tags 'Key=Name,Value=pubVPC_Subnet02-east-1b'
 ```
-& Create two security groups
+
+#### Add the Routes
+```sh
+### Create public routes and associate with internet gateway
+routeTableID=$(aws ec2 create-route-table --vpc-id "$pubVPCID" --query 'RouteTable.RouteTableId' --output text)
+aws ec2 create-route --route-table-id "$routeTableID" --destination-cidr-block 0.0.0.0/0 --gateway-id "$internetGatewayId"
+aws ec2 associate-route-table --route-table-id "$routeTableID" --subnet-id "$pubVPC_Subnet01ID"
+aws ec2 associate-route-table --route-table-id "$routeTableID" --subnet-id "$pubVPC_Subnet02ID"
+```
+### Create two security groups
+```sh
+### Creating a security group for the public instances
+pubSecGrpID=$(aws ec2 create-security-group --group-name pubSecGrp \
+            --description "Security Group for public instances" \
+            --vpc-id "$pubVPCID" \
+            --output text)
+
+```
