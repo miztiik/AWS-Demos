@@ -96,7 +96,23 @@ ec2SecGrpID=$(aws ec2 create-security-group --group-name ec2SecGrp \
               --vpc-id "$pubVPCID" \
               --output text)
 
-#### Tag the subnet ID's
+#### Tag the Security Group ID's
 aws ec2 create-tags --resources "$efsSecGrpID" --tags 'Key=Name,Value=EFS-Security-Group'
 aws ec2 create-tags --resources "$ec2SecGrpID" --tags 'Key=Name,Value=EC2-Security-Group'
+```
+
+#### Add Rules to the Security Groups to Authorize Inbound/Outbound Access
+```sh
+#### Add a rule that allows inbound SSH ( from any source ) to our EC2 Instances
+aws ec2 authorize-security-group-ingress \
+        --group-id "$ec2SecGrpID" \
+        --protocol tcp \
+        --port 22 \
+        --cidr 0.0.0.0/0
+#### Add a rule that allows inbound to our mount only from our EC2 Instances
+aws ec2 authorize-security-group-ingress \
+        --group-id "$efsSecGrpID" \
+        --protocol tcp \
+        --port 2049 \
+        --source-group "$ec2SecGrpID" 
 ```
