@@ -195,6 +195,7 @@ Make sure you have the following information,
  - DNS name of your file system's mount target. You can construct this DNS name using the following generic form: 
     - `availability-zone`.`file-system-id`.efs.`aws-region`.amazonaws.com
 
+
     ```sh
     efsDNS="$prefRegionAZ1"."$efsID".efs."$prefRegion".amazonaws.com
     ```
