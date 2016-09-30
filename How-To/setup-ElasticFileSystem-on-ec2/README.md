@@ -228,8 +228,8 @@ nfsClientInst02Url=$(aws ec2 describe-instances \
                  --output text)                 
 
 ##### Tag the instances
-aws ec2 create-tags --resources "$nfsClientInst01ID" --tags 'Key=Name,Value=NFS-Client-Instance'
-aws ec2 create-tags --resources "$nfsClientInst02ID" --tags 'Key=Name,Value=NFS-Client-Instance'
+aws ec2 create-tags --resources "$nfsClientInst01ID" --tags 'Key=Name,Value=NFS-Client-Instance-01'
+aws ec2 create-tags --resources "$nfsClientInst02ID" --tags 'Key=Name,Value=NFS-Client-Instance-02'
 ```
 
 
