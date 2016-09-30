@@ -1,4 +1,4 @@
-# Create Amazon EFS File System and Mount It on EC2 Instance(s)
+# Create Amazon EFS File System and Mount it on EC2 Instance(s)
 
 ## Why you need EFS File System?
 Suppose you have one or more EC2 instances launched in your VPC. Now you want to create and share a file system on these instances, EFS is your friend. You can mount an Amazon EFS file system on EC2 instances in your Amazon Virtual Private Cloud (Amazon VPC) using the Network File System version 4.1 protocol (NFSv4.1). Amazon EFS provides elastic, shared file storage that is
@@ -175,6 +175,34 @@ You can also use the `describe-mount-targets` command to get descriptions of mou
         }
     ]
 }
+```
+### Launch EC2 Instances
+Gather the following information before you create the instance
+  - Security Group ID of the security group you created for an EC2 instance, i.e., `$ec2SecGrpID`
+  - Subnet ID – You need this value when you create a mount target. In this exercise, you create a mount target in the same subnet where you launch an EC2 instance. In our demo are we going to use `$pubVPC_Subnet01ID`
+  - Availability Zone of the subnet – You need this to construct your mount target DNS name, which you use to mount a file system on the EC2 instance.
+  - Key Pair
+  - AMI ID
+
+```sh
+nfsClientInstID=$(aws ec2 run-instances \
+                  --image-id ami-775e4f16 \
+                  --count 1 \
+                  --instance-type t2.micro \
+                  --key-name efsec2-key \
+                  --security-group-ids "$ec2SecGrpID" \
+                  --subnet-id "$pubVPC_Subnet01ID" \
+                  --associate-public-ip-address \
+                  --query 'Instances[0].InstanceId' \
+                  --output text)                 
+
+nfsClientInstUrl=$(aws ec2 describe-instances \
+                 --instance-ids "$nfsClientInstID" \
+                 --query 'Reservations[0].Instances[0].PublicDnsName' \
+                 --output text)
+
+##### Tag the instances
+aws ec2 create-tags --resources "$nfsClientInstID" --tags 'Key=Name,Value=NFS-Client-Instance'
 ```
 
 ## Mount the Amazon EFS File System on the EC2 Instance
