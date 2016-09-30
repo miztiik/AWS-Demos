@@ -7,11 +7,33 @@ Amazon EFS provides elastic, shared file storage that is **POSIX-compliant**. Th
 
 You can mount an Amazon EFS file system on EC2 instances in your Amazon Virtual Private Cloud (Amazon VPC) using the Network File System version 4.1 protocol (NFSv4.1).
 
-In this walkthrough, you will create the following resources"
+In this walkthrough, you will create the following resources:
  - Amazon EC2 resources - 
    - Two security groups (for your EC2 instance and Amazon EFS file system) - You add rules to these security groups to authorize appropriate inbound/outbound access to allow your EC2 instance to connect to the file system via the mount target using a standard NFSv4.1 TCP port.
    - An Amazon EC2 instance in your VPC.
  - Amazon EFS resources:
    - A file system.
-   - A mount target for your file system - To mount your file system on an EC2 instance you need to create a mount target in your VPC. You can create one mount target in each of the Availability Zones in your VPC. For more information, see Amazon EFS: How it Works.
-## Cr
+   - A mount target for your file system - To mount your file system on an EC2 instance you need to create a mount target in your VPC. You can create one mount target in each of the Availability Zones in your VPC. 
+## Creating EC2 Resources
+
+### Create the VPC
+Lets create a /24 VPC and tag it `pubVPC` along with the interget gateway
+
+```sh
+# Setting the Region
+prefAZ=us-west-1
+export AWS_DEFAULT_REGION="$prefAZ"
+
+pubVPCID=$(aws ec2 create-vpc \
+           --cidr-block 10.0.1.0/24 \
+           --query 'Vpc.VpcId' \
+           --output text)
+           
+aws ec2 create-tags --resources "$pubVPCID" --tags 'Key=Name,Value=pubVPC'
+
+### Enable DNS & Hostname support for our `pubVPC`
+aws ec2 modify-vpc-attribute --vpc-id "$pubVPCID" --enable-dns-support "{\"Value\":true}"
+aws ec2 modify-vpc-attribute --vpc-id "$pubVPCID" --enable-dns-hostnames "{\"Value\":true}"
+```
+
+& Create two security groups
