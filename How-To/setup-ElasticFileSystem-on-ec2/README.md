@@ -101,14 +101,17 @@ aws ec2 create-tags --resources "$ec2SecGrpID" --tags 'Key=Name,Value=EC2-Securi
 ```
 
 #### Add Rules to the Security Groups to Authorize Inbound/Outbound Access
+
+Add a rule that allows inbound SSH ( from any source ) to our EC2 Instances
 ```sh
-#### Add a rule that allows inbound SSH ( from any source ) to our EC2 Instances
 aws ec2 authorize-security-group-ingress \
         --group-id "$ec2SecGrpID" \
         --protocol tcp \
         --port 22 \
         --cidr 0.0.0.0/0
-#### Add a rule that allows inbound to our mount only from our EC2 Instances
+```
+ Add a rule that allows inbound to the EFS Security group to allow traffic only from our EC2 Instances
+```sh
 aws ec2 authorize-security-group-ingress \
         --group-id "$efsSecGrpID" \
         --protocol tcp \
@@ -116,11 +119,17 @@ aws ec2 authorize-security-group-ingress \
         --source-group "$ec2SecGrpID" 
 ```
 
-## Create EC2 Instance
+### Launch EC2 Instances
+Gather the following information before you create the instance
+  - Security Group ID of the security group you created for an EC2 instance, i.e., `$ec2SecGrpID`
+  - Subnet ID – You need this value when you create a mount target. In this exercise, you create a mount target in the same subnet where you launch an EC2 instance. In our demo are we going to use `$pubVPC_Subnet01ID`
+  - Availability Zone of the subnet – You need this to construct your mount target DNS name, which you use to mount a file system on the EC2 instance.
+  - Key Pair Name
+  - AMI ID - Which supports NFS
+
 ```sh
-##### EC2 Instances
 nfsClientInstID=$(aws ec2 run-instances \
-                  --image-id ami-d1315fb1 \
+                  --image-id ami-775e4f16 \
                   --count 1 \
                   --instance-type t2.micro \
                   --key-name efsec2-key \
@@ -135,9 +144,8 @@ nfsClientInstUrl=$(aws ec2 describe-instances \
                  --query 'Reservations[0].Instances[0].PublicDnsName' \
                  --output text)
 
-##### Tag the instanes
+##### Tag the instances
 aws ec2 create-tags --resources "$nfsClientInstID" --tags 'Key=Name,Value=NFS-Client-Instance'
-
 ```
 
 ## Create Amazon EFS File System
@@ -175,34 +183,6 @@ You can also use the `describe-mount-targets` command to get descriptions of mou
         }
     ]
 }
-```
-### Launch EC2 Instances
-Gather the following information before you create the instance
-  - Security Group ID of the security group you created for an EC2 instance, i.e., `$ec2SecGrpID`
-  - Subnet ID – You need this value when you create a mount target. In this exercise, you create a mount target in the same subnet where you launch an EC2 instance. In our demo are we going to use `$pubVPC_Subnet01ID`
-  - Availability Zone of the subnet – You need this to construct your mount target DNS name, which you use to mount a file system on the EC2 instance.
-  - Key Pair
-  - AMI ID
-
-```sh
-nfsClientInstID=$(aws ec2 run-instances \
-                  --image-id ami-775e4f16 \
-                  --count 1 \
-                  --instance-type t2.micro \
-                  --key-name efsec2-key \
-                  --security-group-ids "$ec2SecGrpID" \
-                  --subnet-id "$pubVPC_Subnet01ID" \
-                  --associate-public-ip-address \
-                  --query 'Instances[0].InstanceId' \
-                  --output text)                 
-
-nfsClientInstUrl=$(aws ec2 describe-instances \
-                 --instance-ids "$nfsClientInstID" \
-                 --query 'Reservations[0].Instances[0].PublicDnsName' \
-                 --output text)
-
-##### Tag the instances
-aws ec2 create-tags --resources "$nfsClientInstID" --tags 'Key=Name,Value=NFS-Client-Instance'
 ```
 
 ## Mount the Amazon EFS File System on the EC2 Instance
