@@ -51,8 +51,19 @@ aws ec2 create-tags --resources $internetGatewayId --tags 'Key=Name,Value=pubVPC
 Lets create two subnets each in different availability zones within the same region. This allows us to test the NFS mount across availability zones.
 ```sh
 ### Create the subnets for to spread the instances across multiple AZs
-pubVPC_Subnet01ID=$(aws ec2 create-subnet --vpc-id "$pubVPCID" --cidr-block 10.0.1.0/25 --availability-zone us-west-1a --query 'Subnet.SubnetId' --output text)
-pubVPC_Subnet02ID=$(aws ec2 create-subnet --vpc-id "$pubVPCID" --cidr-block 10.0.1.128/25 --availability-zone us-west-1c --query 'Subnet.SubnetId' --output text)
+pubVPC_Subnet01ID=$(aws ec2 create-subnet --vpc-id \
+                    "$pubVPCID" \
+                    --cidr-block 10.0.1.0/25 \
+                    --availability-zone us-west-1a \
+                    --query 'Subnet.SubnetId' \
+                    --output text)
+
+pubVPC_Subnet02ID=$(aws ec2 create-subnet \
+                    --vpc-id "$pubVPCID" \
+                    --cidr-block 10.0.1.128/25 \
+                    --availability-zone us-west-1c \
+                    --query 'Subnet.SubnetId' \
+                    --output text)
 
 #### Tag the subnet ID's
 aws ec2 create-tags --resources "$pubVPC_Subnet01ID" --tags 'Key=Name,Value=pubVPC_Subnet01-west-1a'
@@ -63,7 +74,10 @@ aws ec2 create-tags --resources "$pubVPC_Subnet02ID" --tags 'Key=Name,Value=pubV
 ```sh
 ### Create public routes and associate with internet gateway
 routeTableID=$(aws ec2 create-route-table --vpc-id "$pubVPCID" --query 'RouteTable.RouteTableId' --output text)
-aws ec2 create-route --route-table-id "$routeTableID" --destination-cidr-block 0.0.0.0/0 --gateway-id "$internetGatewayId"
+aws ec2 create-route --route-table-id "$routeTableID" \
+                     --destination-cidr-block 0.0.0.0/0 \
+                     --gateway-id "$internetGatewayId"
+                     
 aws ec2 associate-route-table --route-table-id "$routeTableID" --subnet-id "$pubVPC_Subnet01ID"
 aws ec2 associate-route-table --route-table-id "$routeTableID" --subnet-id "$pubVPC_Subnet02ID"
 ```
