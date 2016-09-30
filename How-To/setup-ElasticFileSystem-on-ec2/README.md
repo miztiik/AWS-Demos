@@ -142,5 +142,39 @@ aws ec2 create-tags --resources "$nfsClientInstID" --tags 'Key=Name,Value=NFS-Cl
 
 ## Create Amazon EFS File System
 ```sh
+## Create Amazon EFS File System
+efsID=$(aws efs create-file-system --creation-token "efs-demo" --query 'FileSystemId' --output text)
 
+##### Tag the EFS Filesystem
+aws efs create-tags --file-system-id "$efsID" --tags 'Key=Name,Value=EFS-Demo-FileSystem'
 ```
+### Create a Mount Target
+Create a mount target for your file system in the Availability Zone where you have your EC2 instance launched, In our case it will be `us-west-2a`
+```sh
+### Create a Mount Target
+efsMountTargetID=$(aws efs create-mount-target \
+        --file-system-id "$efsID" \
+        --subnet-id  "$pubVPC_Subnet01ID" \
+        --security-group "$efsSecGrpID" \
+        --query 'MountTargetId' \
+        --output text)
+```
+You can also use the `describe-mount-targets` command to get descriptions of mount targets you created on a file system.
+```sh
+~]# aws efs describe-mount-targets --file-system-id "$efsID"
+{
+    "MountTargets": [
+        {
+            "MountTargetId": "fsmt-d31de57a",
+            "NetworkInterfaceId": "eni-ce264ab1",
+            "FileSystemId": "fs-1fb049b6",
+            "LifeCycleState": "available",
+            "SubnetId": "subnet-77edd613",
+            "OwnerId": "xxxxxxxxxxxx",
+            "IpAddress": "10.0.1.57"
+        }
+    ]
+}
+```
+
+## Mount the Amazon EFS File System on the EC2 Instance
