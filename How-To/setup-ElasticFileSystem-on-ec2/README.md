@@ -1,11 +1,16 @@
-# Create Amazon EFS File System and Mount It on an EC2 Instance
+# Create Amazon EFS File System and Mount It on EC2 Instance(s)
 
 ## Why you need EFS File System?
-Suppose you have one or more EC2 instances launched in your VPC. Now you want to create and share a file system on these instances, EFS is your friend.
+Suppose you have one or more EC2 instances launched in your VPC. Now you want to create and share a file system on these instances, EFS is your friend. You can mount an Amazon EFS file system on EC2 instances in your Amazon Virtual Private Cloud (Amazon VPC) using the Network File System version 4.1 protocol (NFSv4.1).
 
-Amazon EFS provides elastic, shared file storage that is **POSIX-compliant**. The file system you create supports concurrent read and write access from multiple Amazon EC2 instances and is accessible from all of the `Availability Zones` in the `AWS Region` where it is created. Beware of some of the _[not supported features of EFS](http://docs.aws.amazon.com/efs/latest/ug/nfs4-unsupported-features.html)_
+Amazon EFS provides elastic, shared file storage that is
+ - **POSIX-compliant**
+ - Supports **concurrent read and write access** from multiple Amazon EC2 instances
+ - Accessible from all of the `Availability Zones` in the `AWS Region`
 
-You can mount an Amazon EFS file system on EC2 instances in your Amazon Virtual Private Cloud (Amazon VPC) using the Network File System version 4.1 protocol (NFSv4.1).
+Having said that, Beware of some of the _[not supported features of EFS](http://docs.aws.amazon.com/efs/latest/ug/nfs4-unsupported-features.html)_.
+
+
 
 In this walkthrough, you will create the following resources:
  - Amazon EC2 resources - 
@@ -49,12 +54,12 @@ aws ec2 create-tags --resources $internetGatewayId --tags 'Key=Name,Value=pubVPC
 Lets create two subnets each in different availability zones within the same region. This allows us to test the NFS mount across availability zones.
 ```sh
 ### Create the subnets for to spread the instances across multiple AZs
-pubVPC_Subnet01ID=$(aws ec2 create-subnet --vpc-id "$pubVPCID" --cidr-block 10.0.1.0/25 --availability-zone us-east-1a --query 'Subnet.SubnetId' --output text)
-pubVPC_Subnet02ID=$(aws ec2 create-subnet --vpc-id "$pubVPCID" --cidr-block 10.0.1.128/25 --availability-zone us-east-1b --query 'Subnet.SubnetId' --output text)
+pubVPC_Subnet01ID=$(aws ec2 create-subnet --vpc-id "$pubVPCID" --cidr-block 10.0.1.0/25 --availability-zone us-west-1a --query 'Subnet.SubnetId' --output text)
+pubVPC_Subnet02ID=$(aws ec2 create-subnet --vpc-id "$pubVPCID" --cidr-block 10.0.1.128/25 --availability-zone us-west-1c --query 'Subnet.SubnetId' --output text)
 
 #### Tag the subnet ID's
-aws ec2 create-tags --resources "$pubVPC_Subnet01ID" --tags 'Key=Name,Value=pubVPC_Subnet01-east-1a'
-aws ec2 create-tags --resources "$pubVPC_Subnet02ID" --tags 'Key=Name,Value=pubVPC_Subnet02-east-1b'
+aws ec2 create-tags --resources "$pubVPC_Subnet01ID" --tags 'Key=Name,Value=pubVPC_Subnet01-west-1a'
+aws ec2 create-tags --resources "$pubVPC_Subnet02ID" --tags 'Key=Name,Value=pubVPC_Subnet02-west-1c'
 ```
 
 #### Add the Routes
@@ -66,11 +71,21 @@ aws ec2 associate-route-table --route-table-id "$routeTableID" --subnet-id "$pub
 aws ec2 associate-route-table --route-table-id "$routeTableID" --subnet-id "$pubVPC_Subnet02ID"
 ```
 ### Create two security groups
+Both an Amazon EC2 instance and a mount target need to have associated security groups. These security groups act as a virtual firewall that controls the traffic between them. You can use the security group you associated with the mount target to control inbound traffic to your file system by adding an inbound rule to the mount target security group that allows access from a specific EC2 instance. Then, you can mount the file system only on that EC2 instance.
+
 ```sh
 ### Creating a security group for the public instances
-pubSecGrpID=$(aws ec2 create-security-group --group-name pubSecGrp \
-            --description "Security Group for public instances" \
-            --vpc-id "$pubVPCID" \
-            --output text)
+efsSecGrpID=$(aws ec2 create-security-group --group-name efsSecGrp \
+              --description "Security Group for public instances" \
+              --vpc-id "$pubVPCID" \
+              --output text)
 
+ec2SecGrpID=$(aws ec2 create-security-group --group-name ec2SecGrp \
+              --description "Security Group for public instances" \
+              --vpc-id "$pubVPCID" \
+              --output text)
+
+#### Tag the subnet ID's
+aws ec2 create-tags --resources "$efsSecGrpID" --tags 'Key=Name,Value=EFS-Security-Group'
+aws ec2 create-tags --resources "$ec2SecGrpID" --tags 'Key=Name,Value=EC2-Security-Group'
 ```
