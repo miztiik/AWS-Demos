@@ -123,35 +123,6 @@ aws ec2 authorize-security-group-ingress \
         --source-group "$ec2SecGrpID" 
 ```
 
-### Launch EC2 Instances
-Gather the following information before you create the instance. But do note that, _Amazon EFS does not require that your Amazon EC2 instance have either a public IP address or public DNS name_.
-  - Security Group ID of the security group you created for an EC2 instance, i.e., `ec2SecGrpID`
-  - Subnet ID – You need this value when you create a mount target. In this exercise, you create a mount target in the same subnet where you launch an EC2 instance. In our demo are we going to use `pubVPC_Subnet01ID`
-  - Availability Zone of the subnet – You need this to construct your mount target DNS name, which you use to mount a file system on the EC2 instance. i.e., `prefRegionAZ1`
-  - Key Pair Name
-  - AMI ID - Which supports NFS - `amiID`
-
-```sh
-nfsClientInstID=$(aws ec2 run-instances \
-                  --image-id "$amiID" \
-                  --count 1 \
-                  --instance-type t2.micro \
-                  --key-name efsec2-key \
-                  --security-group-ids "$ec2SecGrpID" \
-                  --subnet-id "$pubVPC_Subnet01ID" \
-                  --associate-public-ip-address \
-                  --query 'Instances[0].InstanceId' \
-                  --output text)                 
-
-nfsClientInstUrl=$(aws ec2 describe-instances \
-                 --instance-ids "$nfsClientInstID" \
-                 --query 'Reservations[0].Instances[0].PublicDnsName' \
-                 --output text)
-
-##### Tag the instances
-aws ec2 create-tags --resources "$nfsClientInstID" --tags 'Key=Name,Value=NFS-Client-Instance'
-```
-
 ## Create Amazon EFS File System
 ```sh
 ## Create Amazon EFS File System
@@ -199,7 +170,72 @@ Make sure you have the following information,
   efsDNS="$prefRegionAZ1"."$efsID".efs."$prefRegion".amazonaws.com
   ```
 
-### Install the NFS Client in the 
+### Launch EC2 Instances
+Gather the following information before you create the instance. But do note that, _Amazon EFS does not require that your Amazon EC2 instance have either a public IP address or public DNS name_.
+  - Security Group ID of the security group you created for an EC2 instance, i.e., `ec2SecGrpID`
+  - Subnet ID – You need this value when you create a mount target. In this exercise, you create a mount target in the same subnet where you launch an EC2 instance. In our demo are we going to use `pubVPC_Subnet01ID`
+  - Availability Zone of the subnet – You need this to construct your mount target DNS name, which you use to mount a file system on the EC2 instance. i.e., `prefRegionAZ1`
+  - Key Pair Name
+  - AMI ID - Which supports NFS - `amiID`
+
+We will be creating two instanes each in different availability zone. Since the `user-data` script attempts to mount the NFS, this step will have to be done after the EFS creation.
+
+```sh
+## User data script to install the NFS client and mount the NFS Directory
+cat >> userDataScript <<EOF
+#!/bin/bash
+set -e -x
+yum -y install nfs-utils
+mkdir ~/efs-mount-point
+mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 "$efsDNS":/   ~/efs-mount-point
+cd ~/efs-mount-point
+chmod go+rw .
+EOF
+
+
+nfsClientInst01ID=$(aws ec2 run-instances \
+                  --image-id "$amiID" \
+                  --count 1 \
+                  --instance-type t2.micro \
+                  --key-name efsec2-key \
+                  --security-group-ids "$ec2SecGrpID" \
+                  --subnet-id "$pubVPC_Subnet01ID" \
+                  --user-data file://userDataScript \
+                  --associate-public-ip-address \
+                  --query 'Instances[0].InstanceId' \
+                  --output text)                 
+
+nfsClientInst01Url=$(aws ec2 describe-instances \
+                 --instance-ids "$nfsClientInst01ID" \
+                 --query 'Reservations[0].Instances[0].PublicDnsName' \
+                 --output text)
+
+nfsClientInst02ID=$(aws ec2 run-instances \
+                  --image-id "$amiID" \
+                  --count 1 \
+                  --instance-type t2.micro \
+                  --key-name efsec2-key \
+                  --security-group-ids "$ec2SecGrpID" \
+                  --subnet-id "$pubVPC_Subnet02ID" \
+                  --user-data file://userDataScript \
+                  --associate-public-ip-address \
+                  --query 'Instances[0].InstanceId' \
+                  --output text)                 
+
+nfsClientInst02Url=$(aws ec2 describe-instances \
+                 --instance-ids "$nfsClientInst02ID" \
+                 --query 'Reservations[0].Instances[0].PublicDnsName' \
+                 --output text)                 
+
+##### Tag the instances
+aws ec2 create-tags --resources "$nfsClientInst01ID" --tags 'Key=Name,Value=NFS-Client-Instance'
+aws ec2 create-tags --resources "$nfsClientInst02ID" --tags 'Key=Name,Value=NFS-Client-Instance'
+```
+
+
+
+
+###### The file system you mounted will not persist across reboots. To automatically remount the directory you can use the fstab file
 
 
 
