@@ -6,15 +6,14 @@ Suppose you have one or more EC2 instances launched in your VPC. Now you want to
  - Supports **concurrent read and write access** from multiple Amazon EC2 instances
  - Accessible from all of the `Availability Zones` in the `AWS Region`
 
-Having said that, Beware of some of the _[not supported features of EFS](http://docs.aws.amazon.com/efs/latest/ug/nfs4-unsupported-features.html)_.
-
+Having said that, Beware of some of the _[not supported features of EFS](http://docs.aws.amazon.com/efs/latest/ug/nfs4-unsupported-features.html)_ & [limitations](http://docs.aws.amazon.com/efs/latest/ug/limits.html), For example Elastic File System is [not available](http://docs.aws.amazon.com/general/latest/gr/rande.html#elasticfilesystem_region) in all regions.
 
 
 In this walkthrough, you will create the following resources:
- - Amazon EC2 resources - 
+ - Amazon EC2 resources,
    - Two security groups (for your EC2 instance and Amazon EFS file system) - You add rules to these security groups to authorize appropriate inbound/outbound access to allow your EC2 instance to connect to the file system via the mount target using a standard NFSv4.1 TCP port.
    - An Amazon EC2 instance in your VPC.
- - Amazon EFS resources:
+ - Amazon EFS resources,
    - A file system.
    - A mount target for your file system - To mount your file system on an EC2 instance you need to create a mount target in your VPC. You can create one mount target in each of the Availability Zones in your VPC. 
 
@@ -25,7 +24,7 @@ Lets create a /24 VPC and tag it `pubVPC` along with the interget gateway
 
 ```sh
 # Setting the Region
-prefAZ=us-west-1
+prefAZ=us-west-2
 export AWS_DEFAULT_REGION="$prefAZ"
 
 pubVPCID=$(aws ec2 create-vpc \
@@ -54,20 +53,20 @@ Lets create two subnets each in different availability zones within the same reg
 pubVPC_Subnet01ID=$(aws ec2 create-subnet --vpc-id \
                     "$pubVPCID" \
                     --cidr-block 10.0.1.0/25 \
-                    --availability-zone us-west-1a \
+                    --availability-zone us-west-2a \
                     --query 'Subnet.SubnetId' \
                     --output text)
 
 pubVPC_Subnet02ID=$(aws ec2 create-subnet \
                     --vpc-id "$pubVPCID" \
                     --cidr-block 10.0.1.128/25 \
-                    --availability-zone us-west-1c \
+                    --availability-zone us-west-2c \
                     --query 'Subnet.SubnetId' \
                     --output text)
 
 #### Tag the subnet ID's
-aws ec2 create-tags --resources "$pubVPC_Subnet01ID" --tags 'Key=Name,Value=pubVPC_Subnet01-west-1a'
-aws ec2 create-tags --resources "$pubVPC_Subnet02ID" --tags 'Key=Name,Value=pubVPC_Subnet02-west-1c'
+aws ec2 create-tags --resources "$pubVPC_Subnet01ID" --tags 'Key=Name,Value=pubVPC_Subnet01-west-2a'
+aws ec2 create-tags --resources "$pubVPC_Subnet02ID" --tags 'Key=Name,Value=pubVPC_Subnet02-west-2c'
 ```
 
 #### Add the Routes
