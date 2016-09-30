@@ -236,8 +236,7 @@ Login into one of the EC2 Instance and create a file
 [ec2-user@nfsclient01 efs-mount-point]$ df -h /usr/efs-mount-point/
 Filesystem                                            Size  Used Avail Use% Mounted on
 us-west-2a.fs-1fb049b6.efs.us-west-2.amazonaws.com:/  8.0E     0  8.0E   0% /usr/efs-mount-point
-[ec2-user@nfsclient01 efs-mount-point]$
- cd /usr/efs-mount-point/
+[ec2-user@nfsclient01 efs-mount-point]$ cd /usr/efs-mount-point/
 [ec2-user@nfsclient01 efs-mount-point]$ touch this-is-awesome
 [ec2-user@nfsclient01 efs-mount-point]$ ls -la .
 total 12
