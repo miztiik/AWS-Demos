@@ -193,11 +193,11 @@ You can also use the `describe-mount-targets` command to get descriptions of mou
 Make sure you have the following information,
  - Public DNS name of your EC2 instance i.e., `nfsClientInstUrl`
  - DNS name of your file system's mount target. You can construct this DNS name using the following generic form: 
-    - `availability-zone`.`file-system-id`.efs.`aws-region`.amazonaws.com`
+    - `availability-zone`.`file-system-id`.efs.`aws-region`.amazonaws.com
 
-```sh
-efsDNS="$prefRegionAZ1"."$efsID".efs."$prefRegion".amazonaws.com
-```
+    ```sh
+    efsDNS="$prefRegionAZ1"."$efsID".efs."$prefRegion".amazonaws.com
+    ```
 
 ### Install the NFS Client in the 
 
