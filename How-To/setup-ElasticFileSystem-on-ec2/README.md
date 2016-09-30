@@ -116,3 +116,25 @@ aws ec2 authorize-security-group-ingress \
         --port 2049 \
         --source-group "$ec2SecGrpID" 
 ```
+
+## Create EC2 Instance
+```sh
+##### EC2 Instances
+nfsClientInstID=$(aws ec2 run-instances \
+                  --image-id ami-d1315fb1 \
+                  --count 1 \
+                  --instance-type t2.micro \
+                  --key-name efsec2-key \
+                  --security-group-ids "$ec2SecGrpID" \
+                  --subnet-id "$pubVPC_Subnet01ID" \
+                  --associate-public-ip-address \
+                  --query 'Instances[0].InstanceId' \
+                  --output text)
+
+aws ec2 create-tags --resources "$nfsClientInstID" --tags 'Key=Name,Value=NFS-Client-Instance'
+```
+
+## Create Amazon EFS File System
+```sh
+
+```
