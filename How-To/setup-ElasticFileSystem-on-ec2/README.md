@@ -160,16 +160,6 @@ You can also use the `describe-mount-targets` command to get descriptions of mou
 }
 ```
 
-## Mount the Amazon EFS File System on the EC2 Instance
-Make sure you have the following information,
- - Public DNS name of your EC2 instance i.e., `nfsClientInstUrl`
- - DNS name of your file system's mount target. You can construct this DNS name using the following generic form: 
-    - `availability-zone`.`file-system-id`.efs.`aws-region`.amazonaws.com
-
-  ```sh
-  efsDNS="$prefRegionAZ1"."$efsID".efs."$prefRegion".amazonaws.com
-  ```
-
 ### Launch EC2 Instances
 Gather the following information before you create the instance. But do note that, _Amazon EFS does not require that your Amazon EC2 instance have either a public IP address or public DNS name_.
   - Security Group ID of the security group you created for an EC2 instance, i.e., `ec2SecGrpID`
@@ -178,6 +168,13 @@ Gather the following information before you create the instance. But do note tha
   - Key Pair Name
   - AMI ID - Which supports NFS - `amiID`
 
+##### Mount the Amazon EFS File System on the EC2 Instance
+We need the DNS name of your file system's mount target to be used in our `user-data` script. You can construct this DNS name using the following generic form: 
+    `availability-zone`.`file-system-id`.efs.`aws-region`.amazonaws.com
+
+  ```sh
+  efsDNS="$prefRegionAZ1"."$efsID".efs."$prefRegion".amazonaws.com
+  ```
 We will be creating two instanes each in different availability zone. Since the `user-data` script attempts to mount the NFS, this step will have to be done after the EFS creation.
 
 ```sh
