@@ -186,12 +186,10 @@ cat >> userDataScript <<EOF
 #!/bin/bash
 set -e -x
 yum -y install nfs-utils
-mkdir ~/efs-mount-point
-mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 "$efsDNS":/   ~/efs-mount-point
-cd ~/efs-mount-point
-chmod go+rw .
+mkdir -p /var/efs-mount-point
+mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 "$efsDNS":/ /var/efs-mount-point
+cd /var/efs-mount-point
 EOF
-
 
 nfsClientInst01ID=$(aws ec2 run-instances \
                   --image-id "$amiID" \
@@ -232,10 +230,61 @@ aws ec2 create-tags --resources "$nfsClientInst01ID" --tags 'Key=Name,Value=NFS-
 aws ec2 create-tags --resources "$nfsClientInst02ID" --tags 'Key=Name,Value=NFS-Client-Instance-02'
 ```
 
+## Testing the NFS Mount
+Login into one of the EC2 Instance and create a file
+```sh
+[ec2-user@nfsclient01 efs-mount-point]$ df -h /usr/efs-mount-point/
+Filesystem                                            Size  Used Avail Use% Mounted on
+us-west-2a.fs-1fb049b6.efs.us-west-2.amazonaws.com:/  8.0E     0  8.0E   0% /usr/efs-mount-point
+[ec2-user@nfsclient01 efs-mount-point]$
+ cd /usr/efs-mount-point/
+[ec2-user@nfsclient01 efs-mount-point]$ touch this-is-awesome
+[ec2-user@nfsclient01 efs-mount-point]$ ls -la .
+total 12
+drwxrwxrwx.  2 root     root     4096 Sep 30 17:25 .
+drwxr-xr-x. 14 root     root     4096 Sep 30 17:24 ..
+-rw-rw-r--.  1 ec2-user ec2-user    0 Sep 30 17:25 this-is-awesome
+[ec2-user@nfsclient01 efs-mount-point]$
+```
 
+Login to the second EC2 Insance and check out the EFS for the file `this-is-awesome`
+```sh
+[ec2-user@nfsclient02 efs-mount-point]$ ls -la .
+total 12
+drwxrwxrwx.  2 root     root     4096 Sep 30 17:25 .
+drwxr-xr-x. 14 root     root     4096 Sep 30 17:20 ..
+-rw-rw-r--.  1 ec2-user ec2-user    0 Sep 30 17:25 this-is-awesome
+[ec2-user@nfsclient02 efs-mount-point]$
+```
 
-
-###### The file system you mounted will not persist across reboots. To automatically remount the directory you can use the fstab file
+### Testing with big file
+Lets create a random big file of some 128MB using `dd` in `nfsclient02`
+```sh
+[ec2-user@nfsclient01 efs-mount-point]$ dd if=/dev/urandom of=sample-bigFile.txt bs=64M count=2
+2+0 records in
+2+0 records out
+134217728 bytes (134 MB) copied, 12.2977 s, 10.9 MB/s
+[ec2-user@nfsclient01 efs-mount-point]$ ls -lart .
+total 131084
+drwxr-xr-x. 14 root     root          4096 Sep 30 17:24 ..
+-rw-rw-r--.  1 ec2-user ec2-user         0 Sep 30 17:25 this-is-awesome
+drwxrwxrwx.  2 root     root          4096 Sep 30 17:34 .
+-rw-rw-r--.  1 ec2-user ec2-user 134217728 Sep 30 17:36 sample-bigFile.txt
+[ec2-user@nfsclient01 efs-mount-point]$ du -h /usr/efs-mount-point
+129M    /usr/efs-mount-point
+```
+From `nfsclient02`,
+```sh
+[ec2-user@nfsclient02 efs-mount-point]$ du -h /usr/efs-mount-point/
+129M    /usr/efs-mount-point/
+[ec2-user@nfsclient02 efs-mount-point]$ ls -lart .
+total 131084
+drwxr-xr-x. 14 root     root          4096 Sep 30 17:20 ..
+-rw-rw-r--.  1 ec2-user ec2-user         0 Sep 30 17:25 this-is-awesome
+drwxrwxrwx.  2 root     root          4096 Sep 30 17:34 .
+-rw-rw-r--.  1 ec2-user ec2-user 134217728 Sep 30 17:36 sample-bigFile.txt
+```
+###### The file system you mounted will not persist across reboots. To automatically remount the directory you can use the fstab file.
 
 
 
