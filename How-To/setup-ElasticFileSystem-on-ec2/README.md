@@ -196,9 +196,9 @@ Make sure you have the following information,
     - `availability-zone`.`file-system-id`.efs.`aws-region`.amazonaws.com
 
 
-    ```sh
-    efsDNS="$prefRegionAZ1"."$efsID".efs."$prefRegion".amazonaws.com
-    ```
+  ```sh
+  efsDNS="$prefRegionAZ1"."$efsID".efs."$prefRegion".amazonaws.com
+  ```
 
 ### Install the NFS Client in the 
 
