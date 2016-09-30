@@ -129,9 +129,16 @@ nfsClientInstID=$(aws ec2 run-instances \
                   --subnet-id "$pubVPC_Subnet01ID" \
                   --associate-public-ip-address \
                   --query 'Instances[0].InstanceId' \
-                  --output text)
+                  --output text)                 
 
+nfsClientInstUrl=$(aws ec2 describe-instances \
+                 --instance-ids "$nfsClientInstID" \
+                 --query 'Reservations[0].Instances[0].PublicDnsName' \
+                 --output text)
+
+##### Tag the instanes
 aws ec2 create-tags --resources "$nfsClientInstID" --tags 'Key=Name,Value=NFS-Client-Instance'
+
 ```
 
 ## Create Amazon EFS File System
