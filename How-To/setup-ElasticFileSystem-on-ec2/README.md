@@ -20,7 +20,6 @@ In this walkthrough, you will create the following resources:
    - A file system.
    - A mount target for your file system - To mount your file system on an EC2 instance you need to create a mount target in your VPC. You can create one mount target in each of the Availability Zones in your VPC. 
 
-
 ## Creating EC2 Resources
 
 ### Create the VPC
