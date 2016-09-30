@@ -1,9 +1,7 @@
 # Create Amazon EFS File System and Mount It on EC2 Instance(s)
 
 ## Why you need EFS File System?
-Suppose you have one or more EC2 instances launched in your VPC. Now you want to create and share a file system on these instances, EFS is your friend. You can mount an Amazon EFS file system on EC2 instances in your Amazon Virtual Private Cloud (Amazon VPC) using the Network File System version 4.1 protocol (NFSv4.1).
-
-Amazon EFS provides elastic, shared file storage that is
+Suppose you have one or more EC2 instances launched in your VPC. Now you want to create and share a file system on these instances, EFS is your friend. You can mount an Amazon EFS file system on EC2 instances in your Amazon Virtual Private Cloud (Amazon VPC) using the Network File System version 4.1 protocol (NFSv4.1). Amazon EFS provides elastic, shared file storage that is
  - **POSIX-compliant**
  - Supports **concurrent read and write access** from multiple Amazon EC2 instances
  - Accessible from all of the `Availability Zones` in the `AWS Region`
