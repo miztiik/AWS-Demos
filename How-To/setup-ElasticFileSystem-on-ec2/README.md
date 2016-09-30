@@ -23,9 +23,13 @@ In this walkthrough, you will create the following resources:
 Lets create a /24 VPC and tag it `pubVPC` along with the interget gateway
 
 ```sh
-# Setting the Region
-prefAZ=us-west-2
-export AWS_DEFAULT_REGION="$prefAZ"
+# Setting the Region & Availability Zone
+prefRegion=us-west-2
+prefRegionAZ1=us-west-2a
+prefRegionAZ2=us-west-2c
+amiID=ami-775e4f16
+
+export AWS_DEFAULT_REGION="$prefRegion"
 
 pubVPCID=$(aws ec2 create-vpc \
            --cidr-block 10.0.1.0/24 \
@@ -53,14 +57,14 @@ Lets create two subnets each in different availability zones within the same reg
 pubVPC_Subnet01ID=$(aws ec2 create-subnet --vpc-id \
                     "$pubVPCID" \
                     --cidr-block 10.0.1.0/25 \
-                    --availability-zone us-west-2a \
+                    --availability-zone "$prefRegionAZ1" \
                     --query 'Subnet.SubnetId' \
                     --output text)
 
 pubVPC_Subnet02ID=$(aws ec2 create-subnet \
                     --vpc-id "$pubVPCID" \
                     --cidr-block 10.0.1.128/25 \
-                    --availability-zone us-west-2c \
+                    --availability-zone "$prefRegionAZ2" \
                     --query 'Subnet.SubnetId' \
                     --output text)
 
@@ -120,16 +124,16 @@ aws ec2 authorize-security-group-ingress \
 ```
 
 ### Launch EC2 Instances
-Gather the following information before you create the instance
-  - Security Group ID of the security group you created for an EC2 instance, i.e., `$ec2SecGrpID`
-  - Subnet ID – You need this value when you create a mount target. In this exercise, you create a mount target in the same subnet where you launch an EC2 instance. In our demo are we going to use `$pubVPC_Subnet01ID`
-  - Availability Zone of the subnet – You need this to construct your mount target DNS name, which you use to mount a file system on the EC2 instance.
+Gather the following information before you create the instance. But do note that, _Amazon EFS does not require that your Amazon EC2 instance have either a public IP address or public DNS name_.
+  - Security Group ID of the security group you created for an EC2 instance, i.e., `ec2SecGrpID`
+  - Subnet ID – You need this value when you create a mount target. In this exercise, you create a mount target in the same subnet where you launch an EC2 instance. In our demo are we going to use `pubVPC_Subnet01ID`
+  - Availability Zone of the subnet – You need this to construct your mount target DNS name, which you use to mount a file system on the EC2 instance. i.e., `prefRegionAZ1`
   - Key Pair Name
-  - AMI ID - Which supports NFS
+  - AMI ID - Which supports NFS - `amiID`
 
 ```sh
 nfsClientInstID=$(aws ec2 run-instances \
-                  --image-id ami-775e4f16 \
+                  --image-id "$amiID" \
                   --count 1 \
                   --instance-type t2.micro \
                   --key-name efsec2-key \
@@ -169,7 +173,7 @@ efsMountTargetID=$(aws efs create-mount-target \
 ```
 You can also use the `describe-mount-targets` command to get descriptions of mount targets you created on a file system.
 ```sh
-~]# aws efs describe-mount-targets --file-system-id "$efsID"
+~]# aws efs describe-mount-targets --file-system-id "$efsID" --region "$prefRegion"
 {
     "MountTargets": [
         {
@@ -186,3 +190,23 @@ You can also use the `describe-mount-targets` command to get descriptions of mou
 ```
 
 ## Mount the Amazon EFS File System on the EC2 Instance
+Make sure you have the following information,
+ - Public DNS name of your EC2 instance i.e., `nfsClientInstUrl`
+ - DNS name of your file system's mount target. You can construct this DNS name using the following generic form: 
+    - `availability-zone`.`file-system-id`.efs.`aws-region`.amazonaws.com`
+
+```sh
+efsDNS="$prefRegionAZ1"."$efsID".efs."$prefRegion".amazonaws.com
+```
+
+### Install the NFS Client in the 
+
+
+
+
+
+
+
+
+
+
