@@ -16,7 +16,7 @@ In this walkthrough, you will create the following resources:
  - Amazon EFS resources,
    - A file system.
    - A mount target for your file system - To mount your file system on an EC2 instance you need to create a mount target in your VPC. You can create one mount target in each of the Availability Zones in your VPC. 
-
+![Fig 1 : EFS on EC2 Architecture Context](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/img/Elastic-FileSystem-EC2.jpg)
 ## Creating EC2 Resources
 
 ### Create the VPC
@@ -281,6 +281,11 @@ drwxrwxrwx.  2 root     root          4096 Sep 30 17:34 .
 -rw-rw-r--.  1 ec2-user ec2-user 134217728 Sep 30 17:36 sample-bigFile.txt
 ```
 ###### The file system you mounted will not persist across reboots. To automatically remount the directory you can use the fstab file.
+
+It should of the below format
+```sh
+mount-target-DNS:/ efs-mount-point nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 0 0
+```
 
 
 
