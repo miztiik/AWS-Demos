@@ -7,6 +7,8 @@ This walkthrough is to show how to create an "Logical Volume Manager - LVM" in R
  - Security Group updated for `Port 22` access
  - Two EBS Volumes (5GB & 2GB) attached to the instance
 
+![LVM-Logical-Understanding](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/img/hdd-pv-vg-lv-fs.jpg)
+
 ## Physical Volume - PV Creation:
 Before we go ahead and create LVM, we need to create an Physical Volume on the EBS disks
 
