@@ -93,17 +93,30 @@ dnl # DAEMON_OPTIONS(`Port=smtp,Addr=127.0.0.1, Name=MTA')dnl
 ```
 Now generate new `sendmail.cf` file by using `m4` command as shown here,
 ```sh
-m4 /etc/mail/sendmail.mc > /etc/mail.sendmail.cf
+m4 /etc/mail/sendmail.mc > /etc/mail.sendmail.cf && \
 systemctl restart sendmail
 ```
-######  For example, to have all emails addressed to the _example.com_ domain delivered to _bob@other-example.com_, add the following line to the virtusertable file:
+
+#### Updating `mailertable`
+Edit the `/etc/mail/mailertable` file with your domains. For help, refer [here](http://www.sendmail.com/sm/open_source/docs/m4/mailertables.html). 
+```sh
+my.domain		esmtp:host.my.domain
+```
+After saving your edits, update the db with the `makemap hash` command
+```sh
+makemap hash /etc/mail/mailertable < /etc/mail/mailertable && \
+systemctl restart sendmail
+```
+#### Updating `virtualusertable`
+For example, to have all emails addressed to the _example.com_ domain delivered to _bob@other-example.com_, add the following line to the virtusertable file:
 
 ```sh
 @example.com bob@other-example.com
 ```
 To finalize the change, the `virtusertable.db` file must be updated:
 ```sh
-~]# makemap hash /etc/mail/virtusertable < /etc/mail/virtusertable
+makemap hash /etc/mail/virtusertable < /etc/mail/virtusertable && \
+systemctl restart sendmail
 ```
 Sendmail will create an updated `virtusertable.db` file containing the new configuration. When Sendmail is started or restarted a new `sendmail.cf` file is automatically generated if `sendmail.mc` has been modified.
 
