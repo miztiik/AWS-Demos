@@ -59,6 +59,13 @@ There are two basic configuration files:
  - `sendmail.cf` - The main sendmail configuration file.
  - `sendmail.mc` - A macro that's easier to edit, which can be used to generate a new sendmail.cf file.
 
+Other Sendmail configuration files are installed in the `/etc/mail/` directory including:
+ - `access` : Specifies which systems can use Sendmail for outbound email.
+ - `domaintable` : Specifies domain name mapping.
+ - `local-host-names` : Specifies aliases for the host.
+ - `mailertable` : Specifies instructions that override routing for particular domains.
+ - `virtusertable` : Specifies a domain-specific form of aliasing, allowing multiple virtual domains to be hosted on one machine.
+
 Avoid editing the sendmail.cf file directly. To make configuration changes to Sendmail, edit the `/etc/mail/sendmail.mc` file, back up the original `/etc/mail/sendmail.cf` file, and use the following alternatives to generate a new configuration file
 
 The package `m4` macro processor assists in making changes to the sendmail config files
@@ -69,17 +76,7 @@ or
 yum -y install m4
 ```
 
-Various Sendmail configuration files are installed in the `/etc/mail/` directory including:
-
-
-
- - `access` : Specifies which systems can use Sendmail for outbound email.
- - `domaintable` : Specifies domain name mapping.
- - `local-host-names` : Specifies aliases for the host.
- - `mailertable` : Specifies instructions that override routing for particular domains.
- - `virtusertable` : Specifies a domain-specific form of aliasing, allowing multiple virtual domains to be hosted on one machine.
-
-Several of the configuration files in `/etc/mail/`, such as access, domaintable, mailertable and virtusertable, must actually store their information in database files before Sendmail can use any configuration changes. 
+Several of the configuration files in `/etc/mail/`, such as `access`, `domaintable`, `mailertable` and `virtusertable`, must actually store their information in database files before Sendmail can use any configuration changes.
 
 For example, to have all emails addressed to the _example.com_ domain delivered to _bob@other-example.com_, add the following line to the virtusertable file:
 ```sh
@@ -89,7 +86,7 @@ To finalize the change, the `virtusertable.db` file must be updated:
 ```sh
 ~]# makemap hash /etc/mail/virtusertable < /etc/mail/virtusertable
 ```
-Sendmail will create an updated `virtusertable.db` file containing the new configuration.
+Sendmail will create an updated `virtusertable.db` file containing the new configuration. When Sendmail is started or restarted a new `sendmail.cf` file is automatically generated if `sendmail.mc` has been modified.
 
 
 ## Testing sendmail
