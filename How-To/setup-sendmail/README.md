@@ -78,7 +78,26 @@ yum -y install m4
 
 Several of the configuration files in `/etc/mail/`, such as `access`, `domaintable`, `mailertable` and `virtusertable`, must actually store their information in database files before Sendmail can use any configuration changes.
 
-For example, to have all emails addressed to the _example.com_ domain delivered to _bob@other-example.com_, add the following line to the virtusertable file:
+#### Disable loop-back address
+By default, the following line limits sendmail access to connect local host only `sendmail.mc` You can allow other computers to use your sendmail server by commenting out this line. 
+
+In the `sendmail.mc` file , lines that begin with dnl, which stands for delete to new line, are considered comments. Some lines end with dnl, but lines ending in dnl are not comments.
+
+The following line should be commented to ( with dnl keyword followed by # sign)
+```sh
+DAEMON_OPTIONS(`Port=smtp,Addr=127.0.0.1, Name=MTA')dnl
+```
+to
+```sh
+dnl # DAEMON_OPTIONS(`Port=smtp,Addr=127.0.0.1, Name=MTA')dnl
+```
+Now generate new `sendmail.cf` file by using `m4` command as shown here,
+```sh
+m4 /etc/mail/sendmail.mc > /etc/mail.sendmail.cf
+systemctl restart sendmail
+```
+######  For example, to have all emails addressed to the _example.com_ domain delivered to _bob@other-example.com_, add the following line to the virtusertable file:
+
 ```sh
 @example.com bob@other-example.com
 ```
