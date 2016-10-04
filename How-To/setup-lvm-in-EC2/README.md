@@ -158,8 +158,8 @@ Filesystem                  Size  Used Avail Use% Mounted on
 ```
 ### Extend the File system `/data` size by 2GB
 It is a two step activity,
- - Step 1 : Extend the Logical Volume
- - Step 2 : Resize the Filesystem to use the extended volume
+ - Step 1 - Extend the Logical Volume
+ - Step 2 - Resize the Filesystem to use the extended volume
 ```
 ~]# lvextend -L +2G /dev/datavg/data_lv
   Size of logical volume datavg/data_lv changed from 2.00 GiB (512 extents) to 4.00 GiB (1024 extents).
