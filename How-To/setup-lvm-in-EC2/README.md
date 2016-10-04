@@ -7,13 +7,14 @@ This walkthrough is to show how to create an "Logical Volume Manager - LVM" in R
  - Security Group updated for `Port 22` access
  - Two EBS Volumes (5GB & 2GB) attached to the instance
 
-
 ## Physical Volume - PV Creation:
 Before we go ahead and create LVM, we need to create an Physical Volume on the EBS disks
 
 There are 2 ways you can create PV
 
-### Method 1 :Creating partitions by using Physical Dsik and crating pv by using partition
+### Method 1 :
+Creating partitions by using Physical Disk and creating pv by using partition
+   
    `fdisk /dev/xvdb >> press n >> Prees p >> press t >> press w`
 
 ```sh
@@ -48,8 +49,7 @@ The partition table has been altered!
 
 Calling ioctl() to re-read partition table.
 Syncing disks.
-```
-```
+
 [root@ip-172-31-56-77 ~]#  fdisk -l /dev/xvdb
 
 Disk /dev/xvdb: 5368 MB, 5368709120 bytes, 10485760 sectors
@@ -62,7 +62,8 @@ Disk identifier: 0x271caa5a
     Device Boot      Start         End      Blocks   Id  System
 /dev/xvdb1            2048    10485759     5241856   8e  Linux LVM
 ```
-```
+Creating the PV
+```sh
 [root@ip-172-31-56-77 ~]# pvcreate /dev/xvdb1
   Physical volume "/dev/xvdb1" successfully created
 [root@ip-172-31-56-77 ~]# pvs
@@ -81,7 +82,7 @@ Creting PV by using physical disk /dev/xvdg
   /dev/xvdb1           lvm2 ---     5.00g 5.00g
   /dev/xvdg            lvm2 ---     2.00g 2.00g
 ```
-4. Creating Volume Group 
+### Create Volume Group 
 ```
 [root@ip-172-31-56-77 ~]# vgcreate datavg /dev/xvdb1 /dev/xvdg
   Volume group "datavg" successfully created
@@ -111,7 +112,7 @@ Creting PV by using physical disk /dev/xvdg
 
 [root@ip-172-31-56-77 ~]#
 ```
-5. Creating Logical Volumes
+### Create Logical Volumes
 ```
 [root@ip-172-31-56-77 ~]# lvcreate -L 2G -n data_lv datavg
   Logical volume "data_lv" created.
@@ -136,21 +137,29 @@ Creting PV by using physical disk /dev/xvdg
   Block device           253:0
 [root@ip-172-31-56-77 ~]#
 ```
-6. File System creation:\
-    ` mkfs.ext4 /dev/datavg/data_lv`\
-    `mkdir /data`\
-    `mount /dev/datavg/data_lv /data`\
-And add newly created FS entry in fstab 
+### Create File System
+```sh
+mkfs.ext4 /dev/datavg/data_lv` \
+          mkdir /data` \
+          mount /dev/datavg/data_lv /data` \
+```
+And add newly created FS entry in fstab and refresh the `fstab` to mount all the entries
 ```
 [root@ip-172-31-56-77 ~]# grep /data /etc/fstab
 /dev/datavg/data_lv /data  ext4 defaults 0 0
+[root@ip-172-31-56-77 ~]# mount -a
+[root@ip-172-31-56-77 ~]# 
 ```
+Check if the new filesystem had been mounted,
 ```
 [root@ip-172-31-56-77 ~]# df -h /data
 Filesystem                  Size  Used Avail Use% Mounted on
 /dev/mapper/datavg-data_lv  2.0G  6.0M  1.8G   1% /data
 ```
-If you want increase the File system "/data"size by 2GB:
+### Extend the File system `/data` size by 2GB
+It is a two step activity,
+ - First - Extend the Logical Volume
+ - Secondly, Resize the Filesystem to use the extended volume
 ```
 [root@ip-172-31-56-77 ~]# lvextend -L +2G /dev/datavg/data_lv
   Size of logical volume datavg/data_lv changed from 2.00 GiB (512 extents) to 4.00 GiB (1024 extents).
@@ -163,6 +172,7 @@ Filesystem at /dev/datavg/data_lv is mounted on /data; on-line resizing required
 old_desc_blocks = 1, new_desc_blocks = 1
 The filesystem on /dev/datavg/data_lv is now 1048576 blocks long.
 ```
+Check the size again,
 ```
 [root@ip-172-31-56-77 ~]# df -h /data
 Filesystem                  Size  Used Avail Use% Mounted on
