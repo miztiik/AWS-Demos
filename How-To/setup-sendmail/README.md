@@ -53,6 +53,12 @@ systemctl list-units --type service --all | grep postfix
 ```
 
 ## Configuring Sendmail
+By default sendmail server allows to connect to local host only. So we should edit the `/etc/mail/sendmail.mc` file to allow connect to other hosts. The sendmail daemon is configured from a directory of files in `/etc/mail` and a directory of configuration files in `/usr/share/sendmail-cf`. 
+
+There are two basic configuration files:
+ - `sendmail.cf` - The main sendmail configuration file.
+ - `sendmail.mc` - A macro that's easier to edit, which can be used to generate a new sendmail.cf file.
+
 Avoid editing the sendmail.cf file directly. To make configuration changes to Sendmail, edit the `/etc/mail/sendmail.mc` file, back up the original `/etc/mail/sendmail.cf` file, and use the following alternatives to generate a new configuration file
 
 The package `m4` macro processor assists in making changes to the sendmail config files
@@ -86,7 +92,7 @@ To finalize the change, the `virtusertable.db` file must be updated:
 Sendmail will create an updated `virtusertable.db` file containing the new configuration.
 
 
-## Testsing sendmail
+## Testing sendmail
 ```sh
 echo "Mail from server:`uname -n`" | sendmail -v user@example.com
 ```
