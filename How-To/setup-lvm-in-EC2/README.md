@@ -1,5 +1,5 @@
 # Configuring LVM in EC2
-This walkthrough is to show how to create an "Logical Volume Manager - LVM" in Redhat Linux 7.2 running on an EC Instances. 
+This walkthrough is to show how to create an "Logical Volume Manager - LVM" in Redhat Linux 7.2 running on an EC2 Instances. 
 
 ### Pre-Requisites
  - EC2 Instance running Redhat
