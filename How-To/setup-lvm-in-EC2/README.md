@@ -1,11 +1,22 @@
 # Configuring LVM in EC2 (Redhat) - AWS 
-1. Log on to AWS Console, Select Redhat OS and launch EC2 instance
-2. Attach EBS volumes to your instance 
-3. PV Creation:
-    There are 2 ways you can create PV\
-    (i) Creating partitions by using Physical Dsik and crating pv by using partition\
-        fdisk /dev/xvdb >> press n >> Prees p >> press t >> press w 
-```
+This walkthrough is to show how to create an "Logical Volume Manager - LVM" in Redhat Linux 7.2 running on an EC Instances. 
+
+### Pre-Requisites
+ - EC2 Instance running Redhat
+ - Internet gateway setup for the VPC
+ - Security Group updated for `Port 22` access
+ - Two EBS Volumes (5GB & 2GB) attached to the instance
+
+
+## Physical Volume - PV Creation:
+Before we go ahead and create LVM, we need to create an Physical Volume on the EBS disks
+
+There are 2 ways you can create PV
+
+### Method 1 :Creating partitions by using Physical Dsik and crating pv by using partition
+   `fdisk /dev/xvdb >> press n >> Prees p >> press t >> press w`
+
+```sh
 [root@ip-172-31-56-77 ~]# fdisk /dev/xvdb
 Welcome to fdisk (util-linux 2.23.2).
 
@@ -58,7 +69,8 @@ Disk identifier: 0x271caa5a
   PV         VG   Fmt  Attr PSize PFree
   /dev/xvdb1      lvm2 ---  5.00g 5.00g
 ```
-   (ii) Creting PV by using physical disk /dev/xvdg
+### Method 2: 
+Creting PV by using physical disk /dev/xvdg
 ```
 [root@ip-172-31-56-77 ~]# pvcreate /dev/xvdg
     Physical volume "/dev/xvdg" successfully created
