@@ -18,7 +18,7 @@ Creating partitions by using Physical Disk and creating pv by using partition
    `fdisk /dev/xvdb >> press n >> Prees p >> press t >> press w`
 
 ```sh
-[root@ip-172-31-56-77 ~]# fdisk /dev/xvdb
+~]# fdisk /dev/xvdb
 Welcome to fdisk (util-linux 2.23.2).
 
 Changes will remain in memory only, until you decide to write them.
@@ -50,7 +50,7 @@ The partition table has been altered!
 Calling ioctl() to re-read partition table.
 Syncing disks.
 
-[root@ip-172-31-56-77 ~]#  fdisk -l /dev/xvdb
+~]#  fdisk -l /dev/xvdb
 
 Disk /dev/xvdb: 5368 MB, 5368709120 bytes, 10485760 sectors
 Units = sectors of 1 * 512 = 512 bytes
@@ -64,31 +64,31 @@ Disk identifier: 0x271caa5a
 ```
 Creating the PV
 ```sh
-[root@ip-172-31-56-77 ~]# pvcreate /dev/xvdb1
+~]# pvcreate /dev/xvdb1
   Physical volume "/dev/xvdb1" successfully created
-[root@ip-172-31-56-77 ~]# pvs
+~]# pvs
   PV         VG   Fmt  Attr PSize PFree
   /dev/xvdb1      lvm2 ---  5.00g 5.00g
 ```
 ### Method 2: 
 Creting PV by using physical disk /dev/xvdg
 ```
-[root@ip-172-31-56-77 ~]# pvcreate /dev/xvdg
+~]# pvcreate /dev/xvdg
     Physical volume "/dev/xvdg" successfully created
 ```
 ```
-[root@ip-172-31-56-77 ~]# pvs
+~]# pvs
   PV             VG    Fmt  Attr PSize    PFree
   /dev/xvdb1           lvm2 ---     5.00g 5.00g
   /dev/xvdg            lvm2 ---     2.00g 2.00g
 ```
 ### Create Volume Group 
 ```
-[root@ip-172-31-56-77 ~]# vgcreate datavg /dev/xvdb1 /dev/xvdg
+~]# vgcreate datavg /dev/xvdb1 /dev/xvdg
   Volume group "datavg" successfully created
 ```
 ```
-[root@ip-172-31-56-77 ~]# vgdisplay datavg
+~]# vgdisplay datavg
   --- Volume group ---
   VG Name               datavg
   System ID
@@ -110,15 +110,15 @@ Creting PV by using physical disk /dev/xvdg
   Free  PE / Size       1790 / 6.99 GiB
   VG UUID               jVFZYw-NXgD-JsoP-ay8u-8hr8-dgev-wMvZ0p
 
-[root@ip-172-31-56-77 ~]#
+~]#
 ```
 ### Create Logical Volumes
 ```
-[root@ip-172-31-56-77 ~]# lvcreate -L 2G -n data_lv datavg
+~]# lvcreate -L 2G -n data_lv datavg
   Logical volume "data_lv" created.
 ```
 ```
-[root@ip-172-31-56-77 ~]# lvdisplay
+~]# lvdisplay
   --- Logical volume ---
   LV Path                /dev/datavg/data_lv
   LV Name                data_lv
@@ -135,7 +135,7 @@ Creting PV by using physical disk /dev/xvdg
   Read ahead sectors     auto
   - currently set to     8192
   Block device           253:0
-[root@ip-172-31-56-77 ~]#
+~]#
 ```
 ### Create File System
 ```sh
@@ -145,28 +145,28 @@ mkfs.ext4 /dev/datavg/data_lv` \
 ```
 And add newly created FS entry in fstab and refresh the `fstab` to mount all the entries
 ```
-[root@ip-172-31-56-77 ~]# grep /data /etc/fstab
+~]# grep /data /etc/fstab
 /dev/datavg/data_lv /data  ext4 defaults 0 0
-[root@ip-172-31-56-77 ~]# mount -a
-[root@ip-172-31-56-77 ~]# 
+~]# mount -a
+~]# 
 ```
 Check if the new filesystem had been mounted,
 ```
-[root@ip-172-31-56-77 ~]# df -h /data
+~]# df -h /data
 Filesystem                  Size  Used Avail Use% Mounted on
 /dev/mapper/datavg-data_lv  2.0G  6.0M  1.8G   1% /data
 ```
 ### Extend the File system `/data` size by 2GB
 It is a two step activity,
- - First - Extend the Logical Volume
- - Secondly, Resize the Filesystem to use the extended volume
+ - Step 1 : Extend the Logical Volume
+ - Step 2 : Resize the Filesystem to use the extended volume
 ```
-[root@ip-172-31-56-77 ~]# lvextend -L +2G /dev/datavg/data_lv
+~]# lvextend -L +2G /dev/datavg/data_lv
   Size of logical volume datavg/data_lv changed from 2.00 GiB (512 extents) to 4.00 GiB (1024 extents).
   Logical volume data_lv successfully resized.
 ```
 ```
-[root@ip-172-31-56-77 ~]# resize2fs /dev/datavg/data_lv
+~]# resize2fs /dev/datavg/data_lv
 resize2fs 1.42.9 (28-Dec-2013)
 Filesystem at /dev/datavg/data_lv is mounted on /data; on-line resizing required
 old_desc_blocks = 1, new_desc_blocks = 1
@@ -174,7 +174,7 @@ The filesystem on /dev/datavg/data_lv is now 1048576 blocks long.
 ```
 Check the size again,
 ```
-[root@ip-172-31-56-77 ~]# df -h /data
+~]# df -h /data
 Filesystem                  Size  Used Avail Use% Mounted on
 /dev/mapper/datavg-data_lv  3.9G  8.0M  3.7G   1% /data
 ```
