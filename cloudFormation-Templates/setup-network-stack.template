@@ -1,15 +1,15 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "This template will setup up a network stack. VPC - 10.0.0.0/20 and  three subnets - Private , Public & Spare  and Internet Gateway",
+  "Description": "This template creates a Multi-AZ, multi-subnet VPC infrastructure. 10.0.0.0/20 and  three subnets - Private , Public & Spare  and Internet Gateway",
   "Parameters": {
     "EnvType": {
       "Description": "Choose the type of Environment",
       "Default": "test",
       "Type": "String",
       "AllowedValues": [
-        "dev",
-        "test",
-        "prod"
+        "Dev",
+        "Test",
+        "Production"
       ],
       "ConstraintDescription": "Must choose the type of environment"
     }
