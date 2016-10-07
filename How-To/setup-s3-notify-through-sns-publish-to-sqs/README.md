@@ -67,7 +67,8 @@ bucket_notifications_configuration = {
         }
     }
     
-s3_client.put_bucket_notification(Bucket=s3BucketName, NotificationConfiguration=bucket_notifications_configuration)
+s3_client.put_bucket_notification( Bucket = s3BucketName,
+                                   NotificationConfiguration = bucket_notifications_configuration )
 ```
 ### Subscribe to the SNS Topic for EMail Notification
 ```py
