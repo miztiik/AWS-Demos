@@ -53,6 +53,19 @@ systemctl list-units --type service --all | grep postfix
 ```
 
 ## Configuring Sendmail
+By default sendmail server allows to connect to local host only. So we should edit the `/etc/mail/sendmail.mc` file to allow connect to other hosts. The sendmail daemon is configured from a directory of files in `/etc/mail` and a directory of configuration files in `/usr/share/sendmail-cf`. 
+
+There are two basic configuration files:
+ - `sendmail.cf` - The main sendmail configuration file.
+ - `sendmail.mc` - A macro that's easier to edit, which can be used to generate a new sendmail.cf file.
+
+Other Sendmail configuration files are installed in the `/etc/mail/` directory including:
+ - `access` : Specifies which systems can use Sendmail for outbound email.
+ - `domaintable` : Specifies domain name mapping.
+ - `local-host-names` : Specifies aliases for the host.
+ - `mailertable` : Specifies instructions that override routing for particular domains.
+ - `virtusertable` : Specifies a domain-specific form of aliasing, allowing multiple virtual domains to be hosted on one machine.
+
 Avoid editing the sendmail.cf file directly. To make configuration changes to Sendmail, edit the `/etc/mail/sendmail.mc` file, back up the original `/etc/mail/sendmail.cf` file, and use the following alternatives to generate a new configuration file
 
 The package `m4` macro processor assists in making changes to the sendmail config files
@@ -63,30 +76,52 @@ or
 yum -y install m4
 ```
 
-Various Sendmail configuration files are installed in the `/etc/mail/` directory including:
+Several of the configuration files in `/etc/mail/`, such as `access`, `domaintable`, `mailertable` and `virtusertable`, must actually store their information in database files before Sendmail can use any configuration changes.
 
+#### Disable loop-back address
+By default, the following line limits sendmail access to connect local host only `sendmail.mc` You can allow other computers to use your sendmail server by commenting out this line. 
 
+In the `sendmail.mc` file , lines that begin with dnl, which stands for delete to new line, are considered comments. Some lines end with dnl, but lines ending in dnl are not comments.
 
- - `access` : Specifies which systems can use Sendmail for outbound email.
- - `domaintable` : Specifies domain name mapping.
- - `local-host-names` : Specifies aliases for the host.
- - `mailertable` : Specifies instructions that override routing for particular domains.
- - `virtusertable` : Specifies a domain-specific form of aliasing, allowing multiple virtual domains to be hosted on one machine.
+The following line should be commented to ( with dnl keyword followed by # sign)
+```sh
+DAEMON_OPTIONS(`Port=smtp,Addr=127.0.0.1, Name=MTA')dnl
+```
+to
+```sh
+dnl # DAEMON_OPTIONS(`Port=smtp,Addr=127.0.0.1, Name=MTA')dnl
+```
+Now generate new `sendmail.cf` file by using `m4` command as shown here,
+```sh
+m4 /etc/mail/sendmail.mc > /etc/mail.sendmail.cf && \
+systemctl restart sendmail
+```
 
-Several of the configuration files in `/etc/mail/`, such as access, domaintable, mailertable and virtusertable, must actually store their information in database files before Sendmail can use any configuration changes. 
-
+#### Updating `mailertable`
+Edit the `/etc/mail/mailertable` file with your domains. For help, refer [here](http://www.sendmail.com/sm/open_source/docs/m4/mailertables.html). 
+```sh
+my.domain		esmtp:host.my.domain
+```
+After saving your edits, update the db with the `makemap hash` command
+```sh
+makemap hash /etc/mail/mailertable < /etc/mail/mailertable && \
+systemctl restart sendmail
+```
+#### Updating `virtualusertable`
 For example, to have all emails addressed to the _example.com_ domain delivered to _bob@other-example.com_, add the following line to the virtusertable file:
+
 ```sh
 @example.com bob@other-example.com
 ```
 To finalize the change, the `virtusertable.db` file must be updated:
 ```sh
-~]# makemap hash /etc/mail/virtusertable < /etc/mail/virtusertable
+makemap hash /etc/mail/virtusertable < /etc/mail/virtusertable && \
+systemctl restart sendmail
 ```
-Sendmail will create an updated `virtusertable.db` file containing the new configuration.
+Sendmail will create an updated `virtusertable.db` file containing the new configuration. When Sendmail is started or restarted a new `sendmail.cf` file is automatically generated if `sendmail.mc` has been modified.
 
 
-## Testsing sendmail
+## Testing sendmail
 ```sh
 echo "Mail from server:`uname -n`" | sendmail -v user@example.com
 ```
