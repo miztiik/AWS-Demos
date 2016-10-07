@@ -17,7 +17,8 @@ sqs_queue_name = "trawlerDataProcessor"
 ```
 
 ## Create the `S3` bucket
-```pys3_client = boto3.client('s3',REGION_NAME)
+```py
+s3_client = boto3.client('s3',REGION_NAME)
 s3_client.create_bucket(Bucket= s3BucketName , CreateBucketConfiguration = { 'LocationConstraint': REGION_NAME })
 ```
 
@@ -32,20 +33,15 @@ sns_topic_arn = sns_client.create_topic( Name = sns_topic_name)['TopicArn']
 
 ##### Policy to allow S3 to publish to SNS Topic
 ```py
-s3PubToSnsPolicy = { "Version": "2008-10-17",
- "Id": "Policy-S3-publish-to-sns",
-  "Statement": [{
-    "Effect": "Allow",
-    "Principal": { "AWS" : "*" },
-    "Action": [ "sns:Publish" ],
-    "Resource": sns_topic_arn,
-    "Condition": {
-        "ArnLike": {
-            "aws:SourceArn": "arn:aws:s3:*:*:"+ s3BucketName + ""
-                    }
-                }
-            }]
-}
+s3PubToSnsPolicy = {'Version': '2008-10-17',
+                    'Id': 'Policy-S3-publish-to-sns', 'Statement': [{
+    'Effect': 'Allow',
+    'Principal': {'AWS': '*'},
+    'Action': ['sns:Publish'],
+    'Resource': sns_topic_arn,
+    'Condition': {'ArnLike': {'aws:SourceArn': 'arn:aws:s3:*:*:'
+                  + s3BucketName + ''}},
+    }]}
 
 
 sns_client.set_topic_attributes( TopicArn = sns_topic_arn , 
@@ -77,16 +73,10 @@ s3_client.put_bucket_notification(  Bucket= s3BucketName,
 ### Subscribe to the SNS Topic for EMail Notification
 ```py
 sns_client.subscribe( TopicArn = sns_topic_arn , Protocol = "email", Endpoint="SOMEUSER@gmail.com" )
-
-aws sns subscribe \
-  --topic-arn "$sns_topic_arn" \
-  --protocol email \
-  --notification-endpoint "$email_address"
 ```
 
 
 ###### The above example connects an SNS topic to the S3 bucket notification configuration. Amazon also supports having the bucket notifications go directly to an SQS queue, but I do not recommend it.
-
 
 ######  Instead, send the S3 bucket notification to SNS and have SNS forward it to SQS.
 
@@ -145,8 +135,9 @@ sns_client.subscribe(
 
 ### Test SNS publishing to SQS
 ##### Upload test file to the S3 bucket, which will now generate both the email and a message to the SQS queue.
-# aws s3 cp [SOMEFILE] s3://$s3_bucket_name/testfile-02
 ```py
+# aws s3 cp [SOMEFILE] s3://$s3_bucket_name/testfile-02
+
 s3Up = boto3.resource('s3')
 s3Up.meta.client.upload_file('SOME_FILE.TXT', s3BucketName, 'hello.txt')
 ```
