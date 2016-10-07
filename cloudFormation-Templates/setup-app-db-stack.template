@@ -142,7 +142,7 @@
           "configSets": {
             "wp_install_configure": [
               "install-wordpress",
-			  "install-chef-client"
+              "install-chef-client"
             ]
           },
           "install-wordpress": {
@@ -154,205 +154,188 @@
                 "mysql": []
               }
             },
-			"install-chef-client": {
-            "packages": {
-              "rubygems": {
-                "chef": [
-                  "10.14.2"
-                ],
-                "ohai": [
-                  "0.6.4"
-                ]
-              }
-			},
-            "sources": {
-              "/var/www/html": "https://wordpress.org/latest.tar.gz"
-            },
-            "files": {
-              "/var/www/html/info.php": {
-                "content": {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "<?php \n",
-                      "phpinfo(); \n",
-                      "?> \n"
-                    ]
+            "install-chef-client": {
+              "packages": {
+                "rubygems": {
+                  "chef": [
+                    "10.14.2"
+                  ],
+                  "ohai": [
+                    "0.6.4"
                   ]
-                },
-                "mode": "000644",
-                "owner": "apache",
-                "group": "apache"
+                }
               },
-              "/tmp/quickConfig": {
-                "content": {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "#!/bin/bash -ex \n",
-                      "groupadd www \n",
-                      "chown -R root:www /var/www \n",
-                      "chmod 2775 /var/www \n",
-                      "find /var/www -type d -exec chmod 2775 {} + \n",
-                      "find /var/www -type f -exec chmod 0664 {} + \n",
-                      "# Configure SELinux to allow make network connection to database \n",
-                      "# setsebool -P httpd_can_network_connect=1 \n",
-                      "# setsebool httpd_can_network_connect_db on \n"
+              "sources": {
+                "/var/www/html": "https://wordpress.org/latest.tar.gz"
+              },
+              "files": {
+                "/var/www/html/info.php": {
+                  "content": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "<?php \n",
+                        "phpinfo(); \n",
+                        "?> \n"
+                      ]
                     ]
-                  ]
+                  },
+                  "mode": "000644",
+                  "owner": "apache",
+                  "group": "apache"
                 },
-                "mode": "000744",
-                "owner": "apache",
-                "group": "apache"
-              }
-            },
-            "commands": {
-              "01_config": {
-                "command": "/tmp/quickConfig",
-                "cwd": "/var/www"
-              }
-            },
-            "services": {
-              "sysvinit": {
-                "httpd": {
-                  "enabled": "true",
-                  "ensureRunning": "true"
+                "/tmp/quickConfig": {
+                  "content": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "#!/bin/bash -ex \n",
+                        "groupadd www \n",
+                        "chown -R root:www /var/www \n",
+                        "chmod 2775 /var/www \n",
+                        "find /var/www -type d -exec chmod 2775 {} + \n",
+                        "find /var/www -type f -exec chmod 0664 {} + \n",
+                        "# Configure SELinux to allow make network connection to database \n",
+                        "# setsebool -P httpd_can_network_connect=1 \n",
+                        "# setsebool httpd_can_network_connect_db on \n"
+                      ]
+                    ]
+                  },
+                  "mode": "000744",
+                  "owner": "apache",
+                  "group": "apache"
+                }
+              },
+              "commands": {
+                "01_config": {
+                  "command": "/tmp/quickConfig",
+                  "cwd": "/var/www"
+                }
+              },
+              "services": {
+                "sysvinit": {
+                  "httpd": {
+                    "enabled": "true",
+                    "ensureRunning": "true"
+                  }
                 }
               }
             }
           }
-        }
-      },
-      "Properties": {
-        "EbsOptimized": false,
-        "ImageId": "ami-6869aa05",
-        "InstanceType": "t2.micro",
-		"SecurityGroups": [
-          {
-            "Fn::GetAtt": [
-              "myNwStack",
-              "Outputs.webSecGrp"
-            ]
-          }
-        ],
-        "KeyName": {
+        },
+        "Properties": {
+          "EbsOptimized": false,
+          "ImageId": "ami-6869aa05",
+          "InstanceType": "t2.micro",
+          "SecurityGroups": [
+            {
+              "Fn::GetAtt": [
+                "myNwStack",
+                "Outputs.webSecGrp"
+              ]
+            }
+          ],
+          "KeyName": {
             "Fn::GetAtt": [
               "myNwStack",
               "Outputs.KeyName"
             ]
-        },
-        "AssociatePublicIpAddress": "true",
-        "UserData": {
-          "Fn::Base64": {
-            "Fn::Join": [
-              "",
-              [
-                "#!/bin/bash -ex \n",
-                "# Install the AWS CloudFormation helper scripts and then run the cfn-init helper script  \n",
-                "yum update -y aws-cfn-bootstrap \n",
-                "/opt/aws/bin/cfn-init -v --configsets wp_install_configure --stack ",
-                {
-                  "Ref": "AWS::StackName"
-                },
-                " --resource webServerLaunchConfig --region ",
-                {
-                  "Ref": "AWS::Region"
-                },
-                "\n",
-                "/opt/aws/bin/cfn-signal -e $? --stack ",
-                {
-                  "Ref": "AWS::StackName"
-                },
-                " --resource AutoScalingGroup --region ",
-                {
-                  "Ref": "AWS::Region"
-                },
-                "\n"
-              ]
-            ]
-          }
-        }
-      }
-    },
-    "AutoScalingGroup": {
-      "Type": "AWS::AutoScaling::AutoScalingGroup",
-      "Properties": {
-        "LoadBalancerNames": [
-          {
-            "Ref": "webLoadBalancer"
-          }
-        ],
-        "LaunchConfigurationName": {
-          "Ref": "webServerLaunchConfig"
-        },
-        "MinSize": "1",
-        "MaxSize": "2",
-        "DesiredCapacity": "2",
-        "VPCZoneIdentifier": [
-          {
-            "Fn::GetAtt": [
-              "myNwStack",
-              "Outputs.azAWebSubnet"
-            ]
           },
-          {
-            "Fn::GetAtt": [
-              "myNwStack",
-              "Outputs.azBWebSubnet"
-            ]
+          "AssociatePublicIpAddress": "true",
+          "UserData": {
+            "Fn::Base64": {
+              "Fn::Join": [
+                "",
+                [
+                  "#!/bin/bash -ex \n",
+                  "# Install the AWS CloudFormation helper scripts and then run the cfn-init helper script  \n",
+                  "yum update -y aws-cfn-bootstrap \n",
+                  "/opt/aws/bin/cfn-init -v --configsets wp_install_configure --stack ",
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  " --resource webServerLaunchConfig --region ",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  "\n",
+                  "/opt/aws/bin/cfn-signal -e $? --stack ",
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  " --resource AutoScalingGroup --region ",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  "\n"
+                ]
+              ]
+            }
           }
-        ]
-      },
-      "CreationPolicy": {
-        "ResourceSignal": {
-          "Timeout": "PT15M"
         }
-      }
-    }
-  },
-  "Outputs": {
-    "URL": {
-      "Value": {
-        "Fn::Join": [
-          "",
-          [
-            "http://",
+      },
+      "AutoScalingGroup": {
+        "Type": "AWS::AutoScaling::AutoScalingGroup",
+        "Properties": {
+          "LoadBalancerNames": [
+            {
+              "Ref": "webLoadBalancer"
+            }
+          ],
+          "LaunchConfigurationName": {
+            "Ref": "webServerLaunchConfig"
+          },
+          "MinSize": "1",
+          "MaxSize": "2",
+          "DesiredCapacity": "2",
+          "VPCZoneIdentifier": [
             {
               "Fn::GetAtt": [
-                "webLoadBalancer",
-                "DNSName"
+                "myNwStack",
+                "Outputs.azAWebSubnet"
+              ]
+            },
+            {
+              "Fn::GetAtt": [
+                "myNwStack",
+                "Outputs.azBWebSubnet"
               ]
             }
           ]
-        ]
+        },
+        "CreationPolicy": {
+          "ResourceSignal": {
+            "Timeout": "PT15M"
+          }
+        }
+      }
+    },
+    "Outputs": {
+      "URL": {
+        "Value": {
+          "Fn::Join": [
+            "",
+            [
+              "http://",
+              {
+                "Fn::GetAtt": [
+                  "webLoadBalancer",
+                  "DNSName"
+                ]
+              }
+            ]
+          ]
+        },
+        "Description": "Newly created application URL"
       },
-      "Description": "Newly created application URL"
-    },
-    "RDSDatabaseEndpoint": {
-      "Description": "RDS DB Endpoint Details",
-      "Value": {
-        "Fn::GetAtt": [
-          "rdsInstance",
-          "Endpoint.Address"
-        ]
-      }
-    },
-	"RDSDatabaseEndpoint": {
-      "Description": "RDS DB Endpoint Details",
-      "Value": {
-        "Fn::GetAtt": [
-          "rdsInstance",
-          "Endpoint.Address"
-        ]
-      }
-    },
-	"RDSDatabaseEndpoint": {
-      "Description": "RDS DB Endpoint Details",
-      "Value": {
-        "Fn::GetAtt": [
-          "rdsInstance",
-          "Endpoint.Address"
-        ]
+      "RDSDatabaseEndpoint": {
+        "Description": "RDS DB Endpoint Details",
+        "Value": {
+          "Fn::GetAtt": [
+            "rdsInstance",
+            "Endpoint.Address"
+          ]
+        }
       }
     }
   }
