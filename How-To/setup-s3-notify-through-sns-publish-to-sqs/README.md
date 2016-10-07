@@ -51,25 +51,24 @@ sns_client.set_topic_attributes( TopicArn = sns_topic_arn ,
 ```
 
 ### Set a nice little diplay name for the topic
+```py
 sns_client.set_topic_attributes( TopicArn = sns_topic_arn , 
                                  AttributeName = "DisplayName" , 
                                  AttributeValue = 'Urls2Crawl' 
                                 )
-
+```
 
 #### Add a notification to the S3 bucket so that it sends messages to the SNS topic when objects are created (or updated)
-
+```py
 bucket_notifications_configuration = { 
     "TopicConfiguration" : { 
         "Events" : [ "s3:ObjectCreated:*" ], 
         "Topic" : sns_topic_arn 
         }
     }
-
-s3_client.put_bucket_notification(  Bucket= s3BucketName,
-                                    NotificationConfiguration = bucket_notifications_configuration 
-                                    )
-
+    
+s3_client.put_bucket_notification(Bucket=s3BucketName, NotificationConfiguration=bucket_notifications_configuration)
+```
 ### Subscribe to the SNS Topic for EMail Notification
 ```py
 sns_client.subscribe( TopicArn = sns_topic_arn , Protocol = "email", Endpoint="SOMEUSER@gmail.com" )
