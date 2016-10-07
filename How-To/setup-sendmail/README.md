@@ -107,6 +107,9 @@ After saving your edits, update the db with the `makemap hash` command
 makemap hash /etc/mail/mailertable < /etc/mail/mailertable && \
 systemctl restart sendmail
 ```
+
+**NOTE : YOUR MAIL RELAY SHOULD BE ABLE TO RESOLVE & REACH THE DOMAINS LISTED IN MAILERTABLE. ENSURE YOUR DNS & NETWORKS ARE IN ORDER BEFORE TESTING**
+
 #### Updating `virtualusertable`
 For example, to have all emails addressed to the _example.com_ domain delivered to _bob@other-example.com_, add the following line to the virtusertable file:
 
