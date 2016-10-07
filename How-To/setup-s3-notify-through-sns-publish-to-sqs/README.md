@@ -1,6 +1,3 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
 # S3 Bucket Notification to SQS/SNS on Object Creation
 
 import boto3, json
@@ -76,7 +73,7 @@ s3_client.put_bucket_notification(  Bucket= s3BucketName,
 
 
 ### Subscribe to the SNS Topic for EMail Notification
-sns_client.subscribe( TopicArn = sns_topic_arn , Protocol = "email", Endpoint="kumar.searches@gmail.com" )
+sns_client.subscribe( TopicArn = sns_topic_arn , Protocol = "email", Endpoint="SOMEUSER@gmail.com" )
 
 aws sns subscribe \
   --topic-arn "$sns_topic_arn" \
