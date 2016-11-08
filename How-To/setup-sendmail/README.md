@@ -174,6 +174,7 @@ cat > /etc/mail/update.sh << EOF
 cd /etc/mail
 set -x
 
+systemctl restart sendmail
 /usr/sbin/sendmail -v -bi
 /usr/sbin/makemap hash access < access
 #/usr/sbin/makemap hash virtusertable < virtusertable
@@ -183,4 +184,8 @@ if [[ -f /etc/mail/sendmail.pid ]];then
         /bin/kill -HUP `/usr/bin/head -1 /etc/mail/sendmail.pid`
 fi
 EOF
+```
+Set the permissions for execution,
+```sh
+chmod 744 /etc/mail/update.sh
 ```
