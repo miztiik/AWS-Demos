@@ -165,3 +165,22 @@ If the queue was empty you would simply get this:
 ```sh
 /usr/lib/sendmail -q -v 
 ```
+
+### Automating the sendmail config updates
+```sh
+cat > /etc/mail/update.sh << EOF
+#!/usr/bin/bash
+# Update the map files
+cd /etc/mail
+set -x
+
+/usr/sbin/sendmail -v -bi
+/usr/sbin/makemap hash access < access
+#/usr/sbin/makemap hash virtusertable < virtusertable
+/usr/sbin/makemap hash mailertable < mailertable
+
+if [[ -f /etc/mail/sendmail.pid ]];then 
+        /bin/kill -HUP `/usr/bin/head -1 /etc/mail/sendmail.pid`
+fi
+EOF
+```
