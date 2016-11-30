@@ -177,11 +177,16 @@ set -x
 systemctl restart sendmail
 /usr/sbin/sendmail -v -bi
 /usr/sbin/makemap hash access < access
-#/usr/sbin/makemap hash virtusertable < virtusertable
+/usr/sbin/makemap hash virtusertable < virtusertable
 /usr/sbin/makemap hash mailertable < mailertable
 
-if [[ -f /etc/mail/sendmail.pid ]];then 
-        /bin/kill -HUP `/usr/bin/head -1 /etc/mail/sendmail.pid`
+cd /etc/mail/auth
+/usr/sbin/makemap hash client-info < client-info
+/usr/sbin/makemap hash auth-info < auth-info
+
+if [[ -f /var/run/sendmail.pid ]]
+then
+    /bin/kill -HUP `/usr/bin/head -1 /var/run/sendmail.pid`
 fi
 EOF
 ```
