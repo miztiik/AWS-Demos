@@ -170,24 +170,29 @@ If the queue was empty you would simply get this:
 ```sh
 cat > /etc/mail/update.sh << EOF
 #!/usr/bin/bash
-# Update the map files
-cd /etc/mail
 set -x
 
-systemctl restart sendmail
+cd /etc/mail
+
 /usr/sbin/sendmail -v -bi
+
+# Update the map files
 /usr/sbin/makemap hash access < access
 /usr/sbin/makemap hash virtusertable < virtusertable
 /usr/sbin/makemap hash mailertable < mailertable
 
-cd /etc/mail/auth
-/usr/sbin/makemap hash client-info < client-info
-/usr/sbin/makemap hash auth-info < auth-info
+# cd /etc/mail/auth
+# /usr/sbin/makemap hash client-info < client-info
+# /usr/sbin/makemap hash auth-info < auth-info
 
+# Kill the current sendmail session
 if [[ -f /var/run/sendmail.pid ]]
 then
     /bin/kill -HUP `/usr/bin/head -1 /var/run/sendmail.pid`
 fi
+# Restart sendmail after all updates
+systemctl restart sendmail
+systemctl status sendmail
 EOF
 ```
 Set the permissions for execution,
