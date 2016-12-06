@@ -54,13 +54,18 @@ def getInstanceId(resp):
 
 def setInstanceStatus(resp):
     instanceDict = getInstanceId(resp)
-    # If the instance exists in the reservations,
-    if sys.argv[1] not in instanceDict:
-        print "\n\t Invalid Instance ID - {0}".format ( sys.argv[1] )
-        print "\nFound the following instances,"
-        displayInstances( instanceDict )
+
+    if instanceDict:
+        # If the instance exists in the reservations,
+        if sys.argv[1] not in instanceDict:
+            print "\n\t Invalid Instance ID - {0}".format ( sys.argv[1] )
+            print "\nFound the following instances,"
+            displayInstances( instanceDict )
+            sys.exit(1)
+    else:
+        print "\n\n\t There are no running Reservations-Instances in your account.\n\n"
         sys.exit(1)
-    
+
     if cmdarg == 'status':
         print "Instance '{0}' {1} status is: {2}".format( sys.argv[1], instanceDict[ sys.argv[1] ][ 'Tag-Name' ] , instanceDict[ sys.argv[1] ][ 'Status' ]  )
     
