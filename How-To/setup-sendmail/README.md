@@ -3,7 +3,7 @@
 Lets install the `sendmail` packages its configuration file `sendmail-cf`. 
 
 ```sh
-yum -y install sendmail sendmail-cf m4 -y
+yum -y install sendmail sendmail-cf m4
 ```
 ### Ensure sendmail is started by default
 ```sh
@@ -79,7 +79,7 @@ yum -y install m4
 Several of the configuration files in `/etc/mail/`, such as `access`, `domaintable`, `mailertable` and `virtusertable`, must actually store their information in database files before Sendmail can use any configuration changes.
 
 #### Disable loop-back address
-By default, the following line limits sendmail access to connect local host only `sendmail.mc` You can allow other computers to use your sendmail server by commenting out this line. 
+By default, the following line limits sendmail access to local host only `sendmail.mc` You can allow other computers to use your sendmail server by commenting out this line. 
 
 In the `sendmail.mc` file , lines that begin with dnl, which stands for delete to new line, are considered comments. Some lines end with dnl, but lines ending in dnl are not comments.
 
@@ -126,7 +126,7 @@ Sendmail will create an updated `virtusertable.db` file containing the new confi
 
 ## Testing sendmail
 ```sh
-echo "Mail from server:`uname -n`" | sendmail -v user@example.com
+echo "Mail from server:`uname -n` on date: `date`" | sendmail -v user@example.com
 ```
 _or_ a more detailed example
 ```sh
@@ -164,4 +164,38 @@ If the queue was empty you would simply get this:
 ### Force Mail Queue Processing in the Mail Queue
 ```sh
 /usr/lib/sendmail -q -v 
+```
+
+### Automating the sendmail config updates
+```sh
+cat > /etc/mail/update.sh << EOF
+#!/usr/bin/bash
+set -x
+
+cd /etc/mail
+
+/usr/sbin/sendmail -v -bi
+
+# Update the map files
+/usr/sbin/makemap hash access < access
+/usr/sbin/makemap hash virtusertable < virtusertable
+/usr/sbin/makemap hash mailertable < mailertable
+
+# cd /etc/mail/auth
+# /usr/sbin/makemap hash client-info < client-info
+# /usr/sbin/makemap hash auth-info < auth-info
+
+# Kill the current sendmail session
+if [[ -f /var/run/sendmail.pid ]]
+then
+    /bin/kill -HUP `/usr/bin/head -1 /var/run/sendmail.pid`
+fi
+# Restart sendmail after all updates
+systemctl restart sendmail
+systemctl status sendmail
+EOF
+```
+Set the permissions for execution,
+```sh
+chmod 744 /etc/mail/update.sh
 ```
