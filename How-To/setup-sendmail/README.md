@@ -137,6 +137,10 @@ Subject: Test Send Mail
 Hello World
 control + d (this key combination will finish the email.)
 ```
+_or_ **eMailing a report contents:**
+```sh
+sendmail -s 'Subject-Here' you@email.com < "input.file"
+```
 
 ## List messages in sendmail queue
 ```sh
@@ -160,7 +164,8 @@ If the queue was empty you would simply get this:
 ```sh
 /var/spool/mqueue is empty
                 Total requests: 0
-```                
+```
+_You can also check in `/var/log/maillog` for mail log messages_
 ### Force Mail Queue Processing in the Mail Queue
 ```sh
 /usr/lib/sendmail -q -v 
@@ -197,5 +202,5 @@ EOF
 ```
 Set the permissions for execution,
 ```sh
-chmod 744 /etc/mail/update.sh
+chmod 700 /etc/mail/update.sh
 ```
