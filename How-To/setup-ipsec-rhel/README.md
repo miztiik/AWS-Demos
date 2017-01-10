@@ -1,4 +1,7 @@
-# SECURING VIRTUAL PRIVATE NETWORKS (VPNS) USING IPSec
+
+# IPSec Host-To-Host Tunnel between On-Prem & AWS/EC2 Redhat Linux 7.2
+## SECURING VIRTUAL PRIVATE NETWORKS (VPNS) USING IPSec
+
 
 ###### Ref [1] - https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Security_Guide/sec-Securing_Virtual_Private_Networks.html
 ###### Ref [2] - https://libreswan.org/wiki/Host_to_host_VPN_with_PSK
@@ -67,6 +70,8 @@ Libreswan requires the firewall to allow the following packets:
 ##### Turning on Packet Forwarding
 ###### Ref - https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Load_Balancer_Administration/s1-lvs-forwarding-VSA.html
 
+Libreswan expects the following network parameters to be met to run without warnings, So lets go ahead and do it:
+
 To check if IP forwarding is turned on, issue the following command as root:
 `/sbin/sysctl net.ipv4.ip_forward`
 
@@ -92,7 +97,7 @@ net.ipv4.conf.eth0.rp_filter = 0
 net.ipv4.conf.ip_vti0.rp_filter = 0
 
 ```
-Type this as root `sysctl -p` or The changes take effect when you reboot the system .
+Run the following command as root `sysctl -p` for the changes to take effect immediatelyl, or the changes will take effect when you reboot the system.
 
 ## Host-To-Host VPN Using Libreswan
 Run the following commands as root on both of the hosts (“left” and “right”) to create new raw RSA key pairs:
