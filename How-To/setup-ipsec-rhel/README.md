@@ -240,7 +240,7 @@ Oct 27 07:24:10 us6q pluto[8764]: "mytunnel" #6: STATE_QUICK_R2: IPsec SA establ
 To can also test the IPsec connection using `tcpdump` utility to view the network packets being transfered between the hosts (or networks) and verify that they are encrypted via IPsec. The packet should include an AH header and should be shown as ESP packets. ESP means it is encrypted. 
 For example:,
 ```sh
-tcpdump -n -i eth0 esp or udp port 500 or udp port 4500
+~]# tcpdump -n -i eth0 esp or udp port 500 or udp port 4500
 17:13:20.617872 pinky.example.com > ijin.example.com: \
         AH(spi=0x0aaa749f,seq=0x335): ESP(spi=0x0ec0441e,seq=0x335) (DF)
 ```
