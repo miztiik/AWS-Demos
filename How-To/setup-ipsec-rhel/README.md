@@ -153,10 +153,10 @@ cat > /etc/ipsec.d/onprem-to-aws.conf << "EOF"
 conn mytunnel
     leftid=@us6q
     left=10.188.60.201
-    leftrsasigkey=0sAQOXIdVCvLT8SsP/unqb1eKVKBec3fbuJvcuguGE8KD54/YNTclweejkyJXBE9STGr+ASZDHDOmScKVF0jU7vPSdyB8V+HgyiUnz71Sph65MfNvU7wUWdDLsrZ6MthkJwOKnIkegzb7BYydoEcGgNJONGntXbovlxcHbnC/DIeyCeOIiAISdl3pMzjYalg2R+//0hVBYz/u2/r5wfys6bsovCy2xhVrCyrCufBIuiUtr66xQ07EFEbdGwFYAxjychNFX4bclZKumLUv/+TSoel4GLoDbaF30o3F8vst7oH6VFyumnsh6gB+Muy6sDzvT7oj9uJhjSxGR63wt/COO4a0DPK/i4N/M+72z2gqGfa/9rKp7I8zB67HPDQWRa+syFOPWG3rvYCM3x80Dz25YivoT6wBYDmrxpOMig5gy73W/x7cuXbyFz0LoCZHIKhh0NH6Gilb/M/S2s+WuRo9QZZ3TfKJBwD+Fai10/WaKdtXXGBlxAuiN0ticgYVLMRYCIZN0cjWgla27JfOV49YbmUF0Mrs=
+    leftrsasigkey=0sAQOXIdVCvLT8SsP/unqb1eKVKBec3fbuJvcuguGE8KD54/YNTclweejkyJXBE9STGr+ASZDHDOmScKVF0jU7vPSdyB8V+HgyiUnz71Sph65MfNvU7wUWdDLsrZ6MthkJwOKnIkegzb7BYydoEcGgNJONGntXbovlxcHbnC/DIeyCeOIiAISdl3pMzjYalg2R+/<MissingText>/WaKdtXXGBlxAuiN0ticgYVLMRYCIZN0cjWgla27JfOV49YbmUF0Mrs=
     rightid=@us6p
     right=10.188.50.255
-    rightrsasigkey=0sAQO4BhWccAeVzwyKhd4DLi43Qd8jbzeVXbk0U5I7u+2Hlnt6B5f+tRQoRI9btZOWoupGRZtZVmeqbQaqaVNhsotzIw+6CtA1eRPlWtc2wGXIfwTF6ORze0/AvX2PFIPjYP/77IEt1YWTdxOZN0Zj4nOSF0l6La3EvjFYNCu3c44UI4YzgIxOtymillZ/RZUnLcmDbpQcXqOplgLCe5FObIltieepY5A+z/zIXFo+E+epm53g6Nr636KREM5xFmXc0S3HPi5Y6Y3BAweA0omAHgH2a5lrQNkZpm5GR/6SIWkrlvrJ8VxsvUcyKpZCGWskKEU+Y5mkGZAtK5Ib99qMWZjd4DkC9S40slrYl7MoEKg4QrDY+lbHAelcUd1bFJDepbslyggCNouoO+961ebiwMMJ4uHadPghcninxsAu/vSAVtr4oGWv1S5Pt65ocmXrcSAA3dRWWyhDOuDga7atWWJfwHxJyUaOWHJzDUjTHvDOgtPzFPn8y6hdUnvYomcpmqxn1r4GYYLZ+QgefvjFLqthujeMvraw57cp2MlDwzr0qlWXUmn01QzOUDt5blbp6am/psoKxc1c4infAFqNw4W1p0U=
+    rightrsasigkey=0sAQO4BhWccAeVzwyKhd4DLi43Qd8jbzeVXbk0U5I7u+2Hlnt6B5f+tRQoRI9btZOWoupGRZtZVmeqbQaqaVNhsotzIw+6CtA1eRPlWtc2wGXIfwTF6ORze0/AvX2PFIPjYP/77IEt1YWTdxOZN0Zj4nOSF0l6La3EvjFYNCu3c44UI4YzgIxOtymillZ/RZUnLcmDbpQcXqOplgLCe5FObIltieepY5A+z/<MissingText>/psoKxc1c4infAFqNw4W1p0U=
     authby=rsasig
     # load and initiate automatically
     auto=start
@@ -167,13 +167,13 @@ EOF
 
 ### Restart ipsec to ensure it reads the new configuration
 
-##### Ensure ipsec is started
+##### Ensure IPSec is started
 ```sh
 ipsec setup start
 systemctl restart ipsec
 ```
 
-Load the secrets:
+Load the secrets,
 ```sh
 ipsec auto --rereadsecrets
 ```
@@ -181,11 +181,10 @@ ipsec auto --rereadsecrets
 ```sh
 ipsec addconn --checkconfig
 ```
-The return code for that should be 0, otherwise the scripts might refuse to (re)start ipsec.
+The return code for that should be `0`, otherwise the scripts might refuse to (re)start ipsec.
 
-### Verifying the configurations
+### Verify the configurations
 ```sh
-
 ~]# ipsec verify
 Verifying installed system and configuration files
 
@@ -223,12 +222,12 @@ ipsec auto --up mytunnel
 
 ## Checking IPSec Tunnel
 There are multiple ways to check if the IPSec Tunnel had been establised & encrypted traffic is flowing,
- * From Logs -`/var/log/secure` & `/var/log/pluto.log` 
+* From Logs : `/var/log/secure` & `/var/log/pluto.log` 
 * From `tcpdump` 
 * From Kernel Policies
 
 ### From Logs
-In `/var/log/secure` look for and established messages like "IPsec SA established"
+In `/var/log/secure` look for messages like "IPsec SA established"
 ```sh
 ~]# more /var/log/secure | grep -i "IPsec SA established"
 Oct 27 07:23:05 us6q pluto[8764]: "mytunnel" #2: STATE_QUICK_I2: sent QI2, IPsec SA established tunnel mode {ESP=>0x38c53504 <0xbcb3fdf5 xfrm=AES_128-HMAC_SHA1 NATOA=none NATD=none DPD=passive}
@@ -236,9 +235,15 @@ Oct 27 07:23:09 us6q pluto[8764]: "mytunnel" #4: STATE_QUICK_R2: IPsec SA establ
 Oct 27 07:24:10 us6q pluto[8764]: "mytunnel" #6: STATE_QUICK_R2: IPsec SA established tunnel mode {ESP=>0x32d940e4 <0xd8ea76c7 xfrm=AES_128-HMAC_SHA1 NATOA=none NATD=none DPD=passive}
 ```
 
+```sh
+~]# more /var/log/pluto.log | grep -i "SA established"
+Jan 10 10:23:31: "local_10.188.50.255" #25: STATE_MAIN_R3: sent MR3, ISAKMP SA established {auth=PRESHARED_KEY cipher=aes_256 integ=sha group=MODP2048}
+Jan 10 10:23:31: "local_10.188.50.255" #26: STATE_QUICK_R2: IPsec SA established tunnel mode {ESP=>0x3eb6ca36 <0x0ce6fb49 xfrm=AES_128-HMAC_SHA1 NATOA=none NATD=none DPD=passive}
+```
+
 ### From TCPDUMP
-To can also test the IPsec connection using `tcpdump` utility to view the network packets being transfered between the hosts (or networks) and verify that they are encrypted via IPsec. The packet should include an AH header and should be shown as ESP packets. ESP means it is encrypted. 
-For example:,
+To can also test the IPsec connection using `tcpdump` utility to view the network packets being transfered between the hosts (or networks) and verify that they are encrypted via IPsec. The packet should include an AH header and should be shown as ESP packets. **ESP** means it is encrypted. 
+
 ```sh
 ~]# tcpdump -n -i eth0 esp or udp port 500 or udp port 4500
 17:13:20.617872 pinky.example.com > ijin.example.com: \
