@@ -221,7 +221,13 @@ If you want verbose output, add `--verbose` at the end of the command
 ipsec auto --up mytunnel
 ```
 
-## Check the IPSec Tunnel
+## Checking IPSec Tunnel
+There are multiple ways to check if the IPSec Tunnel had been establised & encrypted traffic is flowing,
+ * From Logs -`/var/log/secure` & `/var/log/pluto.log` 
+* From `tcpdump` 
+* From Kernel Policies
+
+### From Logs
 In `/var/log/secure` look for and established messages like "IPsec SA established"
 ```sh
 ~]# more /var/log/secure | grep -i "IPsec SA established"
@@ -230,7 +236,16 @@ Oct 27 07:23:09 us6q pluto[8764]: "mytunnel" #4: STATE_QUICK_R2: IPsec SA establ
 Oct 27 07:24:10 us6q pluto[8764]: "mytunnel" #6: STATE_QUICK_R2: IPsec SA established tunnel mode {ESP=>0x32d940e4 <0xd8ea76c7 xfrm=AES_128-HMAC_SHA1 NATOA=none NATD=none DPD=passive}
 ```
 
-_Another way to check_, from kernel policies:
+### From TCPDUMP
+To can also test the IPsec connection using `tcpdump` utility to view the network packets being transfered between the hosts (or networks) and verify that they are encrypted via IPsec. The packet should include an AH header and should be shown as ESP packets. ESP means it is encrypted. 
+For example:,
+```sh
+tcpdump -n -i eth0 esp or udp port 500 or udp port 4500
+17:13:20.617872 pinky.example.com > ijin.example.com: \
+        AH(spi=0x0aaa749f,seq=0x335): ESP(spi=0x0ec0441e,seq=0x335) (DF)
+```
+
+### From Kernel Policies
 ```sh
 ~]# ip xfrm policy
 src 10.188.60.201/32 dst 10.188.50.255/32
@@ -247,7 +262,5 @@ src 10.188.50.255/32 dst 10.188.60.201/32
                 proto esp reqid 16401 mode tunnel
 src ::/0 dst ::/0 proto ipv6-icmp type 135
 ```
-You can also collect `tcpdump` and review the logs:
-```sh
-tcpdump -n -i eth0 esp or udp port 500 or udp port 4500
-```
+
+
