@@ -252,6 +252,9 @@ The IKE negotiation takes place on UDP `port 500`. IPsec packets show up as  ESP
         AH(spi=0x0aaa749f,seq=0x335): ESP(spi=0x0ec0441e,seq=0x335) (DF)
 ```
 
+>NOTE:
+The `tcpdump` commands interacts a little unexpectedly with IPsec. It only sees the outgoing encrypted packet, not the outgoing plaintext packet. It does see the encrypted incoming packet, as well as the decrypted incoming packet. If possible, run tcpdump on a router between the two machines and not on one of the endpoints itself.
+
 ### From Kernel Policies
 ```sh
 ~]# ip xfrm policy
@@ -269,7 +272,4 @@ src 10.188.50.255/32 dst 10.188.60.201/32
                 proto esp reqid 16401 mode tunnel
 src ::/0 dst ::/0 proto ipv6-icmp type 135
 ```
-
->NOTE:
-The `tcpdump` commands interacts a little unexpectedly with IPsec. It only sees the outgoing encrypted packet, not the outgoing plaintext packet. It does see the encrypted incoming packet, as well as the decrypted incoming packet. If possible, run tcpdump on a router between the two machines and not on one of the endpoints itself.
 
