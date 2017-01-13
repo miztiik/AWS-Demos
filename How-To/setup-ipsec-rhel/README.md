@@ -255,6 +255,11 @@ The IKE negotiation takes place on UDP `port 500`. IPsec packets show up as  ESP
 >NOTE:
 The `tcpdump` commands interacts a little unexpectedly with IPsec. It only sees the outgoing encrypted packet, not the outgoing plaintext packet. It does see the encrypted incoming packet, as well as the decrypted incoming packet. If possible, run tcpdump on a router between the two machines and not on one of the endpoints itself.
 
+Another dirty shortcut, _Show only ESP packets (IP protocol 50)_
+```sh
+tcpdump ip proto 50
+```
+
 ### From Kernel Policies
 ```sh
 ~]# ip xfrm policy
