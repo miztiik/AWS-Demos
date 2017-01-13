@@ -242,7 +242,9 @@ Jan 10 10:23:31: "local_10.188.50.255" #26: STATE_QUICK_R2: IPsec SA established
 ```
 
 ### From TCPDUMP
-To can also test the IPsec connection using `tcpdump` utility to view the network packets being transfered between the hosts (or networks) and verify that they are encrypted via IPsec. The packet should include an AH header and should be shown as ESP packets. **ESP** means it is encrypted. 
+To can also test the IPsec connection using `tcpdump` utility to view the network packets being transfered between the hosts (or networks) and verify that they are encrypted via IPsec. The packet should include an AH header and should be shown as ESP packets. **ESP** _(Encapsulated Security Payload)_ means it is encrypted. 
+
+The IKE negotiation takes place on UDP `port 500`. IPsec packets show up as  ESP packets. When the VPN connection needs to pass through a NAT router, the ESP packets are encapsulated in UDP packets on `port 4500`.
 
 ```sh
 ~]# tcpdump -n -i eth0 esp or udp port 500 or udp port 4500
@@ -268,4 +270,6 @@ src 10.188.50.255/32 dst 10.188.60.201/32
 src ::/0 dst ::/0 proto ipv6-icmp type 135
 ```
 
+>NOTE:
+The `tcpdump` commands interacts a little unexpectedly with IPsec. It only sees the outgoing encrypted packet, not the outgoing plaintext packet. It does see the encrypted incoming packet, as well as the decrypted incoming packet. If possible, run tcpdump on a router between the two machines and not on one of the endpoints itself.
 
