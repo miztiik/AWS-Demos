@@ -5,13 +5,11 @@
 
 import boto3
 
-import os
-os.system('clear')
-
 REGION_NAME = "ap-south-1"
-AZ1 = "ap-south-1a"
-AZ2 = "ap-south-1b"
-CIDRange = '10.240.0.0/23'
+AZ1         = "ap-south-1a"
+AZ2         = "ap-south-1b"
+CIDRange    = '10.240.0.0/23'
+tagName     = 'miztiik-vpc-demo-01'
 
 # Creating a VPC, Subnet, and Gateway
 ec2         = boto3.resource ( 'ec2', region_name = REGION_NAME )
@@ -49,15 +47,15 @@ routeTable.associate_with_subnet( SubnetId = az2_pvtsubnet.id )
 intRoute = ec2Client.create_route( RouteTableId = routeTable.id , DestinationCidrBlock = '0.0.0.0/0' , GatewayId = intGateway.id )
 
 # Tag the resources
-tag = vpc.create_tags               ( Tags=[{'Key': 'edx', 'Value':'edx-vpc'}] )
-tag = az1_pvtsubnet.create_tags     ( Tags=[{'Key': 'edx', 'Value':'edx-az1-private-subnet'}] )
-tag = az1_pubsubnet.create_tags     ( Tags=[{'Key': 'edx', 'Value':'edx-az1-public-subnet'}] )
-tag = az1_sparesubnet.create_tags   ( Tags=[{'Key': 'edx', 'Value':'edx-az1-spare-subnet'}] )
-tag = az2_pvtsubnet.create_tags     ( Tags=[{'Key': 'edx', 'Value':'edx-az2-private-subnet'}] )
-tag = az2_pubsubnet.create_tags     ( Tags=[{'Key': 'edx', 'Value':'edx-az2-public-subnet'}] )
-tag = az2_sparesubnet.create_tags   ( Tags=[{'Key': 'edx', 'Value':'edx-az2-spare-subnet'}] )
-tag = intGateway.create_tags        ( Tags=[{'Key': 'edx', 'Value':'edx-igw'}] )
-tag = routeTable.create_tags        ( Tags=[{'Key': 'edx', 'Value':'edx-rtb'}] )
+tag = vpc.create_tags               ( Tags=[{'Key': tagName , 'Value':'vpc'}] )
+tag = az1_pvtsubnet.create_tags     ( Tags=[{'Key': tagName , 'Value':'az1-private-subnet'}] )
+tag = az1_pubsubnet.create_tags     ( Tags=[{'Key': tagName , 'Value':'az1-public-subnet'}] )
+tag = az1_sparesubnet.create_tags   ( Tags=[{'Key': tagName , 'Value':'az1-spare-subnet'}] )
+tag = az2_pvtsubnet.create_tags     ( Tags=[{'Key': tagName , 'Value':'az2-private-subnet'}] )
+tag = az2_pubsubnet.create_tags     ( Tags=[{'Key': tagName , 'Value':'az2-public-subnet'}] )
+tag = az2_sparesubnet.create_tags   ( Tags=[{'Key': tagName , 'Value':'az2-spare-subnet'}] )
+tag = intGateway.create_tags        ( Tags=[{'Key': tagName , 'Value':'igw'}] )
+tag = routeTable.create_tags        ( Tags=[{'Key': tagName , 'Value':'rtb'}] )
 
 # Let create the Public & Private Security Groups
 pubSecGrp = ec2.create_security_group( DryRun = False, 
@@ -71,8 +69,8 @@ pvtSecGrp = ec2.create_security_group( DryRun = False,
                               Description='Private_Security_Group',
                               VpcId= vpc.id
                             )
-pubSecGrp.create_tags(Tags=[{'Key': 'edx','Value':'edx-public-security-group'}])
-pvtSecGrp.create_tags(Tags=[{'Key': 'edx','Value':'edx-private-security-group'}])
+pubSecGrp.create_tags(Tags=[{'Key': tagName ,'Value':'public-security-group'}])
+pvtSecGrp.create_tags(Tags=[{'Key': tagName ,'Value':'private-security-group'}])
 
 
 # Add a rule that allows inbound SSH, HTTP, HTTPS traffic ( from any source )
