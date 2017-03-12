@@ -1,4 +1,13 @@
 # Setup Multi-AZ VPC from scratch using Boto3
+In this demo, we are going to setup an VPC, which spans across mutliple availability zones, with different subnets. We will also see how to split up an CIDR range in a logical way across the multiple subnets. We will be doing all of this using Boto3.
+
+#### Assumptions,
+I am going to assume the reader is familiar with up AWS VPCs and using boto3,
+- AWS Account
+- Boto3 - Python familiarity
+
+After we are done, we should be having a VPC architecture as shown below,
+![Fig 1 : Multi-AZ VPC Configuration Context](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/img/multi-az-vpc.png)
 
 ### Define boto defaults:
 We are going to use Asia Pacific Region, Our VPC will have 512 IPs, spread over two AZs each having their own set of 256 IPs. We will use CIDR Block `10.240.0.0/23`
