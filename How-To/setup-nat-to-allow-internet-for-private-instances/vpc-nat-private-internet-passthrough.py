@@ -8,8 +8,8 @@ import boto3
 REGION_NAME = "ap-south-1"
 AZ1         = "ap-south-1a"
 AZ2         = "ap-south-1b"
-CIDRange    = '10.240.0.0/23'
-tagName     = 'miztiik-vpc-demo-01'
+CIDRange    = "10.241.0.0/23"
+tagName     = "miztiik-nat-demo-02"
 
 # Creating a VPC, Subnet, and Gateway
 ec2         = boto3.resource ( 'ec2', region_name = REGION_NAME )
@@ -18,15 +18,15 @@ vpc         = ec2.create_vpc ( CidrBlock = CIDRange  )
 
 
 # AZ1 Subnets
-az1_pvtsubnet   = vpc.create_subnet( CidrBlock = '10.240.0.0/25'   , AvailabilityZone = AZ1 )
-az1_pubsubnet   = vpc.create_subnet( CidrBlock = '10.240.0.128/26' , AvailabilityZone = AZ1 )
-az1_sparesubnet = vpc.create_subnet( CidrBlock = '10.240.0.192/26' , AvailabilityZone = AZ1 )
+az1_pvtsubnet   = vpc.create_subnet( CidrBlock = '10.241.0.0/25'   , AvailabilityZone = AZ1 )
+az1_pubsubnet   = vpc.create_subnet( CidrBlock = '10.241.0.128/26' , AvailabilityZone = AZ1 )
+az1_sparesubnet = vpc.create_subnet( CidrBlock = '10.241.0.192/26' , AvailabilityZone = AZ1 )
 
 
 # AZ2 Subnets
-az2_pvtsubnet   = vpc.create_subnet( CidrBlock = '10.240.1.0/25'   , AvailabilityZone = AZ2 )
-az2_pubsubnet   = vpc.create_subnet( CidrBlock = '10.240.1.128/26' , AvailabilityZone = AZ2 )
-az2_sparesubnet = vpc.create_subnet( CidrBlock = '10.240.1.192/26' , AvailabilityZone = AZ2 )
+az2_pvtsubnet   = vpc.create_subnet( CidrBlock = '10.241.1.0/25'   , AvailabilityZone = AZ2 )
+az2_pubsubnet   = vpc.create_subnet( CidrBlock = '10.241.1.128/26' , AvailabilityZone = AZ2 )
+az2_sparesubnet = vpc.create_subnet( CidrBlock = '10.241.1.192/26' , AvailabilityZone = AZ2 )
 
 # Enable DNS Hostnames in the VPC
 ec2Client.modify_vpc_attribute( VpcId = vpc.id , EnableDnsSupport = { 'Value': True } )
