@@ -11,11 +11,12 @@ os.system('clear')
 REGION_NAME = "ap-south-1"
 AZ1 = "ap-south-1a"
 AZ2 = "ap-south-1b"
+CIDRange = '10.240.0.0/23'
 
 # Creating a VPC, Subnet, and Gateway
-ec2         = boto3.resource('ec2', region_name = REGION_NAME )
-ec2Client   = boto3.client('ec2' , region_name = REGION_NAME )
-vpc         = ec2.create_vpc(    CidrBlock = '10.240.0.0/23' )
+ec2         = boto3.resource ( 'ec2', region_name = REGION_NAME )
+ec2Client   = boto3.client   ( 'ec2', region_name = REGION_NAME )
+vpc         = ec2.create_vpc ( CIDRange  )
 
 
 # AZ1 Subnets
