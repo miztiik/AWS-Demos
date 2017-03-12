@@ -11,21 +11,33 @@ AZ2 = "ap-south-1b"
 
 ## Create VPC, Subnet, and Internet Gateway
 ```py
-ec2         = boto3.resource('ec2', region_name = REGION_NAME )
-ec2Client   = boto3.client('ec2' , region_name = REGION_NAME )
-vpc         = ec2.create_vpc(    CidrBlock = '10.240.0.0/23' )
+ec2         = boto3.resource ( 'ec2', region_name = REGION_NAME )
+ec2Client   = boto3.client   ( 'ec2', region_name = REGION_NAME )
+vpc         = ec2.create_vpc ( CidrBlock = '10.240.0.0/23' )
 ```
 
-# AZ1 Subnets
+## Create Subnets
+We will create three subnets in each AZ, 
+ - Private Subnet
+ - Public Subnet
+ - Spare Subnet
+Since VPCs CIDR cannot be modified after they are created, we need to allocated some spare IPs in our VPC to accomodate future growth.
+
+### In Availability Zone 01
+For AZ1, We will allocated the CIDR `10.240.0.0/24` , i,e 256 IPs
+```py
 az1_pvtsubnet   = vpc.create_subnet( CidrBlock = '10.240.0.0/25'   , AvailabilityZone = AZ1 )
 az1_pubsubnet   = vpc.create_subnet( CidrBlock = '10.240.0.128/26' , AvailabilityZone = AZ1 )
 az1_sparesubnet = vpc.create_subnet( CidrBlock = '10.240.0.192/26' , AvailabilityZone = AZ1 )
+```
 
-
-# AZ2 Subnets
+### In Availability Zone 02
+For AZ2, We will allocated the CIDR `10.240.1.0/24` , i,e 256 IPs
+```py
 az2_pvtsubnet   = vpc.create_subnet( CidrBlock = '10.240.1.0/25'   , AvailabilityZone = AZ2 )
 az2_pubsubnet   = vpc.create_subnet( CidrBlock = '10.240.1.128/26' , AvailabilityZone = AZ2 )
 az2_sparesubnet = vpc.create_subnet( CidrBlock = '10.240.1.192/26' , AvailabilityZone = AZ2 )
+```
 
 # Enable DNS Hostnames in the VPC
 ec2Client.modify_vpc_attribute( VpcId = vpc.id , EnableDnsSupport = { 'Value': True } )
