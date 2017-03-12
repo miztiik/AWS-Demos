@@ -1,16 +1,13 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+# Setup Multi-AZ VPC from scratch using Boto3
 
-# Using NAT Instances to connect Private instance to internet
-
+### Define boto defaults:
+We are going to use Asia Pacific Region, Our VPC will have 512 IPs, spread over two AZs each having their own set of 256 IPs. We will use CIDR Block `10.240.0.0/23`
+```py
 import boto3
-
-import os
-os.system('clear')
-
 REGION_NAME = "ap-south-1"
 AZ1 = "ap-south-1a"
 AZ2 = "ap-south-1b"
+```
 
 # Creating a VPC, Subnet, and Gateway
 ec2         = boto3.resource('ec2', region_name = REGION_NAME )
