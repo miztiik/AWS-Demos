@@ -10,6 +10,8 @@ AZ2 = "ap-south-1b"
 CIDRange = '10.240.0.0/23'
 ```
 
+_ToDo: Create the subnet split as variables, and remaining can be automated_
+
 ## Create VPC, Subnet, and Internet Gateway
 ```py
 ec2         = boto3.resource ( 'ec2', region_name = REGION_NAME )
@@ -40,25 +42,39 @@ az2_pubsubnet   = vpc.create_subnet( CidrBlock = '10.240.1.128/26' , Availabilit
 az2_sparesubnet = vpc.create_subnet( CidrBlock = '10.240.1.192/26' , AvailabilityZone = AZ2 )
 ```
 
-# Enable DNS Hostnames in the VPC
+## Enable DNS Hostnames in the VPC
+Enabling DNS Hostnames in the VPC allows AWS to generate public DNS routable _AWS hostnames_ for our EC2 Instances,
+```py
 ec2Client.modify_vpc_attribute( VpcId = vpc.id , EnableDnsSupport = { 'Value': True } )
 ec2Client.modify_vpc_attribute( VpcId = vpc.id , EnableDnsHostnames = { 'Value': True } )
+```
 
-# Create the Internet Gatway & Attach to the VPC
+## Create the Internet Gateway & Attach to the VPC
+EC2 instances require an internet gateway with in the VPC to route traffic to the internet.
+```py
 intGateway  = ec2.create_internet_gateway()
 intGateway.attach_to_vpc( VpcId = vpc.id )
+```
 
-# Create another route table for Public & Private traffic
+## Create route table for Public & Private traffic
+Although there is a default route table for the VPC, it is advisable to have your own routable to allow for specific rules within the subnet. We will need to associate the route table with subnets specifically.
+```py
 routeTable = ec2.create_route_table( VpcId = vpc.id )
 routeTable.associate_with_subnet( SubnetId = az1_pubsubnet.id )
 routeTable.associate_with_subnet( SubnetId = az1_pvtsubnet.id )
 routeTable.associate_with_subnet( SubnetId = az2_pubsubnet.id )
 routeTable.associate_with_subnet( SubnetId = az2_pvtsubnet.id )
+```
 
-# Create a route for internet traffic to flow out
+## Create a route for internet traffic to flow out
+Create route in our table to allow internet traffic to pass through to any destination through our internet gateway.
+```py
 intRoute = ec2Client.create_route( RouteTableId = routeTable.id , DestinationCidrBlock = '0.0.0.0/0' , GatewayId = intGateway.id )
+```
 
-# Tag the resources
+## Tag the resources
+It is always a good idea to tag the resources. It allows for easier resource identification, classification and helps in billing.
+```py
 tag = vpc.create_tags               ( Tags=[{'Key': 'edx', 'Value':'edx-vpc'}] )
 tag = az1_pvtsubnet.create_tags     ( Tags=[{'Key': 'edx', 'Value':'edx-az1-private-subnet'}] )
 tag = az1_pubsubnet.create_tags     ( Tags=[{'Key': 'edx', 'Value':'edx-az1-public-subnet'}] )
@@ -68,8 +84,11 @@ tag = az2_pubsubnet.create_tags     ( Tags=[{'Key': 'edx', 'Value':'edx-az2-publ
 tag = az2_sparesubnet.create_tags   ( Tags=[{'Key': 'edx', 'Value':'edx-az2-spare-subnet'}] )
 tag = intGateway.create_tags        ( Tags=[{'Key': 'edx', 'Value':'edx-igw'}] )
 tag = routeTable.create_tags        ( Tags=[{'Key': 'edx', 'Value':'edx-rtb'}] )
+```
 
-# Let create the Public & Private Security Groups
+## Let create the Public & Private Security Groups
+We will need separate security groups for our private and public instances for granular control. Further more, you may allow your private  instances only reachable from your public instances to increase security(although this is not shown here)
+```py
 pubSecGrp = ec2.create_security_group( DryRun = False, 
                               GroupName='pubSecGrp',
                               Description='Public_Security_Group',
@@ -81,11 +100,21 @@ pvtSecGrp = ec2.create_security_group( DryRun = False,
                               Description='Private_Security_Group',
                               VpcId= vpc.id
                             )
+```
+#### Tag the Security Groups
+```py
 pubSecGrp.create_tags(Tags=[{'Key': 'edx','Value':'edx-public-security-group'}])
 pvtSecGrp.create_tags(Tags=[{'Key': 'edx','Value':'edx-private-security-group'}])
+```
 
+#### Add a rule that allows inbound SSH, HTTP, HTTPS traffic ( from any source )
+By default, **ALL** Inbound traffic in the security group is blocked. We need to create rules in our security group to allow certain ports/traffic,
 
-# Add a rule that allows inbound SSH, HTTP, HTTPS traffic ( from any source )
+As this is a demo, We will configure three ports,
+ - Port 22 - _For SSH & Remote Administration_
+ - Port 80 - _For HTTP Traffic_
+ - Port 443 - _For HTTPS Traffic_
+```py
 ec2Client.authorize_security_group_ingress( GroupId  = pubSecGrp.id ,
                                         IpProtocol= 'tcp',
                                         FromPort=80,
@@ -104,8 +133,15 @@ ec2Client.authorize_security_group_ingress( GroupId  = pubSecGrp.id ,
                                         ToPort=22,
                                         CidrIp='0.0.0.0/0'
                                         )
+```
 
+### Exercise
+ - Create an EC2 Instances in any of the subnets and try to ping the internet
 
+## Python Funtion to Cleanup AWS Resources,
+It is a prudent to cleanup after you have successfully completed the demo, Call this function `cleanAll` only if you are sure of what you are doing, as this function **assumes** you are running it in the same terminal as the previous commands.
+
+```py
 """
 Function to clean up all the resources
 """
@@ -122,3 +158,4 @@ def cleanAll(resourcesDict=None):
     az2_sparesubnet.delete()
 
     vpc.delete()
+```
