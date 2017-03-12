@@ -25,7 +25,7 @@ _ToDo: Create the subnet split as variables, and remaining can be automated_
 ```py
 ec2         = boto3.resource ( 'ec2', region_name = REGION_NAME )
 ec2Client   = boto3.client   ( 'ec2', region_name = REGION_NAME )
-vpc         = ec2.create_vpc ( CIDRange  )
+vpc         = ec2.create_vpc ( CidrBlock = CIDRange  )
 ```
 
 ## Create Subnets
