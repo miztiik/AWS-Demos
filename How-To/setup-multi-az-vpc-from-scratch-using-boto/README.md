@@ -9,11 +9,12 @@ AZ1 = "ap-south-1a"
 AZ2 = "ap-south-1b"
 ```
 
-# Creating a VPC, Subnet, and Gateway
+## Create VPC, Subnet, and Internet Gateway
+```py
 ec2         = boto3.resource('ec2', region_name = REGION_NAME )
 ec2Client   = boto3.client('ec2' , region_name = REGION_NAME )
 vpc         = ec2.create_vpc(    CidrBlock = '10.240.0.0/23' )
-
+```
 
 # AZ1 Subnets
 az1_pvtsubnet   = vpc.create_subnet( CidrBlock = '10.240.0.0/25'   , AvailabilityZone = AZ1 )
