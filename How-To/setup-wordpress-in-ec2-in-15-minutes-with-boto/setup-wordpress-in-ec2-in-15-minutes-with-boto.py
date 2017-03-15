@@ -11,7 +11,7 @@ globalVars['AZ1']                   = "ap-south-1a"
 globalVars['AZ2']                   = "ap-south-1b"
 globalVars['CIDRange']              = "10.242.0.0/24"
 globalVars['tagName']               = "miztiik-wp-demo-00"
-globalVars['EC2-AMI-ID']            = "ami-2051294a"
+globalVars['EC2-AMI-ID']            = "ami-cdbdd7a2"
 globalVars['EC2-InstanceType']      = "t2.micro"
 globalVars['EC2-KeyName']           = "wp-key"
 
@@ -93,15 +93,20 @@ ec2Client.authorize_security_group_ingress( GroupId  = pubSecGrp.id ,
 # Using the userdata field, we will download, install & configure our basic word press website.
 
 
-# Lets create the key-pair that we will use,
-ec2_key_pair = ec2.create_key_pair( KeyName= globalVars['EC2-KeyName'] )
+# Lets create the key-pair that we will use
 
-userDataCode = """
-#!/bin/bash
+
+### Check if key is already present
+customEC2Keys = ec2Client.describe_key_pairs()['KeyPairs']
+if not next((key for key in customEC2Keys if key["KeyName"] == globalVars['EC2-KeyName'] ),False):
+    ec2_key_pair = ec2.create_key_pair( KeyName = globalVars['EC2-KeyName'] )
+    print ("New Private Key created,Save the below key-material\n\n")
+    print ( ec2_key_pair.key_material )
+
+userDataCode = """#!/bin/bash
 set -e -x
 
 # Setting up the HTTP server 
-yum update -y
 yum install -y httpd php php-mysql mysql
 systemctl httpd start
 chkconfig httpd on
@@ -131,16 +136,23 @@ systemctl restart httpd
 echo "<?php phpinfo(); ?>" > /var/www/html/phptestinfo.php
 """
 
+##### **DeviceIndex**:The network interface's position in the attachment order. For example, the first attached network interface has a DeviceIndex of 0 
 instanceLst = ec2.create_instances(ImageId = globalVars['EC2-AMI-ID'],
-                                    MinCount=1,
-                                    MaxCount=1,
-                                    KeyName=globalVars['EC2-KeyName'] ,
-                                    SecurityGroupIds=[ pubSecGrp.id ],
-                                    UserData = user_code,
-                                    InstanceType = globalVars['EC2-InstanceType'],
-                                    NetworkInterfaces=[ { 'DeviceIndex': 0, 'SubnetId': az1_pubsubnet.id, 'AssociatePublicIpAddress': True } ]
-                                    )
-
+                                   MinCount=1,
+                                   MaxCount=1,
+                                   KeyName=globalVars['EC2-KeyName'] ,
+                                   UserData = userDataCode,
+                                   InstanceType = globalVars['EC2-InstanceType'],
+                                   NetworkInterfaces=[
+                                                        {
+                                                            'SubnetId': az1_pubsubnet.id,
+                                                            'Groups': [ pubSecGrp.id],
+                                                            'DeviceIndex':0,
+                                                            'DeleteOnTermination': True,
+                                                            'AssociatePublicIpAddress': True,
+                                                        }
+                                                    ]
+                                )
 """
 Function to clean up all the resources
 """
