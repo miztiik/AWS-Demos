@@ -29,8 +29,8 @@ az2_pubsubnet   = vpc.create_subnet( CidrBlock = '10.240.1.128/26' , Availabilit
 az2_sparesubnet = vpc.create_subnet( CidrBlock = '10.240.1.192/26' , AvailabilityZone = AZ2 )
 
 # Enable DNS Hostnames in the VPC
-ec2Client.modify_vpc_attribute( VpcId = vpc.id , EnableDnsSupport = { 'Value': True } )
-ec2Client.modify_vpc_attribute( VpcId = vpc.id , EnableDnsHostnames = { 'Value': True } )
+vpc.modify_attribute( EnableDnsSupport = { 'Value': True } )
+vpc.modify_attribute( EnableDnsHostnames = { 'Value': True } )
 
 # Create the Internet Gatway & Attach to the VPC
 intGateway  = ec2.create_internet_gateway()

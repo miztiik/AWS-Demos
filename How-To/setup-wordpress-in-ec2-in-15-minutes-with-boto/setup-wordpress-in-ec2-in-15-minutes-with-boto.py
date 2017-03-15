@@ -9,12 +9,11 @@ globalVars  = {}
 globalVars['REGION_NAME']           = "ap-south-1"
 globalVars['AZ1']                   = "ap-south-1a"
 globalVars['AZ2']                   = "ap-south-1b"
-globalVars['CIDRange']              = "10.241.0.0/24"
-globalVars['tagName']               = "miztiik-nat-demo-02"
-globalVars['EC2-AMI-ID']            = "ami-f9daac96"
-globalVars['NAT-AMI-ID']            = "ami-48dcaa27"
+globalVars['CIDRange']              = "10.242.0.0/24"
+globalVars['tagName']               = "miztiik-wp-demo-00"
+globalVars['EC2-AMI-ID']            = "ami-2051294a"
 globalVars['EC2-InstanceType']      = "t2.micro"
-globalVars['EC2-KeyName']           = "edx-key"
+globalVars['EC2-KeyName']           = "wp-key"
 
 
 # Creating a VPC, Subnet, and Gateway
@@ -24,9 +23,9 @@ vpc         = ec2.create_vpc ( CidrBlock = globalVars['CIDRange']  )
 
 
 # AZ1 Subnets
-az1_pvtsubnet   = vpc.create_subnet( CidrBlock = '10.241.0.0/25'   , AvailabilityZone = globalVars['AZ1'] )
-az1_pubsubnet   = vpc.create_subnet( CidrBlock = '10.241.0.128/26' , AvailabilityZone = globalVars['AZ1'] )
-az1_sparesubnet = vpc.create_subnet( CidrBlock = '10.241.0.192/26' , AvailabilityZone = globalVars['AZ1'] )
+az1_pvtsubnet   = vpc.create_subnet( CidrBlock = '10.242.0.0/25'   , AvailabilityZone = globalVars['AZ1'] )
+az1_pubsubnet   = vpc.create_subnet( CidrBlock = '10.242.0.128/26' , AvailabilityZone = globalVars['AZ1'] )
+az1_sparesubnet = vpc.create_subnet( CidrBlock = '10.242.0.192/26' , AvailabilityZone = globalVars['AZ1'] )
 
 
 # Enable DNS Hostnames in the VPC
@@ -47,12 +46,12 @@ routeTable.associate_with_subnet( SubnetId = az1_pvtsubnet.id )
 intRoute = ec2Client.create_route( RouteTableId = routeTable.id , DestinationCidrBlock = '0.0.0.0/0' , GatewayId = intGateway.id )
 
 # Tag the resources
-tag = vpc.create_tags               ( Tags=[{'Key': tagName , 'Value':'vpc'}] )
-tag = az1_pvtsubnet.create_tags     ( Tags=[{'Key': tagName , 'Value':'az1-private-subnet'}] )
-tag = az1_pubsubnet.create_tags     ( Tags=[{'Key': tagName , 'Value':'az1-public-subnet'}] )
-tag = az1_sparesubnet.create_tags   ( Tags=[{'Key': tagName , 'Value':'az1-spare-subnet'}] )
-tag = intGateway.create_tags        ( Tags=[{'Key': tagName , 'Value':'igw'}] )
-tag = routeTable.create_tags        ( Tags=[{'Key': tagName , 'Value':'rtb'}] )
+tag = vpc.create_tags               ( Tags=[{'Key': globalVars['tagName'] , 'Value':'vpc'}] )
+tag = az1_pvtsubnet.create_tags     ( Tags=[{'Key': globalVars['tagName'] , 'Value':'az1-private-subnet'}] )
+tag = az1_pubsubnet.create_tags     ( Tags=[{'Key': globalVars['tagName'] , 'Value':'az1-public-subnet'}] )
+tag = az1_sparesubnet.create_tags   ( Tags=[{'Key': globalVars['tagName'] , 'Value':'az1-spare-subnet'}] )
+tag = intGateway.create_tags        ( Tags=[{'Key': globalVars['tagName'] , 'Value':'igw'}] )
+tag = routeTable.create_tags        ( Tags=[{'Key': globalVars['tagName'] , 'Value':'rtb'}] )
 
 # Let create the Public & Private Security Groups
 pubSecGrp = ec2.create_security_group( DryRun = False, 
@@ -66,8 +65,8 @@ pvtSecGrp = ec2.create_security_group( DryRun = False,
                               Description='Private_Security_Group',
                               VpcId= vpc.id
                             )
-pubSecGrp.create_tags(Tags=[{'Key': tagName ,'Value':'public-security-group'}])
-pvtSecGrp.create_tags(Tags=[{'Key': tagName ,'Value':'private-security-group'}])
+pubSecGrp.create_tags(Tags=[{'Key': globalVars['tagName'] ,'Value':'public-security-group'}])
+pvtSecGrp.create_tags(Tags=[{'Key': globalVars['tagName'] ,'Value':'private-security-group'}])
 
 
 # Add a rule that allows inbound SSH, HTTP, HTTPS traffic ( from any source )
@@ -90,37 +89,57 @@ ec2Client.authorize_security_group_ingress( GroupId  = pubSecGrp.id ,
                                         CidrIp='0.0.0.0/0'
                                         )
 
-# Create the  Private Instance
-pvtInstance = ec2.create_instances(ImageId = globalVars['EC2-AMI-ID'],
+# Create the  Public Word Press Instance
+# Using the userdata field, we will download, install & configure our basic word press website.
+
+
+# Lets create the key-pair that we will use,
+ec2_key_pair = ec2.create_key_pair( KeyName= globalVars['EC2-KeyName'] )
+
+userDataCode = """
+#!/bin/bash
+set -e -x
+
+# Setting up the HTTP server 
+yum update -y
+yum install -y httpd php php-mysql mysql
+systemctl httpd start
+chkconfig httpd on
+groupadd www
+usermod -a -G www ec2-user
+
+
+# Download wordpress site & move to http
+cd /var/www/
+curl -O https://wordpress.org/latest.tar.gz && tar -zxf latest.tar.gz
+rm -rf /var/www/html
+mv wordpress /var/www/html
+
+# Set the permissions
+chown -R root:www /var/www
+chmod 2775 /var/www
+find /var/www -type d -exec chmod 2775 {} +
+find /var/www -type f -exec chmod 0664 {} +
+
+# SE Linux permissive
+# needed to make wp connect to DB over newtork
+setsebool -P httpd_can_network_connect=1
+setsebool httpd_can_network_connect_db on
+
+systemctl restart httpd
+# Remove below file after testing
+echo "<?php phpinfo(); ?>" > /var/www/html/phptestinfo.php
+"""
+
+instanceLst = ec2.create_instances(ImageId = globalVars['EC2-AMI-ID'],
                                     MinCount=1,
                                     MaxCount=1,
                                     KeyName=globalVars['EC2-KeyName'] ,
-                                    SecurityGroupIds=[ pvtSecGrp.id ],
-                                    SubnetId = az1_pvtsubnet.id,
-                                    InstanceType = globalVars['EC2-InstanceType']
+                                    SecurityGroupIds=[ pubSecGrp.id ],
+                                    UserData = user_code,
+                                    InstanceType = globalVars['EC2-InstanceType'],
+                                    NetworkInterfaces=[ { 'DeviceIndex': 0, 'SubnetId': az1_pubsubnet.id, 'AssociatePublicIpAddress': True } ]
                                     )
-NetworkInterfaces=[
-        {
-            'NetworkInterfaceId': 'string',
-            'DeviceIndex': 123,
-            'SubnetId': 'string',
-            'Description': 'string',
-            'PrivateIpAddress': 'string',
-            'Groups': [
-                'string',
-            ],
-            'DeleteOnTermination': True,
-            'PrivateIpAddresses': [
-                {
-                    'Primary': True
-                },
-            ],
-            'AssociatePublicIpAddress': False
-        },
-    ],
-
-
-
 
 """
 Function to clean up all the resources
@@ -128,7 +147,7 @@ Function to clean up all the resources
 def cleanAll(resourcesDict=None):
 
     ids=[]
-    for i in pvtInstance:
+    for i in instanceLst:
         ids.append(i.id)
 
     ec2.instances.filter(InstanceIds=ids).terminate()
@@ -140,4 +159,8 @@ def cleanAll(resourcesDict=None):
     az1_pubsubnet.delete()
     az1_sparesubnet.delete()
 
+    pubSecGrp.delete()
+    pvtSecGrp.delete()
+
+    routeTable.delete()
     vpc.delete()
