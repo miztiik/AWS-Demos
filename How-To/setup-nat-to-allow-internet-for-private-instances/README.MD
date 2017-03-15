@@ -1,7 +1,7 @@
 ## Why do i need NAT Instances?
 Sometimes you dont want to expose your instances to the public and put them behind another hardened instances. A network address translation (NAT) instance in a public subnet in your VPC enables instances in the private subnet to initiate outbound IPv4 traffic to the Internet or other AWS services, but prevent the instances from receiving inbound traffic initiated by someone on the Internet.
 
-(AWS-NAT-Instance-Miztiik-Demo)(https://github.com/miztiik/AWS-Demos/blob/master/img/VPC-NAT-Instance.png?raw=true)
+![Fig 1 : AWS-NAT-Instance-Miztiik-Demo](https://github.com/miztiik/AWS-Demos/blob/master/img/VPC-NAT-Instance.png)
 
 ## How does NAT Instances work?
 
