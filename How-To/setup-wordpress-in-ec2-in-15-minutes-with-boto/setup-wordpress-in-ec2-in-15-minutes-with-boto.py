@@ -108,8 +108,8 @@ set -e -x
 
 # Setting up the HTTP server 
 yum install -y httpd php php-mysql mysql
-systemctl httpd start
-chkconfig httpd on
+systemctl start httpd
+systemctl enable httpd
 groupadd www
 usermod -a -G www ec2-user
 
@@ -153,6 +153,8 @@ instanceLst = ec2.create_instances(ImageId = globalVars['EC2-AMI-ID'],
                                                         }
                                                     ]
                                 )
+
+
 """
 Function to clean up all the resources
 """
