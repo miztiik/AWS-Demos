@@ -189,7 +189,7 @@ instanceLst = ec2.create_instances(ImageId = globalVars['EC2-AMI-ID'],
                                    NetworkInterfaces=[
                                                         {
                                                             'SubnetId': az1_pubsubnet.id,
-                                                            'Groups': [ pubSecGrp.id],
+                                                            'Groups': [ pubSecGrp.id ],
                                                             'DeviceIndex':0,
                                                             'DeleteOnTermination': True,
                                                             'AssociatePublicIpAddress': True,
