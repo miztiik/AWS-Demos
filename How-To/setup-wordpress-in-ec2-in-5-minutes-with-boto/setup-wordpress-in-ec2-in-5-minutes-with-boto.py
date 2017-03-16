@@ -59,10 +59,11 @@ rtbAssn=[]
 rtbAssn.append(routeTable.associate_with_subnet( SubnetId = az1_pubsubnet.id ))
 rtbAssn.append(routeTable.associate_with_subnet( SubnetId = az1_pvtsubnet.id ))
 
-
-
 # Create a route for internet traffic to flow out
-intRoute = ec2Client.create_route( RouteTableId = routeTable.id , DestinationCidrBlock = '0.0.0.0/0' , GatewayId = intGateway.id )
+intRoute = ec2Client.create_route( RouteTableId = routeTable.id, 
+                                    DestinationCidrBlock = '0.0.0.0/0',
+                                    GatewayId = intGateway.id
+                                 )
 
 # Tag the resources
 tag = vpc.create_tags               ( Tags=[{'Key': globalVars['tagName'] , 'Value':'vpc'}] )
@@ -170,7 +171,6 @@ instanceLst = ec2.create_instances(ImageId = globalVars['EC2-AMI-ID'],
                                                         }
                                                     ]
                                 )
-
 
 """
 Function to clean up all the resources

@@ -61,7 +61,7 @@ az1_sparesubnet = vpc.create_subnet( CidrBlock = '10.242.0.192/26' , Availabilit
 
 
 # Enable DNS Hostnames in the VPC
-vpc.modify_attribute( EnableDnsSupport = { 'Value': True } )
+vpc.modify_attribute( EnableDnsSupport   = { 'Value': True } )
 vpc.modify_attribute( EnableDnsHostnames = { 'Value': True } )
 
 # Create the Internet Gatway & Attach to the VPC
@@ -75,10 +75,11 @@ rtbAssn=[]
 rtbAssn.append(routeTable.associate_with_subnet( SubnetId = az1_pubsubnet.id ))
 rtbAssn.append(routeTable.associate_with_subnet( SubnetId = az1_pvtsubnet.id ))
 
-
-
 # Create a route for internet traffic to flow out
-intRoute = ec2Client.create_route( RouteTableId = routeTable.id , DestinationCidrBlock = '0.0.0.0/0' , GatewayId = intGateway.id )
+intRoute = ec2Client.create_route( RouteTableId = routeTable.id,
+                                   DestinationCidrBlock = '0.0.0.0/0',
+                                   GatewayId = intGateway.id
+                                   )
 
 # Tag the resources
 tag = vpc.create_tags               ( Tags=[{'Key': globalVars['tagName'] , 'Value':'vpc'}] )
@@ -100,6 +101,7 @@ pvtSecGrp = ec2.create_security_group( DryRun = False,
                               Description='Private_Security_Group',
                               VpcId= vpc.id
                             )
+
 pubSecGrp.create_tags(Tags=[{'Key': globalVars['tagName'] ,'Value':'public-security-group'}])
 pvtSecGrp.create_tags(Tags=[{'Key': globalVars['tagName'] ,'Value':'private-security-group'}])
 
@@ -176,7 +178,8 @@ echo "<?php phpinfo(); ?>" > /var/www/html/phptestinfo.php
 
 # Create EC2 Instance
 ```py
-##### **DeviceIndex**:The network interface's position in the attachment order. For example, the first attached network interface has a DeviceIndex of 0 
+##### **DeviceIndex**:The network interface's position in the attachment order. 
+##### For example, the first attached network interface has a DeviceIndex of 0 
 instanceLst = ec2.create_instances(ImageId = globalVars['EC2-AMI-ID'],
                                    MinCount=1,
                                    MaxCount=1,
@@ -193,6 +196,7 @@ instanceLst = ec2.create_instances(ImageId = globalVars['EC2-AMI-ID'],
                                                         }
                                                     ]
                                 )
+
 ```
 
 ### Resource Cleanup
