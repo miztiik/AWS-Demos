@@ -1,12 +1,19 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+# Setup Wordpress in AWS in 5 Minutes using Boto3
 
-# Using NAT Instances to connect Private instance to internet
+This demo assumes basic knowledge of AWS, Boto3 & Python.
 
-import boto3
+**Prerequisites**:
+ - AWS Account
+ - IAM Role with Access & Secret Key
+ - Boto3 Installed & Configured
 
+At the end of the demo, we should be having an architecture as shown below,
+![]()
 
-# Check if the user has the Access & Secret key configured
+### Check User Credentials
+This snippet checks the boto session for the user access & secret key and exits the script if they are not configured.
+```py
+# Check if the user has the Access & Secret key configured in AWS CLI
 from boto3 import Session
 session = Session()
 credentials = session.get_credentials()
@@ -20,8 +27,13 @@ if current_credentials.access_key is None:
 if current_credentials.secret_key is None:
     print "Secret Key missing, use  `aws configure` to setup"
     exit()
+```
 
-globalVars  = {}
+### Set AWS Resources
+The AWS Resources options are set globally in python dict. This allows the user to customize the script to their region(for example change the region_name & AMI ID to your needs etc.,)
+
+```py
+globalVars = {}
 globalVars['REGION_NAME']           = "ap-south-1"
 globalVars['AZ1']                   = "ap-south-1a"
 globalVars['AZ2']                   = "ap-south-1b"
@@ -30,8 +42,12 @@ globalVars['tagName']               = "miztiik-wp-demo-00"
 globalVars['EC2-AMI-ID']            = "ami-cdbdd7a2"
 globalVars['EC2-InstanceType']      = "t2.micro"
 globalVars['EC2-KeyName']           = "wp-key"
+```
 
+### Setup Networks
+The VPC, Subnet, Internet Gateway, Routing Table & Security Groups are created as [described here](https://github.com/miztiik/AWS-Demos/tree/master/How-To/setup-multi-az-vpc-from-scratch-using-boto).
 
+```py
 # Creating a VPC, Subnet, and Gateway
 ec2         = boto3.resource ( 'ec2', region_name = globalVars['REGION_NAME'] )
 ec2Client   = boto3.client   ( 'ec2', region_name = globalVars['REGION_NAME'] )
@@ -87,7 +103,6 @@ pvtSecGrp = ec2.create_security_group( DryRun = False,
 pubSecGrp.create_tags(Tags=[{'Key': globalVars['tagName'] ,'Value':'public-security-group'}])
 pvtSecGrp.create_tags(Tags=[{'Key': globalVars['tagName'] ,'Value':'private-security-group'}])
 
-
 # Add a rule that allows inbound SSH, HTTP, HTTPS traffic ( from any source )
 ec2Client.authorize_security_group_ingress( GroupId  = pubSecGrp.id ,
                                         IpProtocol= 'tcp',
@@ -107,23 +122,24 @@ ec2Client.authorize_security_group_ingress( GroupId  = pubSecGrp.id ,
                                         ToPort=22,
                                         CidrIp='0.0.0.0/0'
                                         )
+```
 
-# Create the  Public Word Press Instance
-# Using the userdata field, we will download, install & configure our basic word press website.
-
-
-# Lets create the key-pair that we will use
-
-
+### Create Key-pair
+The following piece checks the account for the keyname, If not present, It create a new one and prints the private key - **Be sure to save it**.
+```py
 ### Check if key is already present
 customEC2Keys = ec2Client.describe_key_pairs()['KeyPairs']
 if not next((key for key in customEC2Keys if key["KeyName"] == globalVars['EC2-KeyName'] ),False):
     ec2_key_pair = ec2.create_key_pair( KeyName = globalVars['EC2-KeyName'] )
     print ("New Private Key created,Save the below key-material\n\n")
     print ( ec2_key_pair.key_material )
+```
 
+### Install & Configure Wordpress
+The script to download, install & configure Wordpressis passed onto the EC2 instance through the `UserData` field. _As this being a demo, not much attention is being paid to secure the server, nor the php configuration._
 
-# The user defined code to install Wordpress, WebServer & Configure them
+### Set `UserData`
+```py
 userDataCode = """
 #!/bin/bash
 set -e -x
@@ -134,7 +150,6 @@ systemctl start httpd
 systemctl enable httpd
 groupadd www
 usermod -a -G www ec2-user
-
 
 # Download wordpress site & move to http
 cd /var/www/
@@ -157,7 +172,10 @@ systemctl restart httpd
 # Remove below file after testing
 echo "<?php phpinfo(); ?>" > /var/www/html/phptestinfo.php
 """
+```
 
+# Create EC2 Instance
+```py
 ##### **DeviceIndex**:The network interface's position in the attachment order. For example, the first attached network interface has a DeviceIndex of 0 
 instanceLst = ec2.create_instances(ImageId = globalVars['EC2-AMI-ID'],
                                    MinCount=1,
@@ -175,43 +193,50 @@ instanceLst = ec2.create_instances(ImageId = globalVars['EC2-AMI-ID'],
                                                         }
                                                     ]
                                 )
+```
 
+### Resource Cleanup
+Its always good to clean up the resources after the demo. There is an order to do it avoid dependancy failures
+ - Instances (Wait for it to be terminated)
+ - Routes & Routing Table
+ - Subnets
+ - Internet Gateway (Disassociate from VPC & delete)
+ - Security Groups
+ - Finally, VPC.
+ 
+```py
+# Delete the instances
+ids=[]
+for i in instanceLst:
+    ids.append(i.id)
 
-"""
-Function to clean up all the resources
-"""
-def cleanAll(resourcesDict=None):
+ec2.instances.filter(InstanceIds=ids).terminate()
 
-    # Delete the instances
-    ids=[]
-    for i in instanceLst:
-        ids.append(i.id)
+# Wait for the instance to be terminated
+# Boto waiters might be best, for this demo, i will will "sleep"
+from time import sleep
+sleep(120)
 
-    ec2.instances.filter(InstanceIds=ids).terminate()
-    
-    # Wait for the instance to be terminated
-    # Boto waiters might be best, for this demo, i will will "sleep"
-    from time import sleep
-    sleep(120)
+ec2Client.delete_key_pair( KeyName = globalVars['EC2-KeyName'] )
 
-    
-    # Delete Routes & Routing Table
-    for assn in rtbAssn:
-        ec2Client.disassociate_route_table( AssociationId = assn.id )
+# Delete Routes & Routing Table
+for assn in rtbAssn:
+    ec2Client.disassociate_route_table( AssociationId = assn.id )
 
-    routeTable.delete()
+routeTable.delete()
 
-    # Delete Subnets
-    az1_pvtsubnet.delete()
-    az1_pubsubnet.delete()
-    az1_sparesubnet.delete()
+# Delete Subnets
+az1_pvtsubnet.delete()
+az1_pubsubnet.delete()
+az1_sparesubnet.delete()
 
-    # Detach & Delete internet Gateway
-    ec2Client.detach_internet_gateway( InternetGatewayId = intGateway.id , VpcId = vpc.id )
-    intGateway.delete()
+# Detach & Delete internet Gateway
+ec2Client.detach_internet_gateway( InternetGatewayId = intGateway.id , VpcId = vpc.id )
+intGateway.delete()
 
-    # Delete Security Groups
-    pubSecGrp.delete()
-    pvtSecGrp.delete()
+# Delete Security Groups
+pubSecGrp.delete()
+pvtSecGrp.delete()
 
-    vpc.delete()
+vpc.delete()
+```
