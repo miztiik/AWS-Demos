@@ -8,7 +8,7 @@ This demo assumes basic knowledge of AWS, Boto3 & Python.
  - Boto3 Installed & Configured
 
 At the end of the demo, we should be having an architecture as shown below,
-![]()
+![Setup Wordpress in AWS in 5 Minutes using Boto3](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/img/setup-ec2-wordpress-boto.png)
 
 ### Check User Credentials
 This snippet checks the boto session for the user access & secret key and exits the script if they are not configured.
