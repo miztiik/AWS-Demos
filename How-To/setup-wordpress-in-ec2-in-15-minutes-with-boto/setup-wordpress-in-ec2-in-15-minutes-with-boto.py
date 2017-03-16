@@ -5,6 +5,22 @@
 
 import boto3
 
+
+# Check if the user has the Access & Secret key configured
+from boto3 import Session
+session = Session()
+credentials = session.get_credentials()
+current_credentials = credentials.get_frozen_credentials()
+
+# Break & Exit if any of the key is not present
+if current_credentials.access_key is None:
+    print "Access Key missing, use  `aws configure` to setup"
+    exit()
+
+if current_credentials.secret_key is None:
+    print "Secret Key missing, use  `aws configure` to setup"
+    exit()
+
 globalVars  = {}
 globalVars['REGION_NAME']           = "ap-south-1"
 globalVars['AZ1']                   = "ap-south-1a"
@@ -38,8 +54,11 @@ intGateway.attach_to_vpc( VpcId = vpc.id )
 
 # Create another route table for Public & Private traffic
 routeTable = ec2.create_route_table( VpcId = vpc.id )
-routeTable.associate_with_subnet( SubnetId = az1_pubsubnet.id )
-routeTable.associate_with_subnet( SubnetId = az1_pvtsubnet.id )
+
+rtbAssn=[]
+rtbAssn.append(routeTable.associate_with_subnet( SubnetId = az1_pubsubnet.id ))
+rtbAssn.append(routeTable.associate_with_subnet( SubnetId = az1_pvtsubnet.id ))
+
 
 
 # Create a route for internet traffic to flow out
@@ -103,7 +122,10 @@ if not next((key for key in customEC2Keys if key["KeyName"] == globalVars['EC2-K
     print ("New Private Key created,Save the below key-material\n\n")
     print ( ec2_key_pair.key_material )
 
-userDataCode = """#!/bin/bash
+
+# The user defined code to install Wordpress, WebServer & Configure them
+userDataCode = """
+#!/bin/bash
 set -e -x
 
 # Setting up the HTTP server 
@@ -160,21 +182,36 @@ Function to clean up all the resources
 """
 def cleanAll(resourcesDict=None):
 
+    # Delete the instances
     ids=[]
     for i in instanceLst:
         ids.append(i.id)
 
     ec2.instances.filter(InstanceIds=ids).terminate()
+    
+    # Wait for the instance to be terminated
+    # Boto waiters might be best, for this demo, i will will "sleep"
+    from time import sleep
+    sleep(120)
 
-    intGateway.delete()
+    
+    # Delete Routes & Routing Table
+    for assn in rtbAssn:
+        ec2Client.disassociate_route_table( AssociationId = assn.id )
+
+    routeTable.delete()
 
     # Delete Subnets
     az1_pvtsubnet.delete()
     az1_pubsubnet.delete()
     az1_sparesubnet.delete()
 
+    # Detach & Delete internet Gateway
+    ec2Client.detach_internet_gateway( InternetGatewayId = intGateway.id , VpcId = vpc.id )
+    intGateway.delete()
+
+    # Delete Security Groups
     pubSecGrp.delete()
     pvtSecGrp.delete()
 
-    routeTable.delete()
     vpc.delete()
