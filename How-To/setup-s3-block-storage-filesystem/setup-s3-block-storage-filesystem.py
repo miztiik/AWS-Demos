@@ -213,6 +213,7 @@ def cleanAll(resourcesDict=None):
 
     # Delete S3 Bucket
     s3 = boto3.resource( 's3',  region_name = globalVars['REGION_NAME'] )
+    bucket = s3.Bucket( globalVars['S3-BucketName'] )
     for key in bucket.objects.all():
         key.delete()
-    s3Client.delete_bucket( Bucket = globalVars['S3-BucketName'] )
+    bucket.delete()
