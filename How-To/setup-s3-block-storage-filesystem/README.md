@@ -1,6 +1,6 @@
 
-# Setup S3 as a filesystem in EC2
-----------
+# Setup S3 as a filesystem in 
+
 ![Setup S3 as a filesystem in EC2](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-s3-block-storage-filesystem/img/EC2-S3FS.png)
 
 ### Setup Networks
@@ -23,7 +23,7 @@ s3Bucket = s3Client.create_bucket( ACL='private',
                                    CreateBucketConfiguration = { 'LocationConstraint': globalVars['REGION_NAME'] }
                                 )
 ```
-##### _**No Validations** are being done to check for pre-existing buckets_. It is preferable to create a new bucket, as we will be deleting it at the end of the exercise
+###### _**No Validations** are being done to check for pre-existing buckets_. It is preferable to create a new bucket, as we will be deleting it at the end of the exercise
 
 ### Create the S3-FS host Instance
 
@@ -59,11 +59,9 @@ echo "This is a test text input" >>/var/s3fs-demo-fs/test-file-during-demo.txt
 
 _**To automount during boot**_: Update the `/etc/fstab` as shown below,
 ```sh
-<bucket>    <mount_point> fuse.s3fs    _netdev,use_cache=/tmp,use_rrs=1,allow_other             0 0
+echo -n "<bucket>    <mount_point> fuse.s3fs    _netdev,use_cache=/tmp,use_rrs=1,allow_other             0 0" >> /etc/fstab
 ```
-
-### Create the EC2 Instance
-##### **DeviceIndex**:The network interface's position in the attachment order. For example, the first attached network interface has a DeviceIndex of 0
+###### **DeviceIndex**:The network interface's position in the attachment order. For example, the first attached network interface has a DeviceIndex of 0
 ```py
 instanceLst = ec2.create_instances(ImageId = globalVars['EC2-AMI-ID'],
                                    MinCount=1,
