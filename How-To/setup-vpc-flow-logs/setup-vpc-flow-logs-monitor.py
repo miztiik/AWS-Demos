@@ -8,25 +8,28 @@ globalVars = {}
 globalVars['REGION_NAME']           = "ap-south-1"
 globalVars['AZ1']                   = "ap-south-1a"
 globalVars['AZ2']                   = "ap-south-1b"
-globalVars['CIDRange']              = "10.243.0.0/24"
-globalVars['tagName']               = "miztiik-s3fs-demo-04"
+globalVars['CIDRange']              = "10.244.0.0/24"
+globalVars['tagName']               = "miztiik-demo-05-flowlogs"
 globalVars['EC2-AMI-ID']            = "ami-cdbdd7a2"
 globalVars['EC2-InstanceType']      = "t2.micro"
-globalVars['EC2-KeyName']           = "s3fs-key"
-globalVars['S3-BucketName']         = "miztiik-demo-s3fs-bucket"
+globalVars['EC2-KeyName']           = "flowlogs-key"
+globalVars['Log-GroupName']         = "miztiik-demo-05-flowlogs"
+globalVars['IAM-RoleName']          = "miztiik-demo-05-flowlogs-role"
+
 
 ### Setup Networks
 # The VPC, Subnet, Internet Gateway, Routing Table & Security Groups are created as [described here](https://github.com/miztiik/AWS-Demos/tree/master/How-To/setup-multi-az-vpc-from-scratch-using-boto)
 # Creating a VPC, Subnet, and Gateway
 ec2         = boto3.resource ( 'ec2', region_name = globalVars['REGION_NAME'] )
 ec2Client   = boto3.client   ( 'ec2', region_name = globalVars['REGION_NAME'] )
-s3Client    = boto3.client   ( 's3',  region_name = globalVars['REGION_NAME'] )
+logsClient  = boto3.client   ( 'logs',region_name = globalVars['REGION_NAME'] )
+iamClient   = boto3.client   ( 'iam', region_name = globalVars['REGION_NAME'] )
 
 vpc         = ec2.create_vpc ( CidrBlock = globalVars['CIDRange'] )
 # AZ1 Subnets
-az1_pvtsubnet   = vpc.create_subnet( CidrBlock = '10.243.0.0/25'   , AvailabilityZone = globalVars['AZ1'] )
-az1_pubsubnet   = vpc.create_subnet( CidrBlock = '10.243.0.128/26' , AvailabilityZone = globalVars['AZ1'] )
-az1_sparesubnet = vpc.create_subnet( CidrBlock = '10.243.0.192/26' , AvailabilityZone = globalVars['AZ1'] )
+az1_pvtsubnet   = vpc.create_subnet( CidrBlock = '10.244.0.0/25'   , AvailabilityZone = globalVars['AZ1'] )
+az1_pubsubnet   = vpc.create_subnet( CidrBlock = '10.244.0.128/26' , AvailabilityZone = globalVars['AZ1'] )
+az1_sparesubnet = vpc.create_subnet( CidrBlock = '10.244.0.192/26' , AvailabilityZone = globalVars['AZ1'] )
 
 
 # Enable DNS Hostnames in the VPC
@@ -96,52 +99,93 @@ ec2Client.authorize_security_group_ingress( GroupId  = pubSecGrp.id ,
 
 # Lets create the key-pair that we will use
 ### Check if key is already present
+from time import sleep
 customEC2Keys = ec2Client.describe_key_pairs()['KeyPairs']
-if not next((key for key in customEC2Keys if key["KeyName"] == globalVars['EC2-KeyName'] ),False):
+sleep(10)
+if not next( ( key for key in customEC2Keys if key["KeyName"] == globalVars['EC2-KeyName'] ),False):
     ec2_key_pair = ec2.create_key_pair( KeyName = globalVars['EC2-KeyName'] )
     print ("New Private Key created,Save the below key-material\n\n")
     print ( ec2_key_pair.key_material )
 
-### Create S3 Bucket
+# Create VPC Flow Logs
+## We need to create a `Cloudwatch` Logs group that will be used by our log monitor
+logGroup = logsClient.create_log_group( logGroupName = globalVars['Log-GroupName'],
+                                        tags = {'Key': globalVars['tagName'] , 'Value':'Flow-Logs'}
+                                        )
 
-# **No Validations** are being done to check for pre-existing bucket s
-    # The bucket does not exist or you have no access.
-s3Bucket = s3Client.create_bucket( ACL='private', 
-                                   Bucket = globalVars['S3-BucketName'], 
-                                   CreateBucketConfiguration = { 'LocationConstraint': globalVars['REGION_NAME'] }
+### Create IAM Role
+flowLogsTrustPolicy = """{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "vpc-flow-logs.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+} 
+"""
+
+flowLogsPermissions = """{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "logs:DescribeLogGroups",
+        "logs:DescribeLogStreams"
+      ],
+      "Effect": "Allow",
+      "Resource": "*"
+    }
+  ]
+}"""
+
+
+#### Create the role with trust policy
+iamRole = iamClient.create_role( RoleName = globalVars['IAM-RoleName'] ,
+                                 AssumeRolePolicyDocument = flowLogsTrustPolicy
                                 )
 
+#### Attach permissions to the role
+flowLogsPermPolicy = iamClient.create_policy( PolicyName    = "flowLogsPermissions",
+                                              PolicyDocument= flowLogsPermissions,
+                                              Description   = 'Provides permissions to publish flow logs to the specified log group in CloudWatch Logs'
+                                            )
 
+response = iamClient.attach_role_policy( RoleName = globalVars['IAM-RoleName'] ,
+                                         PolicyArn= flowLogsPermPolicy['Policy']['Arn']
+                                        )
 
+sleep(10)
 
+#### Creating flow logs with the IAM role and permissions
+nwFlowLogs = ec2Client.create_flow_logs( ResourceIds              = [ vpc.id, ],
+                                         ResourceType             = 'VPC',
+                                         TrafficType              = 'ALL',
+                                         LogGroupName             = globalVars['Log-GroupName'],
+                                         DeliverLogsPermissionArn = iamRole['Role']['Arn']
+                                        )
 
+# EC2 Instance for traffic generation
 
-# Create the S3-FS host Instance
-
-# Using the userdata field, we will download, install & configure our basic word press website.
-# The user defined code to install Wordpress, WebServer & Configure them
+# Using the userdata field, we will download, install webserver to generate some traffic
 userDataCode = """
 #!/bin/bash
 set -e -x
 
-# Install FUSE Packages
-# Ref - https://github.com/s3fs-fuse/s3fs-fuse
-yum -y install automake fuse fuse-devel gcc-c++ git libcurl-devel libxml2-devel make openssl-devel
-git clone https://github.com/s3fs-fuse/s3fs-fuse.git
-cd s3fs-fuse
-./autogen.sh
-./configure
-make
-make install
-
-
-# Enter the Identity(Access-Key)&Credentials(Secret-Key)
-echo "<A.C.C.E.S.S-K.E.Y>:<A.C.T.U.A.L-S.E.C.R.E.T-K.E.Y>" > /root/.s3fs-passwd
-chmod 600 /root/.s3fs-passwd
-# Mount s3fs with an existing bucket
-mkdir -p /var/s3fs-demo-fs
-s3fs miztiik-demo-s3fs-bucket /var/s3fs-demo-fs -o passwd_file=/root/.s3fs-passwd
-echo "This is a test text input" >>/var/s3fs-demo-fs/test-file-during-demo.txt
+# Install HTTP Server to generate some traffic
+yum -y install httpd
+systemctl start httpd
+systemctl enable httpd
+echo "<h1>Welcome to flow logs demo from Miztiik</h1>" >> /var/www/html/index.html
+ping -c5 twitter.com
+ping -c5 localhost
 """
 
 
@@ -150,8 +194,8 @@ instanceLst = ec2.create_instances(ImageId = globalVars['EC2-AMI-ID'],
                                    MinCount=1,
                                    MaxCount=1,
                                    KeyName=globalVars['EC2-KeyName'] ,
-                                   InstanceType = globalVars['EC2-InstanceType'],
                                    UserData = userDataCode,
+                                   InstanceType = globalVars['EC2-InstanceType'],
                                    NetworkInterfaces=[
                                                         {
                                                             'SubnetId': az1_pubsubnet.id,
@@ -164,12 +208,19 @@ instanceLst = ec2.create_instances(ImageId = globalVars['EC2-AMI-ID'],
                                 )
 
 #### Sample Output
-[root@ip-10-243-0-147 ~]# df -h /var/s3fs-demo-fs
-Filesystem      Size  Used Avail Use% Mounted on
-s3fs            256T     0  256T   0% /var/s3fs-demo-fs
-
-[root@ip-10-243-0-147 ~]# more /var/s3fs-demo-fs/test-file-during-demo.txt
-This is a test text input
+18:34:26 2 566667777886 eni-86d38dee 123.108.200.124  10.244.0.139    123     38270 17 1  76   1490121266 1490121326 ACCEPT OK
+18:34:26 2 566667777886 eni-86d38dee 10.244.0.139     139.59.19.184   47521   123   17 1  76   1490121266 1490121326 ACCEPT OK
+18:34:26 2 566667777886 eni-86d38dee 10.244.0.139     122.166.159.156 80      49740 6  3  120  1490121266 1490121326 ACCEPT OK
+18:34:26 2 566667777886 eni-86d38dee 10.244.0.139     122.166.159.156 80      49722 6  3  120  1490121266 1490121326 ACCEPT OK
+18:34:26 2 566667777886 eni-86d38dee 94.233.207.244   10.244.0.139    8131    23    6  1  40   1490121266 1490121326 REJECT OK
+18:34:26 2 566667777886 eni-86d38dee 10.244.0.139     209.132.183.107 42319   443   6  12 1474 1490121266 1490121326 ACCEPT OK
+18:34:26 2 566667777886 eni-86d38dee 139.59.45.40     10.244.0.139    123     50535 17 1  76   1490121266 1490121326 ACCEPT OK
+18:34:26 2 566667777886 eni-86d38dee 10.244.0.139     139.59.19.184   37270   123   17 1  76   1490121266 1490121326 ACCEPT OK
+18:34:26 2 566667777886 eni-86d38dee 10.244.0.139     209.132.183.107 42320   443   6  14 1584 1490121266 1490121326 ACCEPT OK
+18:34:26 2 566667777886 eni-86d38dee 209.132.183.107  10.244.0.139    443     42319 6  12 4633 1490121266 1490121326 ACCEPT OK
+18:34:26 2 566667777886 eni-86d38dee 10.244.0.139     123.108.200.124 53652   123   17 1  76   1490121266 1490121326 ACCEPT OK
+18:34:26 2 566667777886 eni-86d38dee 139.59.19.184    10.244.0.139    123     34449 17 1  76   1490121266 1490121326 ACCEPT OK
+18:34:26 2 566667777886 eni-86d38dee 10.244.0.139     139.59.32.74 3  5676    123   17 1  76   1490121266 1490121326 ACCEPT OK
 
 """
 Function to clean up all the resources
@@ -189,6 +240,10 @@ def cleanAll(resourcesDict=None):
     sleep(120)
 
     ec2Client.delete_key_pair( KeyName = globalVars['EC2-KeyName'] )
+
+    # Delete Log Group & Flow Logs
+    response = logsClient.delete_log_group( logGroupName = globalVars['Log-GroupName'] )
+    response = ec2Client.delete_flow_logs( FlowLogIds = [ nwFlowLogs.id ] )
     
     # Delete Routes & Routing Table
     for assn in rtbAssn:
@@ -212,9 +267,9 @@ def cleanAll(resourcesDict=None):
     # Delete VPC
     vpc.delete()
 
-    # Delete S3 Bucket
-    s3 = boto3.resource( 's3',  region_name = globalVars['REGION_NAME'] )
-    bucket = s3.Bucket( globalVars['S3-BucketName'] )
-    for key in bucket.objects.all():
-        key.delete()
-    bucket.delete()
+    # Detach & Delete IAM Role
+    response = iamClient.detach_role_policy( RoleName = globalVars['IAM-RoleName'],
+                                             PolicyArn= flowLogsPermPolicy['Policy']['Arn']
+                                            )
+    response = iamClient.delete_policy( PolicyArn = flowLogsPermPolicy['Policy']['Arn'] )
+    response = iamClient.delete_role( RoleName = globalVars['IAM-RoleName'] )
