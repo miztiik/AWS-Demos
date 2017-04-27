@@ -4,7 +4,18 @@
 cd /tmp
 curl -O https://bootstrap.pypa.io/get-pip.py
 python3 get-pip.py --user
+```
+### Verify that pip is installed correctly.
+```
+pip --version
+pip 8.1.2 from ~/.local/lib/python3.4/site-packages (python 3.4)
+# If the above didn't work, you dont have python3, try the below command
 python get-pip.py --user
+pip --version
+```
+You should see something like
+```
+pip 8.1.2 from ~/.local/lib/python3.4/site-packages (python 3.4)
 ```
 #### Install AWS CLI
 ```
