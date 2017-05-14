@@ -81,7 +81,7 @@ EOF
 ```
 
 Import the json using the below command
-```sh
+```nosql
 aws dynamodb put-item --table-name aws-students --item file://student001.json --return-consumed-capacity TOTAL
 ```
 ##### Output
