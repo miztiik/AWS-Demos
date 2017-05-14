@@ -1,9 +1,17 @@
 # RDS Connections
 
+## Install MySQL Client
+```sh
+yum -y install mariadb
+```
+
 ## How to Connect to RDS from EC2
 ```sql
 mysql -h myinstance.123456789012.us-east-1.rds.amazonaws.com -P 3306 -u dbmaster -p
 ```
+If the above is giving errors, try disabling `selinux` by issuing this command `setenforce 0` to troubleshoot the issue. Once you are set, reenable `SELinux` with the appropriate privileges.
+
+Another area to be sure is to get the `AWS Security Groups` to allow traffic on port `3306` from your `Source IP` or `web-app Security Group` 
 
 ### Retrieve the maximum number of connections allowed for an Amazon RDS
 
