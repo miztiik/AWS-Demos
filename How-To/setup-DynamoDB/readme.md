@@ -33,7 +33,7 @@ use <database-name>
 
 ### Create Tables
 
-#### We will create a students table with Student ID, Name & Address Columns
+#### We will create a `Students` table with `Student ID, Name & City` as Columns
 
 ```sql
 CREATE TABLE Students ( StudentID int, LastName varchar(255), FirstName varchar(255), City varchar(255) );
