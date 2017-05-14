@@ -86,13 +86,12 @@ aws dynamodb put-item --table-name aws-students --item file://student001.json --
 ```
 ##### Output
 ```sh
-Output:
-
 {
     "ConsumedCapacity": {
-        "CapacityUnits": 1.0,
-        "TableName": "MusicCollection"
+        "CapacityUnits": 1.0, 
+        "TableName": "aws-students"
     }
+}
 ```
 
 ##### Ref
