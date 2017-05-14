@@ -31,15 +31,18 @@ show databases;
 use <database-name>
 ```
 
+We will look into `CRUD` basics now,
+
 ### Create Tables
 
 #### We will create a `Students` table with `Student ID, Name & City` as Columns
 
 ```sql
 CREATE TABLE Students ( StudentID int, LastName varchar(255), FirstName varchar(255), City varchar(255) );
+```
 
-
-#### Insert records into tables
+#### Retrieve records into tables
+```sql
 INSERT INTO Students ( StudentID, LastName, FirstName, City) VALUES ( "001", "Kumar", "Anil", "Singapore" );
 
 INSERT INTO Students ( StudentID, LastName, FirstName, City) VALUES ( "002", "Reddy", "M", "Hyderabad" );
@@ -62,7 +65,7 @@ select StudentID from Students WHERE (LastName="Reddy");
 select StudentID,City from Students WHERE (LastName="Reddy");
 ```
 
-### Deleting Tables
+### Delete Tables
 ```sql
 drop tables Students;
 ```
