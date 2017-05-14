@@ -1,24 +1,33 @@
 # RDS Connections
 
 ## How to Connect to RDS from EC2
-`mysql -h myinstance.123456789012.us-east-1.rds.amazonaws.com -P 3306 -u dbmaster -p`
+```sql
+mysql -h myinstance.123456789012.us-east-1.rds.amazonaws.com -P 3306 -u dbmaster -p
+```
 
 ### Retrieve the maximum number of connections allowed for an Amazon RDS
 
-`SELECT @@max_connections;`
+```sql
+SELECT @@max_connections;
+```
 
 ### You can retrieve the number of active connections to an Amazon RDS
 
-`SHOW STATUS WHERE `variable_name` = 'Threads_connected’;`
+```sql
+SHOW STATUS WHERE `variable_name` = 'Threads_connected’;
+```
 
 ### Show Databases
-`show databases;`
-`use <database-name>`
+```sql
+show databases;
+use <database-name>
+```
 
 ### Create Tables
 
 #### We will create a students table with Student ID, Name & Address Columns
 
+```sql
 CREATE TABLE Students ( StudentID int, LastName varchar(255), FirstName varchar(255), City varchar(255) );
 
 
@@ -32,9 +41,12 @@ INSERT INTO Students ( StudentID, LastName, FirstName, City) VALUES ( "003", "Re
 INSERT INTO Students ( StudentID, LastName, FirstName, City) VALUES ( "004", "Vel", "D", "Chennai" );
 
 INSERT INTO Students ( StudentID, LastName, FirstName, City) VALUES ( "005", "Student", "Martian", "Mars" );
+```
 
 ### View the contents of the tables
-`select * from Students;`
+```sql
+select * from Students;
+```
 
 #### Making specific queries
 ```sql
@@ -43,16 +55,13 @@ select StudentID,City from Students WHERE (LastName="Reddy");
 ```
 
 ### Deleting Tables
+```sql
 drop tables Students;
-
-
-
-
+```
 
 # Dynamo DB
 
 Assuming you have a collection named `aws-students` - If not go ahead and create one.
-
 
 ### Insert item into collection
 
@@ -62,13 +71,12 @@ This example adds a new item to the `aws-students` table. Create the json object
 cat > "student001.json" << "EOF"
 {
   "studentId": {
-    "BS": 1
+    "S": "1"
   },
   "studentDetails": {
     "S": "[{Name:John,Age:21,Sex:Male}]"
   }
 }
-
 EOF
 ```
 
@@ -76,3 +84,16 @@ Import the json using the below command
 ```sh
 aws dynamodb put-item --table-name aws-students --item file://student001.json --return-consumed-capacity TOTAL
 ```
+##### Output
+```sh
+Output:
+
+{
+    "ConsumedCapacity": {
+        "CapacityUnits": 1.0,
+        "TableName": "MusicCollection"
+    }
+```
+
+##### Ref
+[1] - [AWS Docs](http://docs.aws.amazon.com/cli/latest/reference/dynamodb/put-item.html)
