@@ -1,12 +1,16 @@
 # RDS Connections
 
-## Install MySQL Client
+## Install MySQL/MariaDB Client
+Copy paste the below in the EC2 `user-data` field
 ```sh
+#!/bin/bash
 yum -y install mariadb
 ```
 
 ## How to Connect to RDS from EC2
 ```sql
+mysql -h <Your-RDS-Endpoint> -P 3306 -u dbmaster -p
+# For Example,
 mysql -h myinstance.123456789012.us-east-1.rds.amazonaws.com -P 3306 -u dbmaster -p
 ```
 If the above is giving errors, try disabling `selinux` by issuing this command `setenforce 0` to troubleshoot the issue. Once you are set, reenable `SELinux` with the appropriate privileges.
