@@ -1,4 +1,4 @@
-# Install Python, pip, and the AWS Command Line Interface on Linux ( Redhat / CentOS )
+# Install Python, pip, and AWS Command Line Interface on Linux ( Redhat / CentOS )
 
 ## Install `pip`
 ```sh
@@ -34,7 +34,7 @@ pip 8.1.2 from ~/.local/lib/python3.4/site-packages (python 3.4)
 pip install awscli --upgrade --user
 ```
 
-# Check version of AWS CLI
+### Check version of AWS CLI
 ```
 aws --version
 ```
