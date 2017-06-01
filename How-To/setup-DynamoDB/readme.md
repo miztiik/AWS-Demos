@@ -13,10 +13,10 @@ If the above is giving errors, try disabling `selinux` by issuing this command `
 
 Another area to be sure is to get the `AWS Security Groups` to allow traffic on port `3306` from your `Source IP` or `web-app Security Group` 
 
-### Retrieve the maximum number of connections allowed for an Amazon RDS
-
+### Show Databases
 ```sql
-SELECT @@max_connections;
+show databases;
+use <database-name>
 ```
 
 ### You can retrieve the number of active connections to an Amazon RDS
@@ -25,10 +25,10 @@ SELECT @@max_connections;
 SHOW STATUS WHERE `variable_name` = 'Threads_connected’;
 ```
 
-### Show Databases
+### Retrieve the maximum number of connections allowed for an Amazon RDS
+
 ```sql
-show databases;
-use <database-name>
+SELECT @@max_connections;
 ```
 
 We will look into `CRUD` basics now,
@@ -41,7 +41,7 @@ We will look into `CRUD` basics now,
 CREATE TABLE Students ( StudentID int, LastName varchar(255), FirstName varchar(255), City varchar(255) );
 ```
 
-#### Retrieve records into tables
+#### Insert records into tables
 ```sql
 INSERT INTO Students ( StudentID, LastName, FirstName, City) VALUES ( "001", "Kumar", "Anil", "Singapore" );
 
@@ -54,7 +54,7 @@ INSERT INTO Students ( StudentID, LastName, FirstName, City) VALUES ( "004", "Ve
 INSERT INTO Students ( StudentID, LastName, FirstName, City) VALUES ( "005", "Student", "Martian", "Mars" );
 ```
 
-### View the contents of the tables
+### Retrieve records from table
 ```sql
 select * from Students;
 ```
@@ -73,6 +73,8 @@ drop tables Students;
 # Dynamo DB
 
 Assuming you have a collection named `aws-students` - If not go ahead and create one.
+
+###### You will need an EC2 Instance with `aws cli` configured to run the below commands
 
 ### Insert item into collection
 
