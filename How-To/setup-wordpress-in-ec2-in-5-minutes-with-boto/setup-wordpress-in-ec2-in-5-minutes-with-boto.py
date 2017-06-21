@@ -27,7 +27,8 @@ globalVars['AZ1']                   = "ap-south-1a"
 globalVars['AZ2']                   = "ap-south-1b"
 globalVars['CIDRange']              = "10.242.0.0/24"
 globalVars['tagName']               = "miztiik-wp-demo-00"
-globalVars['EC2-AMI-ID']            = "ami-cdbdd7a2"
+globalVars['EC2-RH-AMI-ID']         = "ami-cdbdd7a2"
+globalVars['EC2-Amazon-AMI-ID']     = "ami-3c89f653"
 globalVars['EC2-InstanceType']      = "t2.micro"
 globalVars['EC2-KeyName']           = "wp-key"
 
@@ -35,7 +36,6 @@ globalVars['EC2-KeyName']           = "wp-key"
 ec2         = boto3.resource ( 'ec2', region_name = globalVars['REGION_NAME'] )
 ec2Client   = boto3.client   ( 'ec2', region_name = globalVars['REGION_NAME'] )
 vpc         = ec2.create_vpc ( CidrBlock = globalVars['CIDRange']  )
-
 
 # AZ1 Subnets
 az1_pvtsubnet   = vpc.create_subnet( CidrBlock = '10.242.0.0/25'   , AvailabilityZone = globalVars['AZ1'] )
@@ -116,6 +116,7 @@ if not next((key for key in customEC2Keys if key["KeyName"] == globalVars['EC2-K
     print ("New Private Key created,Save the below key-material\n\n")
     print ( ec2_key_pair.key_material )
 
+
 # Using the userdata field, we will download, install & configure our basic word press website.
 # The user defined code to install Wordpress, WebServer & Configure them
 userDataCode = """
@@ -124,8 +125,8 @@ set -e -x
 
 # Setting up the HTTP server 
 yum install -y httpd php php-mysql mysql
-systemctl start httpd
-systemctl enable httpd
+service httpd start
+chkconfig httpd on
 groupadd www
 usermod -a -G www ec2-user
 
@@ -144,17 +145,17 @@ find /var/www -type f -exec chmod 0664 {} +
 
 # SE Linux permissive
 # needed to make wp connect to DB over newtork
-setsebool -P httpd_can_network_connect=1
-setsebool httpd_can_network_connect_db on
+# setsebool -P httpd_can_network_connect=1
+# setsebool httpd_can_network_connect_db on
 
-systemctl restart httpd
+service httpd restart
 # Remove below file after testing
 echo "<?php phpinfo(); ?>" > /var/www/html/phptestinfo.php
 """
 
 # Create the  Public Word Press Instance
 ##### **DeviceIndex**:The network interface's position in the attachment order. For example, the first attached network interface has a DeviceIndex of 0 
-instanceLst = ec2.create_instances(ImageId = globalVars['EC2-AMI-ID'],
+instanceLst = ec2.create_instances(ImageId = globalVars['EC2-Amazon-AMI-ID'],
                                    MinCount=1,
                                    MaxCount=1,
                                    KeyName=globalVars['EC2-KeyName'] ,
@@ -170,6 +171,19 @@ instanceLst = ec2.create_instances(ImageId = globalVars['EC2-AMI-ID'],
                                                         }
                                                     ]
                                 )
+
+###### Print to Screen ########
+print ( "VPC ID                    : {0}".format(vpc.id) )
+print ( "AZ1 Public Subnet ID      : {0}".format(az1_pubsubnet.id) )
+print ( "AZ1 Private Subnet ID     : {0}".format(az1_pvtsubnet.id) )
+print ( "AZ1 Spare Subnet ID       : {0}".format(az1_sparesubnet.id) )
+print ( "Internet Gateway ID       : {0}".format(intGateway.id) )
+print ( "Route Table ID            : {0}".format(routeTable.id) )
+print ( "Public Security Group ID  : {0}".format(pubSecGrp.id) )
+print ( "Private Security Group ID : {0}".format(pvtSecGrp.id) )
+print ( "EC2 Key Pair              : {0}".format(globalVars['EC2-KeyName']) )
+###### Print to Screen ########
+
 
 """
 Function to clean up all the resources
