@@ -143,5 +143,26 @@ EOF
 aws dynamodb put-item --table-name aws-students --item file://student003.json --return-consumed-capacity TOTAL
 ```
 
+## Retrieve data from collection
+Lets see if _Old Mike_'s data had been correctly updated.
+```sh
+aws dynamodb get-item --table-name aws-students --key '{"studentId":{"S":"3"}}'
+```
+
+### Output
+```sh
+{
+    "Item": {
+        "studentId": {
+            "S": "3"
+        },
+        "studentDetails": {
+            "S": "[{Name:'Old Mike',Age:81,Sex:'Male'}]"
+        }
+    }
+}
+```
+
 ##### Ref
 [1] - [AWS Docs](http://docs.aws.amazon.com/cli/latest/reference/dynamodb/put-item.html)
+[2] - [Dynamo DB Get Item Docs](http://docs.aws.amazon.com/cli/latest/reference/dynamodb/get-item.html)
