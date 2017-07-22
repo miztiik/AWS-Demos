@@ -105,6 +105,7 @@ EOF
 cat > "student004.json" << "EOF"
 {"studentId":{"S":"4"},"studentDetails":{"S":"[{Name:'Young Mike',Age:18,Sex:}]"}}
 EOF
+
 ```
 
 Import the json using the below command
@@ -113,14 +114,17 @@ aws dynamodb put-item --table-name aws-students --item file://student001.json --
 aws dynamodb put-item --table-name aws-students --item file://student002.json --return-consumed-capacity TOTAL
 aws dynamodb put-item --table-name aws-students --item file://student003.json --return-consumed-capacity TOTAL
 aws dynamodb put-item --table-name aws-students --item file://student004.json --return-consumed-capacity TOTAL
+
 ```
 
 #### Since i am lazy, I do this instead
 ```sh
+
 for i in {1..4}
 do
   aws dynamodb put-item --table-name aws-students --item file://student00$i.json --return-consumed-capacity TOTAL
 done
+
 ```
 
 ##### Output
