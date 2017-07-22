@@ -82,25 +82,47 @@ Assuming you have a collection named `aws-students` - If not go ahead and create
 
 ### Insert item into collection
 
-This example adds a new item to the `aws-students` table. Create the json object that will be imported
-
+- Create a new table `aws-students`.
+- Set the _Partition Key_ to `studentsId` and Choose type as _**String**_
+- Use `Default Settings` for _Table Settings_
+- Click _Create_
+- 
+#### Create the json object that will be imported
+Lets create four student records to be updated
 ```sh
 cat > "student001.json" << "EOF"
-{
-  "studentId": {
-    "S": "1"
-  },
-  "studentDetails": {
-    "S": "[{Name:John,Age:21,Sex:Male}]"
-  }
-}
+{"studentId":{"S":"1"},"studentDetails":{"S":"[{Name:'John Doe',Age:21,Sex:Male}]"}}
+EOF
+
+cat > "student002.json" << "EOF"
+{"studentId":{"S":"2"},"studentDetails":{"S":"[{Name:'Jane Doe',Age:18,Sex:Female}]"}}
+EOF
+
+cat > "student003.json" << "EOF"
+{"studentId":{"S":"3"},"studentDetails":{"S":"[{Name:'Old Mike',Age:81,Sex:''}]"}}
+EOF
+
+cat > "student004.json" << "EOF"
+{"studentId":{"S":"4"},"studentDetails":{"S":"[{Name:'Young Mike',Age:18,Sex:}]"}}
 EOF
 ```
 
 Import the json using the below command
 ```nosql
 aws dynamodb put-item --table-name aws-students --item file://student001.json --return-consumed-capacity TOTAL
+aws dynamodb put-item --table-name aws-students --item file://student002.json --return-consumed-capacity TOTAL
+aws dynamodb put-item --table-name aws-students --item file://student003.json --return-consumed-capacity TOTAL
+aws dynamodb put-item --table-name aws-students --item file://student004.json --return-consumed-capacity TOTAL
 ```
+
+#### Since i am lazy, I do this instead
+```sh
+for i in {1..4}
+do
+  aws dynamodb put-item --table-name aws-students --item file://student00$i.json --return-consumed-capacity TOTAL
+done
+```
+
 ##### Output
 ```sh
 {
