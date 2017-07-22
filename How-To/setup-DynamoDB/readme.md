@@ -139,7 +139,9 @@ Since _Old Mike_ age is incorrectly updated as `881`, Lets correct it.
 cat > "student003.json" << "EOF"
 {"studentId":{"S":"3"},"studentDetails":{"S":"[{Name:'Old Mike',Age:81,Sex:'Male'}]"}}
 EOF
-
+```
+#### Update the item
+```sh
 aws dynamodb put-item --table-name aws-students --item file://student003.json --return-consumed-capacity TOTAL
 ```
 
@@ -165,4 +167,5 @@ aws dynamodb get-item --table-name aws-students --key '{"studentId":{"S":"3"}}'
 
 ##### Ref
 [1] - [AWS Docs](http://docs.aws.amazon.com/cli/latest/reference/dynamodb/put-item.html)
+
 [2] - [Dynamo DB Get Item Docs](http://docs.aws.amazon.com/cli/latest/reference/dynamodb/get-item.html)
