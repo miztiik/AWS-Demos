@@ -140,7 +140,7 @@ cat > "student003.json" << "EOF"
 {"studentId":{"S":"3"},"studentDetails":{"S":"[{Name:'Old Mike',Age:81,Sex:'Male'}]"}}
 EOF
 ```
-#### Update the item
+#### Run the `put-item` command
 ```sh
 aws dynamodb put-item --table-name aws-students --item file://student003.json --return-consumed-capacity TOTAL
 ```
