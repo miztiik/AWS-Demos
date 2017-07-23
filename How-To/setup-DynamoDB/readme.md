@@ -78,12 +78,15 @@ drop tables Students;
 
 Assuming you have a collection named `aws-students` - If not go ahead and create one.
 
-###### You will need an EC2 Instance with `aws cli` configured to run the below commands
+Lets get into **CRUD** - **C**reate, **R**etrieve, **U**pdate, **D**elete.
+
+###### _You will need an EC2 Instance with `aws cli` configured to run the below commands_
+
 
 ### Insert item into collection
 
 - Create a new table `aws-students`.
-- Set the _Partition Key_ to `studentsId` and Choose type as _**String**_
+- Set the _Partition Key_ to `studentId` and Choose type as _**String**_
 - Use `Default Settings` for _Table Settings_
 - Click _Create_
 
@@ -132,20 +135,7 @@ done
     }
 }
 ```
-
-##### Update `Collection` in DyanamoDB
-Since _Old Mike_ age is incorrectly updated as `881`, Lets correct it.
-```sh
-cat > "student003.json" << "EOF"
-{"studentId":{"S":"3"},"studentDetails":{"S":"[{Name:'Old Mike',Age:81,Sex:'Male'}]"}}
-EOF
-```
-#### Run the `put-item` command
-```sh
-aws dynamodb put-item --table-name aws-students --item file://student003.json --return-consumed-capacity TOTAL
-```
-
-## Retrieve data from collection
+## Retrieve `item` from collection
 Lets see if _Old Mike_'s data had been correctly updated.
 ```sh
 aws dynamodb get-item --table-name aws-students --key '{"studentId":{"S":"3"}}'
@@ -163,6 +153,27 @@ aws dynamodb get-item --table-name aws-students --key '{"studentId":{"S":"3"}}'
         }
     }
 }
+```
+
+## Update `item` in Collection
+Since _Old Mike_ age is incorrectly updated as `881`, Lets correct it.
+```sh
+cat > "student003.json" << "EOF"
+{"studentId":{"S":"3"},"studentDetails":{"S":"[{Name:'Old Mike',Age:81,Sex:'Male'}]"}}
+EOF
+```
+#### Run the `put-item` command
+```sh
+aws dynamodb put-item --table-name aws-students --item file://student003.json --return-consumed-capacity TOTAL
+```
+
+## Delete `item` from Collection
+Old Mike is no longer a student with our organization, Lets go ahead and remove him.
+
+
+
+```sh
+aws dynamodb delete-item --table-name aws-students --key '{"studentId":{"S":"3"}}'
 ```
 
 ##### Ref
