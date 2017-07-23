@@ -76,22 +76,19 @@ drop tables Students;
 
 # Dynamo DB
 
-Assuming you have a collection named `aws-students` - If not go ahead and create one.
+Assuming you have a collection named `aws-students` - If not go ahead and create one, with the following instructions:
+- Create a new table `aws-students`
+- Set the _Partition Key_ to `studentId` and Choose type as _**String**_
+- For _Table Settings_, Use `Default Settings`
+- Click _Create_
 
 Lets get into **CRUD** - **C**reate, **R**etrieve, **U**pdate, **D**elete.
 
-###### _You will need an EC2 Instance with `aws cli` configured to run the below commands_
+###### _You will need an EC2/linux client with `aws cli` configured to run the below commands_
 
 
-### Insert item into collection
-
-- Create a new table `aws-students`.
-- Set the _Partition Key_ to `studentId` and Choose type as _**String**_
-- Use `Default Settings` for _Table Settings_
-- Click _Create_
-
-#### Create the json object that will be imported
-Lets create four student records to be updated
+### Create `item`
+Lets create four student records(as json files) that will be inserted to the DynamoDB Collection called `aws-students` using `aws cli` command `put-item`
 ```sh
 cat > "student001.json" << "EOF"
 {"studentId":{"S":"1"},"studentDetails":{"S":"[{Name:'John Doe',Age:21,Sex:Male}]"}}
@@ -118,7 +115,7 @@ aws dynamodb put-item --table-name aws-students --item file://student003.json --
 aws dynamodb put-item --table-name aws-students --item file://student004.json --return-consumed-capacity TOTAL
 ```
 
-#### Since i am lazy, I do this instead
+#### Since i am lazy, I do this instead,
 ```sh
 for i in {1..4}
 do
@@ -169,9 +166,6 @@ aws dynamodb put-item --table-name aws-students --item file://student003.json --
 
 ## Delete `item` from Collection
 Old Mike is no longer a student with our organization, Lets go ahead and remove him.
-
-
-
 ```sh
 aws dynamodb delete-item --table-name aws-students --key '{"studentId":{"S":"3"}}'
 ```
