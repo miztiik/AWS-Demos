@@ -82,6 +82,8 @@ EOF
 ## BUILD - Lets Package the app
 ```sh
 source /var/virt-env/bin/activate
+pip freeze > requirements.txt
+deactivate
 ```
 #### Create an `eb` environment and deploy our flask application
 ```sh
