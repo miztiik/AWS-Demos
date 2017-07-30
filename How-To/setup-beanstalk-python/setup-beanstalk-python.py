@@ -1,8 +1,4 @@
-curl -O https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \
-&& yum -y install epel-release-latest-7.noarch.rpm
-yum -y install python-pip
-pip install --upgrade pip
-pip install virtualenv
+# Create a Virtual Environment for our App
 
 ## Install Elastic Beanstalk CLI
 pip install --upgrade --user awsebcli
@@ -11,9 +7,10 @@ source ~/.bashrc
 #### Check the installation
 eb --version
 
-
-
-# Create a Virtual Environment for our App
+##  Install the python binaries need for our dev environment
+yum -y install python-pip
+pip install --upgrade pip
+pip install virtualenv
 
 mkdir -p /var/virt-env/elastic-bean-stalk-app
 
@@ -28,13 +25,13 @@ cd /var/virt-env/elastic-bean-stalk-app
 cat > "/var/virt-env/elastic-bean-stalk-app/application.py" << "EOF"
 from flask import Flask
 
-# print a nice greeting.
+# print a Welcome greeting.
 def say_hello(username = "World"):
     return '<p>Hello %s!</p>\n' % username
 
 # some bits of text for the page.
 header_text = '''
-    <html>\n<head> <title>ELastic Bean Stalk Demo<title> </head>\n<body>'''
+    <html>\n<head> <title>Valaxy Infotech ELastic Bean Stalk Demo<title> </head>\n<body>'''
 instructions = '''
     <p><em>Hint</em>: This is a RESTful web service! Append a username
     to the URL (for example: <code>/Valaxy</code>) to say hello to
@@ -59,17 +56,17 @@ if __name__ == "__main__":
     # Setting debug to True enables debug output. This line should be
     # removed before deploying a production app.
     application.debug = True
-    application.run(host='0.0.0.0')
+    application.run()
 EOF
 
 # Lets Package the app
 source /var/virt-env/bin/activate
 
 ## Deploy Your Site With the EB CLI
-### Create an environment and deploy your Flask application
+### Create an environment and deploy our  Flask application
 cd /var/virt-env/elastic-bean-stalk-app
 eb init -p python2.7 prod-env-newsapp
-# Optional Set keypair
+# Optional Set keypair for EC2 Instances
 eb init
 
 eb create newsapp
