@@ -41,15 +41,15 @@ cd /var/virt-env/elastic-bean-stalk-app
 cat > "/var/virt-env/elastic-bean-stalk-app/application.py" << "EOF"
 from flask import Flask
 
-# print a nice greeting.
+# print the welcome greeting.
 def say_hello(username = "World"):
     return '<p>Hello %s!</p>\n' % username
 
 # some bits of text for the page.
 header_text = '''
-    <html>\n<head> <title>ELastic Bean Stalk Demo<title> </head>\n<body>'''
+    <html>\n<head> <title>Valaxy ELastic Bean Stalk Demo<title> </head>\n<body>'''
 instructions = '''
-    <p><em>Hint</em>: This is a RESTful web service! Append a username
+    <p><em>Hint</em>: This is a RESTful web service create by Valaxy Infotech! Append a username
     to the URL (for example: <code>/Valaxy</code>) to say hello to
     someone specific.</p>\n'''
 home_link = '<p><a href="/">Back</a></p>\n'
@@ -72,7 +72,7 @@ if __name__ == "__main__":
     # Setting debug to True enables debug output. This line should be
     # removed before deploying a production app.
     application.debug = True
-    application.run(host='0.0.0.0')
+    application.run()
 EOF
 ```
 
