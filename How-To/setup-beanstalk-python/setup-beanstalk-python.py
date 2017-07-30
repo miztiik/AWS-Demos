@@ -11,14 +11,14 @@ eb --version
 yum -y install python-pip
 pip install --upgrade pip
 pip install virtualenv
+# Install Flask
+pip install flask==0.10.1
+pip freeze
 
 mkdir -p /var/virt-env/elastic-bean-stalk-app
 
 virtualenv /var/virt-env/
 source /var/virt-env/bin/activate
-
-# Install Flask
-pip install flask
 
 cd /var/virt-env/elastic-bean-stalk-app
 
