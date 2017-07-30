@@ -61,6 +61,8 @@ EOF
 
 # Lets Package the app
 source /var/virt-env/bin/activate
+pip freeze > requirements.txt
+deactivate
 
 ## Deploy Your Site With the EB CLI
 ### Create an environment and deploy our  Flask application
