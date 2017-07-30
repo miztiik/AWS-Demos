@@ -12,6 +12,9 @@ To follow this tutorial, you should have all of the Common Prerequisites for Pyt
 yum -y install python-pip
 pip install --upgrade pip
 pip install virtualenv
+# Install Flask
+pip install flask==0.10.1
+pip freeze
 
 ## Install Elastic Beanstalk CLI
 pip install --upgrade --user awsebcli
@@ -76,20 +79,20 @@ if __name__ == "__main__":
 EOF
 ```
 
-### BUILD - Lets Package the app
+## BUILD - Lets Package the app
+```sh
 source /var/virt-env/bin/activate
-
-####  Deploy Your Site With the EB CLI
-### Create an `eb` environment and deploy our flask application
+```
+#### Create an `eb` environment and deploy our flask application
 ```sh
 cd /var/virt-env/elastic-bean-stalk-app
 eb init -p python2.7 prod-env-newsapp
 ```
-# Optional Set keypair for EC2 instances
+#### Optional Set keypair for EC2 instances
 ```sh
 eb init
 ```
-# RELEASE - Deploy `application` to Elastic Bean Stalk
+## RELEASE - Deploy `application` to Elastic Bean Stalk
 ```sh
 eb create newsapp
 ```
