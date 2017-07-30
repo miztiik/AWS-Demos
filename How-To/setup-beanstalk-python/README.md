@@ -80,10 +80,12 @@ EOF
 source /var/virt-env/bin/activate
 
 ####  Deploy Your Site With the EB CLI
-### Create an environment and deploy your Flask application
+### Create an `eb` environment and deploy our flask application
+```sh
 cd /var/virt-env/elastic-bean-stalk-app
 eb init -p python2.7 prod-env-newsapp
-# Optional Set keypair
+```
+# Optional Set keypair for EC2 instances
 ```sh
 eb init
 ```
