@@ -58,15 +58,15 @@ mkdir newsapp
 cat > "/var/eb-virt/newsapp/application.py" << "EOF"
 from flask import Flask
 
-# print the welcome greeting.
-def say_hello(username = "World"):
+# print a nice greeting.
+def say_hello(username = "Valaxy"):
     return '<p>Hello %s!</p>\n' % username
 
 # some bits of text for the page.
 header_text = '''
-    <html>\n<head> <title>Valaxy ELastic Bean Stalk Demo<title> </head>\n<body>'''
+    <html>\n<head> <title>EB Flask Test</title> </head>\n<body>'''
 instructions = '''
-    <p><em>Hint</em>: This is a RESTful web service create by Valaxy Infotech! Append a username
+    <p><em>Hint</em>: This is a RESTful web service! Append a username
     to the URL (for example: <code>/Valaxy</code>) to say hello to
     someone specific.</p>\n'''
 home_link = '<p><a href="/">Back</a></p>\n'
