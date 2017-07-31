@@ -112,11 +112,11 @@ deactivate
 Elastic Beanstalk create an application cluster at the top level under which we can have multiple environments, say `dev`,`test` and `prod`
 ```sh
 cd /var/eb-virt/newsapp
-eb init -p python2.7 newsapp
+eb init -p python2.7 newsapp -–region ap-south-1
 ```
 #### Optional Set keypair for EC2 instances
 ```sh
-eb init -–region ap-south-1
+eb init
 ```
 ## RELEASE - Deploy `application` to Elastic Bean Stalk
 Lets go ahead and create an environment and deploy our app
@@ -131,5 +131,11 @@ eb open
 ```
 ### Clean Up and Next Steps
 ```sh
-eb terminate newsapp
+eb terminate newsapp-env-prod
+```
+
+### To switch between staging and production environment, 
+```sh
+# eb use {{env-name}}
+eb use newsapp-env-dev
 ```
