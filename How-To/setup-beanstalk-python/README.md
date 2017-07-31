@@ -7,41 +7,55 @@ To follow this tutorial, you should have all of the Common Prerequisites for Pyt
 - virtualenv
 - awsebcli
 
-## Setup the development environment
-```sh
-yum -y install python-pip
-pip install --upgrade pip
-pip install virtualenv
-# Install Flask
-pip install flask==0.10.1
-pip freeze
 
+## Setup the development environment
+#### The below commands have been tested in `RHEL`
+```sh
 ## Install Elastic Beanstalk CLI
 pip install --upgrade --user awsebcli
 export PATH=/root/.local/bin:$PATH
 source ~/.bashrc
 #### Check the installation
 eb --version
+
+# Optionally upgrade `pip
+# yum -y install python-pip
+pip install --upgrade pip
+pip install virtualenv
+# Install Flask
+pip install flask==0.10.1
+pip freeze
 ```
 
 
 ## Create a Python Virtual Environment for our Applicaion
 ```sh
-mkdir -p /var/virt-env/elastic-bean-stalk-app
-virtualenv /var/virt-env/
-source /var/virt-env/bin/activate
+virtualenv /var/eb-virt
+source /var/eb-virt/bin/activate
 ```
 
 ### Install Flask
 ```sh
-pip install flask
+pip install flask==0.10.1
 ```
-#### DEV - Write the flask code
-We are creating a simple flask application to welcome our user
+#### Verify `flask` installation
 ```sh
-cd /var/virt-env/elastic-bean-stalk-app
+(newsapp)[root@ip var]# pip freeze
+Flask==0.10.1
+itsdangerous==0.24
+Jinja2==2.9.6
+MarkupSafe==1.0
+Werkzeug==0.12.2
+```
 
-cat > "/var/virt-env/elastic-bean-stalk-app/application.py" << "EOF"
+#### DEV - Write the flask code
+We are going to create a simple RESTful web service to welcome our user using python `flask` web framework
+```sh
+source /var/eb-virt/bin/activate
+cd /var/eb-virt
+mkdir newsapp
+
+cat > "/var/eb-virt/newsapp/application.py" << "EOF"
 from flask import Flask
 
 # print the welcome greeting.
@@ -81,22 +95,33 @@ EOF
 
 ## BUILD - Lets Package the app
 ```sh
-source /var/virt-env/bin/activate
-pip freeze > requirements.txt
+source /var/eb-virt/bin/activate
+pip freeze > /var/eb-virt/newsapp/requirements.txt
 deactivate
 ```
-#### Create an `eb` environment and deploy our flask application
+
+## Verirfy `app` directory structure
 ```sh
-cd /var/virt-env/elastic-bean-stalk-app
-eb init -p python2.7 prod-env-newsapp
+~]# tree -a /var/eb-virt/newsapp
+/var/eb-virt/newsapp
+├── application.py
+└── requirements.txt
+```
+
+#### Create an Elastic Beanstalk Application environment 
+Elastic Beanstalk create an application cluster at the top level under which we can have multiple environments, say `dev`,`test` and `prod`
+```sh
+cd /var/eb-virt/newsapp
+eb init -p python2.7 newsapp
 ```
 #### Optional Set keypair for EC2 instances
 ```sh
 eb init
 ```
 ## RELEASE - Deploy `application` to Elastic Bean Stalk
+Lets go ahead and create an environment and deploy our app
 ```sh
-eb create newsapp
+eb create newsapp-env-prod
 ```
 
 ##### For testing in local browser
