@@ -116,7 +116,7 @@ eb init -p python2.7 newsapp
 ```
 #### Optional Set keypair for EC2 instances
 ```sh
-eb init
+eb init -–region ap-south-1
 ```
 ## RELEASE - Deploy `application` to Elastic Bean Stalk
 Lets go ahead and create an environment and deploy our app
