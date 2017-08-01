@@ -1,4 +1,4 @@
-# Deploying a Flask Application to AWS Elastic Beanstalk
+# Deploy a Flask Application to AWS Elastic Beanstalk
 
 To follow this tutorial, you should have all of the Common Prerequisites for Python installed, including the following packages:
 
@@ -28,13 +28,13 @@ pip freeze
 ```
 
 
-## Create a Python Virtual Environment for our Applicaion
+#### Create a Python Virtual Environment for our Applicaion
 ```sh
 virtualenv /var/eb-virt
 source /var/eb-virt/bin/activate
 ```
 
-### Install Flask
+#### Install Flask
 ```sh
 pip install flask==0.10.1
 ```
@@ -48,7 +48,7 @@ MarkupSafe==1.0
 Werkzeug==0.12.2
 ```
 
-#### DEV - Write the flask code
+#### DEVELOP - Write the flask code
 We are going to create a simple RESTful web service to welcome our user using python `flask` web framework
 ```sh
 source /var/eb-virt/bin/activate
@@ -92,6 +92,13 @@ if __name__ == "__main__":
     application.run()
 EOF
 ```
+#### Verirfy `app` directory structure
+```sh
+~]# tree -a /var/eb-virt/newsapp
+/var/eb-virt/newsapp
+├── application.py
+└── requirements.txt
+```
 
 ## BUILD - Lets Package the app
 ```sh
@@ -100,23 +107,19 @@ pip freeze > /var/eb-virt/newsapp/requirements.txt
 deactivate
 ```
 
-## Verirfy `app` directory structure
-```sh
-~]# tree -a /var/eb-virt/newsapp
-/var/eb-virt/newsapp
-├── application.py
-└── requirements.txt
-```
-
 #### Create an Elastic Beanstalk Application environment 
-Elastic Beanstalk create an application cluster at the top level under which we can have multiple environments, say `dev`,`test` and `prod`
+Elastic Beanstalk create needs application cluster at the top level under which we can have multiple environments, say `dev`,`test` and `prod`
 ```sh
 cd /var/eb-virt/newsapp
-eb init -p python2.7 newsapp -–region ap-south-1
+eb init -p python2.7 newsapp --region ap-south-1
 ```
 #### Optional Set keypair for EC2 instances
 ```sh
 eb init
+```
+### Check `eb` Configuration
+```sh
+eb config
 ```
 ## RELEASE - Deploy `application` to Elastic Bean Stalk
 Lets go ahead and create an environment and deploy our app
@@ -129,9 +132,14 @@ _This step will only work if you have X11 configured in your server and browser 
 ```sh
 eb open
 ```
-### Clean Up and Next Steps
+
+## MONITOR - Configure Cloudwatch
+We can configure cloudwatch to monitor our deplooyment and inform the devs of any potentital bugs and defects
+
+## UPDATES - Pushing `app` updates to `eb`
+Here we will learn how to perform `Blue-Green` deployments
 ```sh
-eb terminate newsapp-env-prod
+{{To Do}}
 ```
 
 ### To switch between staging and production environment, 
@@ -139,3 +147,10 @@ eb terminate newsapp-env-prod
 # eb use {{env-name}}
 eb use newsapp-env-dev
 ```
+### Clean Up and Next Steps
+```sh
+eb terminate newsapp-env-prod
+```
+
+
+
