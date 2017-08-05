@@ -22,9 +22,6 @@ eb --version
 # yum -y install python-pip
 pip install --upgrade pip
 pip install virtualenv
-# Install Flask
-pip install flask==0.10.1
-pip freeze
 ```
 
 
