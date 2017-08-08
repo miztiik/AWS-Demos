@@ -108,17 +108,23 @@ To list the current configuration,
 ```sh
 eb config
 ```
-
+![Fig 1 : AWS Elastic Beanstalk - Application(s)](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/img/Valaxy-Training-Elastic-Beanstalk-Application-Environments.png)
 ##### For testing in local browser
 _This step will only work if you have X11 configured in your server and browser installed,_
 ```sh
 eb open
 ```
+![Fig 2 : Application - Welcome Page](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/img/valaxy-Training-Elastic-Beanstalk-Application-Environments-welcome.png)
 
+###### Choose your 'newssection' to get news
+![Fig 3 : Application - News Section Page](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/img/Valaxy-Training-Elastic-Beanstalk-Application-Environments-newssection.png)
+###### The News Results from various resources are listed
+![Fig 4 : Application - News Results Page](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/img/valaxy-Training-Elastic-Beanstalk-Application-Environments-news.png)
 ## MONITOR - Configure Cloudwatch
 We can configure cloudwatch to monitor our deplooyment and inform the devs of any potentital bugs and defects
 
-## UPDATES - BLUE - GREEN Deployments
+## UPDATES - [Blue / Green Deployments](http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.CNAMESwap.html)
+
 Here we will learn how to perform `Blue-Green` deployments. Make some _cosmetic changes_ to the `templates/welcome.html` file and commit the changes using `git` command.
 ```sh
 cd /var/eb-virt/flask-news-app
@@ -145,7 +151,7 @@ Application: newsapp
 
 
 # eb use {{env-name}}
-eb use newsapp-env-dev
+eb use newsapp-env-prod-blue
 ```
 ### Clean Up and Next Steps
 _if you want to remove only some of the environments,_
