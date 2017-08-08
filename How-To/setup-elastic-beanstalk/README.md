@@ -150,4 +150,3 @@ eb terminate newsapp-env-prod
 ```
 
 
-
