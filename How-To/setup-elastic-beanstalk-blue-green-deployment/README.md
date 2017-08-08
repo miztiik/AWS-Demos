@@ -90,24 +90,6 @@ eb create newsapp-env-prod
 _Safely quit the rolling logs, when you see `-- Events -- (safe to Ctrl+C) Use "eb abort" to cancel the command.`_
 
 ### Check the status of the deployment
-
-
-### Check `eb` Configuration
-```sh
-eb config
-```
-
-##### For testing in local browser
-_This step will only work if you have X11 configured in your server and browser installed,_
-```sh
-eb open
-```
-
-## MONITOR - Configure Cloudwatch
-We can configure cloudwatch to monitor our deplooyment and inform the devs of any potentital bugs and defects
-
-## UPDATES - Pushing `app` updates to `eb`
-Here we will learn how to perform `Blue-Green` deployments
 ```sh
 [root@ip flask-news-app]# eb status
 Environment details for: newsapp-env-prod
@@ -121,15 +103,25 @@ Environment details for: newsapp-env-prod
   Updated: 2017-08-08 10:56:13.741000+00:00
   Status: Ready
   Health: Green
-[root@ip flask-news-app]#
-
+```
+To list the current configuration,
+```sh
+eb config
 ```
 
-
-## BLUE - GREEN Deployments
-_Make some cosmetic changes to the `templates/welcome.html` file and commit the changes using `git`_
+##### For testing in local browser
+_This step will only work if you have X11 configured in your server and browser installed,_
 ```sh
-git 
+eb open
+```
+
+## MONITOR - Configure Cloudwatch
+We can configure cloudwatch to monitor our deplooyment and inform the devs of any potentital bugs and defects
+
+## UPDATES - BLUE - GREEN Deployments
+Here we will learn how to perform `Blue-Green` deployments. Make some _cosmetic changes_ to the `templates/welcome.html` file and commit the changes using `git` command.
+```sh
+cd /var/eb-virt/flask-news-app
 git add .
 git commit -m "Cosmetic Changes to the welcome template"
 ```
