@@ -20,7 +20,7 @@ globalVars['az2_pubsubnet_CIDRange']   = "10.240.1.128/26"
 globalVars['az2_sparesubnet_CIDRange'] = "10.240.1.192/26"
 
 globalVars['tagProject']               = "Project"
-globalVars['tagProjectName']           = "miztiik-vpc-demo"
+globalVars['tagProjectName']           = "miztiik-elb-demo"
 globalVars['EC2-RH-AMI-ID']            = "ami-cdbdd7a2"
 globalVars['EC2-Amazon-AMI-ID']        = "ami-3c89f653"
 globalVars['EC2-InstanceType']         = "t2.micro"
