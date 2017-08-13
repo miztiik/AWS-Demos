@@ -87,8 +87,8 @@ pvtSecGrp = ec2.create_security_group( DryRun = False,
 pubSecGrp.create_tags(Tags=[{'Key': globalVars['tagName'] ,'Value':'public-security-group'}])
 pvtSecGrp.create_tags(Tags=[{'Key': globalVars['tagName'] ,'Value':'private-security-group'}])
 
-pubSecGrp.create_tags(Tags=[{'Key': 'Name' ,'Value': globalVars['tagName']+'-public-security-group'}])
-pvtSecGrp.create_tags(Tags=[{'Key': 'Name' ,'Value': globalVars['tagName']+'-private-security-group'}])
+pubSecGrp.create_tags(Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key': 'Name' ,'Value': globalVars['tagProjectName']+'-public-security-group'}])
+pvtSecGrp.create_tags(Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key': 'Name' ,'Value': globalVars['tagProjectName']+'-private-security-group'}])
 
 # Add a rule that allows inbound SSH, HTTP, HTTPS traffic ( from any source )
 ec2Client.authorize_security_group_ingress( GroupId  = pubSecGrp.id ,
