@@ -71,6 +71,17 @@ tag = az2_sparesubnet.create_tags   ( Tags=[{'Key': globalVars['tagName'] , 'Val
 tag = intGateway.create_tags        ( Tags=[{'Key': globalVars['tagName'] , 'Value':'igw'}] )
 tag = routeTable.create_tags        ( Tags=[{'Key': globalVars['tagName'] , 'Value':'rtb'}] )
 
+tag = vpc.create_tags               ( Tags=[{'Key': 'Name' , 'Value': globalVars['tagName']+'-vpc'}] )
+tag = az1_pvtsubnet.create_tags     ( Tags=[{'Key': 'Name' , 'Value': globalVars['tagName']+'-az1-private-subnet'}] )
+tag = az1_pubsubnet.create_tags     ( Tags=[{'Key': 'Name' , 'Value': globalVars['tagName']+'-az1-public-subnet'}] )
+tag = az1_sparesubnet.create_tags   ( Tags=[{'Key': 'Name' , 'Value': globalVars['tagName']+'-az1-spare-subnet'}] )
+tag = az2_pvtsubnet.create_tags     ( Tags=[{'Key': 'Name' , 'Value': globalVars['tagName']+'-az2-private-subnet'}] )
+tag = az2_pubsubnet.create_tags     ( Tags=[{'Key': 'Name' , 'Value': globalVars['tagName']+'-az2-public-subnet'}] )
+tag = az2_sparesubnet.create_tags   ( Tags=[{'Key': 'Name' , 'Value': globalVars['tagName']+'-az2-spare-subnet'}] )
+tag = intGateway.create_tags        ( Tags=[{'Key': 'Name' , 'Value': globalVars['tagName']+'-igw'}] )
+tag = routeTable.create_tags        ( Tags=[{'Key': 'Name' , 'Value': globalVars['tagName']+'-rtb'}] )
+
+
 # Let create the Public & Private Security Groups
 pubSecGrp = ec2.create_security_group( DryRun = False, 
                               GroupName='pubSecGrp',
@@ -86,6 +97,8 @@ pvtSecGrp = ec2.create_security_group( DryRun = False,
 pubSecGrp.create_tags(Tags=[{'Key': globalVars['tagName'] ,'Value':'public-security-group'}])
 pvtSecGrp.create_tags(Tags=[{'Key': globalVars['tagName'] ,'Value':'private-security-group'}])
 
+pubSecGrp.create_tags(Tags=[{'Key': 'Name' ,'Value': globalVars['tagName']+'public-security-group'}])
+pvtSecGrp.create_tags(Tags=[{'Key': 'Name' ,'Value': globalVars['tagName']+'private-security-group'}])
 
 # Add a rule that allows inbound SSH, HTTP, HTTPS traffic ( from any source )
 ec2Client.authorize_security_group_ingress( GroupId  = pubSecGrp.id ,
