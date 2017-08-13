@@ -45,6 +45,9 @@ source /var/eb-virt/bin/activate
 #### Clone the application repository
 ```sh
 git clone https://github.com/miztiik/flask-news-app.git
+
+# The below tagged release is expected to work perfectly in Elastic Beanstalk
+# git reset --hard "v2.1"
 ```
 
 #### Verirfy `app` directory structure
