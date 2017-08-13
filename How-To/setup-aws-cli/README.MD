@@ -39,3 +39,10 @@ aws --version
 ```
 
 #### To configure aws cli run `aws configure`
+You will be prompted to enter four items. Paste in the two keys, and enter your preferred region, say `ap-south-1` and json for the final prompts as shown.
+```sh
+AWS Access Key ID [None]: AKIAIAY7KGL75O3NTVSA 
+AWS Secret Access Key [None]: 2pM59CQnGpUfxm6PD0JFRz/lzwFUHbNBXG4I5yZb
+Default region name [None]: ap-south-1
+Default output format [None]: json
+```
