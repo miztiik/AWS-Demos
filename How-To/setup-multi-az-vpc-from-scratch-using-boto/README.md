@@ -13,19 +13,35 @@ After we are done, we should be having a VPC architecture as shown below,
 We are going to use Asia Pacific Region, Our VPC will have 512 IPs, spread over two AZs each having their own set of 256 IPs. We will use CIDR Block `10.240.0.0/23`
 ```py
 import boto3
-REGION_NAME = "ap-south-1"
-AZ1 = "ap-south-1a"
-AZ2 = "ap-south-1b"
-CIDRange = '10.240.0.0/23'
+globalVars  = {}
+globalVars['REGION_NAME']              = "ap-south-1"
+globalVars['AZ1']                      = "ap-south-1a"
+globalVars['AZ2']                      = "ap-south-1b"
+globalVars['CIDRange']                 = "10.240.0.0/23"
+
+globalVars['az1_pvtsubnet_CIDRange']   = "10.240.0.0/25"
+globalVars['az1_pubsubnet_CIDRange']   = "10.240.0.128/26"
+globalVars['az1_sparesubnet_CIDRange'] = "10.240.0.192/26"
+
+globalVars['az2_pvtsubnet_CIDRange']   = "10.240.1.0/25"
+globalVars['az2_pubsubnet_CIDRange']   = "10.240.1.128/26"
+globalVars['az2_sparesubnet_CIDRange'] = "10.240.1.192/26"
+
+globalVars['tagName']                  = "miztiik-vpc-demo-00"
+globalVars['EC2-RH-AMI-ID']            = "ami-cdbdd7a2"
+globalVars['EC2-Amazon-AMI-ID']        = "ami-3c89f653"
+globalVars['EC2-InstanceType']         = "t2.micro"
+globalVars['EC2-KeyName']              = "valaxy-key"
+globalVars['EC2-InstanceType']         = "t2.micro"
 ```
 
 _ToDo: Create the subnet split as variables, and remaining can be automated_
 
 ## Create VPC, Subnet, and Internet Gateway
 ```py
-ec2         = boto3.resource ( 'ec2', region_name = REGION_NAME )
-ec2Client   = boto3.client   ( 'ec2', region_name = REGION_NAME )
-vpc         = ec2.create_vpc ( CidrBlock = CIDRange  )
+ec2         = boto3.resource ( 'ec2', region_name = globalVars['REGION_NAME'] )
+ec2Client   = boto3.client   ( 'ec2', region_name = globalVars['REGION_NAME'] )
+vpc         = ec2.create_vpc ( CidrBlock = globalVars['CIDRange']  )
 ```
 
 ## Create Subnets
@@ -38,17 +54,18 @@ Since VPCs CIDR cannot be modified after they are created, we need to allocated 
 ### In Availability Zone 01
 For AZ1, We will allocated the CIDR `10.240.0.0/24` , i,e 256 IPs
 ```py
-az1_pvtsubnet   = vpc.create_subnet( CidrBlock = '10.240.0.0/25'   , AvailabilityZone = AZ1 )
-az1_pubsubnet   = vpc.create_subnet( CidrBlock = '10.240.0.128/26' , AvailabilityZone = AZ1 )
-az1_sparesubnet = vpc.create_subnet( CidrBlock = '10.240.0.192/26' , AvailabilityZone = AZ1 )
+az1_pvtsubnet   = vpc.create_subnet( CidrBlock = globalVars['az1_pvtsubnet_CIDRange'], AvailabilityZone = globalVars['AZ1'] )
+az1_pubsubnet   = vpc.create_subnet( CidrBlock = globalVars['az1_pubsubnet_CIDRange'], AvailabilityZone = globalVars['AZ1'] )
+az1_sparesubnet = vpc.create_subnet( CidrBlock = globalVars['az1_sparesubnet_CIDRange'], AvailabilityZone = globalVars['AZ1'] )
 ```
 
 ### In Availability Zone 02
 For AZ2, We will allocated the CIDR `10.240.1.0/24` , i,e 256 IPs
 ```py
-az2_pvtsubnet   = vpc.create_subnet( CidrBlock = '10.240.1.0/25'   , AvailabilityZone = AZ2 )
-az2_pubsubnet   = vpc.create_subnet( CidrBlock = '10.240.1.128/26' , AvailabilityZone = AZ2 )
-az2_sparesubnet = vpc.create_subnet( CidrBlock = '10.240.1.192/26' , AvailabilityZone = AZ2 )
+az2_pvtsubnet   = vpc.create_subnet( CidrBlock = globalVars['az2_pvtsubnet_CIDRange'], AvailabilityZone = globalVars['AZ2'] )
+az2_pubsubnet   = vpc.create_subnet( CidrBlock = globalVars['az2_pubsubnet_CIDRange'], AvailabilityZone = globalVars['AZ2'] )
+az2_sparesubnet = vpc.create_subnet( CidrBlock = globalVars['az2_sparesubnet_CIDRange'], AvailabilityZone = globalVars['AZ2'] )
+
 ```
 
 ## Enable DNS Hostnames in the VPC
@@ -84,15 +101,15 @@ intRoute = ec2Client.create_route( RouteTableId = routeTable.id , DestinationCid
 ## Tag the resources
 It is always a good idea to tag the resources. It allows for easier resource identification, classification and helps in billing.
 ```py
-tag = vpc.create_tags               ( Tags=[{'Key': 'edx', 'Value':'edx-vpc'}] )
-tag = az1_pvtsubnet.create_tags     ( Tags=[{'Key': 'edx', 'Value':'edx-az1-private-subnet'}] )
-tag = az1_pubsubnet.create_tags     ( Tags=[{'Key': 'edx', 'Value':'edx-az1-public-subnet'}] )
-tag = az1_sparesubnet.create_tags   ( Tags=[{'Key': 'edx', 'Value':'edx-az1-spare-subnet'}] )
-tag = az2_pvtsubnet.create_tags     ( Tags=[{'Key': 'edx', 'Value':'edx-az2-private-subnet'}] )
-tag = az2_pubsubnet.create_tags     ( Tags=[{'Key': 'edx', 'Value':'edx-az2-public-subnet'}] )
-tag = az2_sparesubnet.create_tags   ( Tags=[{'Key': 'edx', 'Value':'edx-az2-spare-subnet'}] )
-tag = intGateway.create_tags        ( Tags=[{'Key': 'edx', 'Value':'edx-igw'}] )
-tag = routeTable.create_tags        ( Tags=[{'Key': 'edx', 'Value':'edx-rtb'}] )
+tag = vpc.create_tags               ( Tags=[{'Key': globalVars['tagName'] , 'Value':'vpc'}] )
+tag = az1_pvtsubnet.create_tags     ( Tags=[{'Key': globalVars['tagName'] , 'Value':'az1-private-subnet'}] )
+tag = az1_pubsubnet.create_tags     ( Tags=[{'Key': globalVars['tagName'] , 'Value':'az1-public-subnet'}] )
+tag = az1_sparesubnet.create_tags   ( Tags=[{'Key': globalVars['tagName'] , 'Value':'az1-spare-subnet'}] )
+tag = az2_pvtsubnet.create_tags     ( Tags=[{'Key': globalVars['tagName'] , 'Value':'az2-private-subnet'}] )
+tag = az2_pubsubnet.create_tags     ( Tags=[{'Key': globalVars['tagName'] , 'Value':'az2-public-subnet'}] )
+tag = az2_sparesubnet.create_tags   ( Tags=[{'Key': globalVars['tagName'] , 'Value':'az2-spare-subnet'}] )
+tag = intGateway.create_tags        ( Tags=[{'Key': globalVars['tagName'] , 'Value':'igw'}] )
+tag = routeTable.create_tags        ( Tags=[{'Key': globalVars['tagName'] , 'Value':'rtb'}] )
 ```
 
 ## Let create the Public & Private Security Groups
@@ -112,8 +129,8 @@ pvtSecGrp = ec2.create_security_group( DryRun = False,
 ```
 #### Tag the Security Groups
 ```py
-pubSecGrp.create_tags(Tags=[{'Key': 'edx','Value':'edx-public-security-group'}])
-pvtSecGrp.create_tags(Tags=[{'Key': 'edx','Value':'edx-private-security-group'}])
+pubSecGrp.create_tags(Tags=[{'Key': globalVars['tagName'] ,'Value':'public-security-group'}])
+pvtSecGrp.create_tags(Tags=[{'Key': globalVars['tagName'] ,'Value':'private-security-group'}])
 ```
 
 #### Add a rule that allows inbound SSH, HTTP, HTTPS traffic ( from any source )
@@ -146,6 +163,7 @@ ec2Client.authorize_security_group_ingress( GroupId  = pubSecGrp.id ,
 
 ### Exercise
  - Create an EC2 Instances in any of the subnets and try to ping the internet
+_Point to Ponder: For ping you **may** need ICMP Port:)_
 
 ## Python Funtion to Cleanup AWS Resources,
 It is a prudent to cleanup after you have successfully completed the demo, Call this function `cleanAll` only if you are sure of what you are doing, as this function **assumes** you are running it in the same terminal as the previous commands.
