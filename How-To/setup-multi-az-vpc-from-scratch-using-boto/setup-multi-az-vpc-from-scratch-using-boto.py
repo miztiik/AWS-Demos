@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Using NAT Instances to connect Private instance to internet
+# VPC design for multi az deployments
 
 import boto3
 
@@ -19,7 +19,8 @@ globalVars['az2_pvtsubnet_CIDRange']   = "10.240.1.0/25"
 globalVars['az2_pubsubnet_CIDRange']   = "10.240.1.128/26"
 globalVars['az2_sparesubnet_CIDRange'] = "10.240.1.192/26"
 
-globalVars['tagName']                  = "miztiik-vpc-demo-00"
+globalVars['tagProject']               = "Project"
+globalVars['tagProjectName']           = "miztiik-vpc-demo"
 globalVars['EC2-RH-AMI-ID']            = "ami-cdbdd7a2"
 globalVars['EC2-Amazon-AMI-ID']        = "ami-3c89f653"
 globalVars['EC2-InstanceType']         = "t2.micro"
@@ -61,26 +62,15 @@ routeTable.associate_with_subnet( SubnetId = az2_pvtsubnet.id )
 intRoute = ec2Client.create_route( RouteTableId = routeTable.id , DestinationCidrBlock = '0.0.0.0/0' , GatewayId = intGateway.id )
 
 # Tag the resources
-tag = vpc.create_tags               ( Tags=[{'Key': globalVars['tagName'] , 'Value':'vpc'}] )
-tag = az1_pvtsubnet.create_tags     ( Tags=[{'Key': globalVars['tagName'] , 'Value':'az1-private-subnet'}] )
-tag = az1_pubsubnet.create_tags     ( Tags=[{'Key': globalVars['tagName'] , 'Value':'az1-public-subnet'}] )
-tag = az1_sparesubnet.create_tags   ( Tags=[{'Key': globalVars['tagName'] , 'Value':'az1-spare-subnet'}] )
-tag = az2_pvtsubnet.create_tags     ( Tags=[{'Key': globalVars['tagName'] , 'Value':'az2-private-subnet'}] )
-tag = az2_pubsubnet.create_tags     ( Tags=[{'Key': globalVars['tagName'] , 'Value':'az2-public-subnet'}] )
-tag = az2_sparesubnet.create_tags   ( Tags=[{'Key': globalVars['tagName'] , 'Value':'az2-spare-subnet'}] )
-tag = intGateway.create_tags        ( Tags=[{'Key': globalVars['tagName'] , 'Value':'igw'}] )
-tag = routeTable.create_tags        ( Tags=[{'Key': globalVars['tagName'] , 'Value':'rtb'}] )
-
-tag = vpc.create_tags               ( Tags=[{'Key': 'Name' , 'Value': globalVars['tagName']+'-vpc'}] )
-tag = az1_pvtsubnet.create_tags     ( Tags=[{'Key': 'Name' , 'Value': globalVars['tagName']+'-az1-private-subnet'}] )
-tag = az1_pubsubnet.create_tags     ( Tags=[{'Key': 'Name' , 'Value': globalVars['tagName']+'-az1-public-subnet'}] )
-tag = az1_sparesubnet.create_tags   ( Tags=[{'Key': 'Name' , 'Value': globalVars['tagName']+'-az1-spare-subnet'}] )
-tag = az2_pvtsubnet.create_tags     ( Tags=[{'Key': 'Name' , 'Value': globalVars['tagName']+'-az2-private-subnet'}] )
-tag = az2_pubsubnet.create_tags     ( Tags=[{'Key': 'Name' , 'Value': globalVars['tagName']+'-az2-public-subnet'}] )
-tag = az2_sparesubnet.create_tags   ( Tags=[{'Key': 'Name' , 'Value': globalVars['tagName']+'-az2-spare-subnet'}] )
-tag = intGateway.create_tags        ( Tags=[{'Key': 'Name' , 'Value': globalVars['tagName']+'-igw'}] )
-tag = routeTable.create_tags        ( Tags=[{'Key': 'Name' , 'Value': globalVars['tagName']+'-rtb'}] )
-
+tag = vpc.create_tags               ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-vpc'}] )
+tag = az1_pvtsubnet.create_tags     ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-az1-private-subnet'}] )
+tag = az1_pubsubnet.create_tags     ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-az1-public-subnet'}] )
+tag = az1_sparesubnet.create_tags   ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-az1-spare-subnet'}] )
+tag = az2_pvtsubnet.create_tags     ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-az2-private-subnet'}] )
+tag = az2_pubsubnet.create_tags     ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-az2-public-subnet'}] )
+tag = az2_sparesubnet.create_tags   ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-az2-spare-subnet'}] )
+tag = intGateway.create_tags        ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-igw'}] )
+tag = routeTable.create_tags        ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-rtb'}] )
 
 # Let create the Public & Private Security Groups
 pubSecGrp = ec2.create_security_group( DryRun = False, 
@@ -97,8 +87,8 @@ pvtSecGrp = ec2.create_security_group( DryRun = False,
 pubSecGrp.create_tags(Tags=[{'Key': globalVars['tagName'] ,'Value':'public-security-group'}])
 pvtSecGrp.create_tags(Tags=[{'Key': globalVars['tagName'] ,'Value':'private-security-group'}])
 
-pubSecGrp.create_tags(Tags=[{'Key': 'Name' ,'Value': globalVars['tagName']+'public-security-group'}])
-pvtSecGrp.create_tags(Tags=[{'Key': 'Name' ,'Value': globalVars['tagName']+'private-security-group'}])
+pubSecGrp.create_tags(Tags=[{'Key': 'Name' ,'Value': globalVars['tagName']+'-public-security-group'}])
+pvtSecGrp.create_tags(Tags=[{'Key': 'Name' ,'Value': globalVars['tagName']+'-private-security-group'}])
 
 # Add a rule that allows inbound SSH, HTTP, HTTPS traffic ( from any source )
 ec2Client.authorize_security_group_ingress( GroupId  = pubSecGrp.id ,
