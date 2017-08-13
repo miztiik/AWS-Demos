@@ -27,7 +27,8 @@ globalVars['az2_pvtsubnet_CIDRange']   = "10.240.1.0/25"
 globalVars['az2_pubsubnet_CIDRange']   = "10.240.1.128/26"
 globalVars['az2_sparesubnet_CIDRange'] = "10.240.1.192/26"
 
-globalVars['tagName']                  = "miztiik-vpc-demo-00"
+globalVars['tagProject']               = "Project"
+globalVars['tagProjectName']           = "miztiik-vpc-demo"
 globalVars['EC2-RH-AMI-ID']            = "ami-cdbdd7a2"
 globalVars['EC2-Amazon-AMI-ID']        = "ami-3c89f653"
 globalVars['EC2-InstanceType']         = "t2.micro"
@@ -101,15 +102,15 @@ intRoute = ec2Client.create_route( RouteTableId = routeTable.id , DestinationCid
 ## Tag the resources
 It is always a good idea to tag the resources. It allows for easier resource identification, classification and helps in billing.
 ```py
-tag = vpc.create_tags               ( Tags=[{'Key': globalVars['tagName'] , 'Value':'vpc'}] )
-tag = az1_pvtsubnet.create_tags     ( Tags=[{'Key': globalVars['tagName'] , 'Value':'az1-private-subnet'}] )
-tag = az1_pubsubnet.create_tags     ( Tags=[{'Key': globalVars['tagName'] , 'Value':'az1-public-subnet'}] )
-tag = az1_sparesubnet.create_tags   ( Tags=[{'Key': globalVars['tagName'] , 'Value':'az1-spare-subnet'}] )
-tag = az2_pvtsubnet.create_tags     ( Tags=[{'Key': globalVars['tagName'] , 'Value':'az2-private-subnet'}] )
-tag = az2_pubsubnet.create_tags     ( Tags=[{'Key': globalVars['tagName'] , 'Value':'az2-public-subnet'}] )
-tag = az2_sparesubnet.create_tags   ( Tags=[{'Key': globalVars['tagName'] , 'Value':'az2-spare-subnet'}] )
-tag = intGateway.create_tags        ( Tags=[{'Key': globalVars['tagName'] , 'Value':'igw'}] )
-tag = routeTable.create_tags        ( Tags=[{'Key': globalVars['tagName'] , 'Value':'rtb'}] )
+tag = vpc.create_tags               ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-vpc'}] )
+tag = az1_pvtsubnet.create_tags     ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-az1-private-subnet'}] )
+tag = az1_pubsubnet.create_tags     ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-az1-public-subnet'}] )
+tag = az1_sparesubnet.create_tags   ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-az1-spare-subnet'}] )
+tag = az2_pvtsubnet.create_tags     ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-az2-private-subnet'}] )
+tag = az2_pubsubnet.create_tags     ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-az2-public-subnet'}] )
+tag = az2_sparesubnet.create_tags   ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-az2-spare-subnet'}] )
+tag = intGateway.create_tags        ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-igw'}] )
+tag = routeTable.create_tags        ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-rtb'}] )
 ```
 
 ## Let create the Public & Private Security Groups
