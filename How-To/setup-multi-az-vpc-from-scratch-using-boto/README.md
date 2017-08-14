@@ -116,7 +116,13 @@ tag = routeTable.create_tags        ( Tags=[{'Key':globalVars['tagProject'], 'Va
 ## Let create the Public & Private Security Groups
 We will need separate security groups for our private and public instances for granular control. Further more, you may allow your private  instances only reachable from your public instances to increase security(although this is not shown here)
 ```py
-pubSecGrp = ec2.create_security_group( DryRun = False, 
+elbSecGrp = ec2.create_security_group( DryRun = False,
+                              GroupName='elbSecGrp',
+                              Description='ElasticLoadBalancer_Security_Group',
+                              VpcId= vpc.id
+                            )
+
+pubSecGrp = ec2.create_security_group( DryRun = False,
                               GroupName='pubSecGrp',
                               Description='Public_Security_Group',
                               VpcId= vpc.id
@@ -130,6 +136,7 @@ pvtSecGrp = ec2.create_security_group( DryRun = False,
 ```
 #### Tag the Security Groups
 ```py
+elbSecGrp.create_tags(Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key': 'Name' ,'Value': globalVars['tagProjectName']+'-elb-security-group'}])
 pubSecGrp.create_tags(Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key': 'Name' ,'Value': globalVars['tagProjectName']+'-public-security-group'}])
 pvtSecGrp.create_tags(Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key': 'Name' ,'Value': globalVars['tagProjectName']+'-private-security-group'}])
 ```
