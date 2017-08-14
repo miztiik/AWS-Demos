@@ -73,6 +73,12 @@ tag = intGateway.create_tags        ( Tags=[{'Key':globalVars['tagProject'], 'Va
 tag = routeTable.create_tags        ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-rtb'}] )
 
 # Let create the Public & Private Security Groups
+elbSecGrp = ec2.create_security_group( DryRun = False,
+                              GroupName='elbSecGrp',
+                              Description='ElasticLoadBalancer_Security_Group',
+                              VpcId= vpc.id
+                            )
+
 pubSecGrp = ec2.create_security_group( DryRun = False, 
                               GroupName='pubSecGrp',
                               Description='Public_Security_Group',
@@ -84,10 +90,18 @@ pvtSecGrp = ec2.create_security_group( DryRun = False,
                               Description='Private_Security_Group',
                               VpcId= vpc.id
                             )
+elbSecGrp.create_tags(Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key': 'Name' ,'Value': globalVars['tagProjectName']+'-elb-security-group'}])
 pubSecGrp.create_tags(Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key': 'Name' ,'Value': globalVars['tagProjectName']+'-public-security-group'}])
 pvtSecGrp.create_tags(Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key': 'Name' ,'Value': globalVars['tagProjectName']+'-private-security-group'}])
 
 # Add a rule that allows inbound SSH, HTTP, HTTPS traffic ( from any source )
+ec2Client.authorize_security_group_ingress( GroupId  = elbSecGrp.id ,
+                                        IpProtocol= 'tcp',
+                                        FromPort=80,
+                                        ToPort=80,
+                                        CidrIp='0.0.0.0/0'
+                                        )
+
 ec2Client.authorize_security_group_ingress( GroupId  = pubSecGrp.id ,
                                         IpProtocol= 'tcp',
                                         FromPort=80,
