@@ -7,38 +7,6 @@ I am going to assume the reader is familiar with up AWS VPCs and using boto3,
 - Boto3 - Python familiarity
 
 After we are done, we should be having a VPC architecture as shown below,
-![Fig 1 : Multi-AZ VPC Configuration Context](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/img/Multi-AZ-VPC-ELB.png)
-
-### Define boto defaults:
-We are going to use Asia Pacific Region, Our VPC will have 512 IPs, spread over two AZs each having their own set of 256 IPs. We will use CIDR Block `10.240.0.0/23`
-```py
-import boto3
-globalVars  = {}
-globalVars['REGION_NAME']              = "ap-south-1"
-globalVars['AZ1']                      = "ap-south-1a"
-globalVars['AZ2']                      = "ap-south-1b"
-globalVars['CIDRange']                 = "10.240.0.0/23"
-
-globalVars['az1_pvtsubnet_CIDRange']   = "10.240.0.0/25"
-globalVars['az1_pubsubnet_CIDRange']   = "10.240.0.128/26"
-globalVars['az1_sparesubnet_CIDRange'] = "10.240.0.192/26"
-
-globalVars['az2_pvtsubnet_CIDRange']   = "10.240.1.0/25"
-globalVars['az2_pubsubnet_CIDRange']   = "10.240.1.128/26"
-globalVars['az2_sparesubnet_CIDRange'] = "10.240.1.192/26"
-
-globalVars['tagProject']               = "Project"
-globalVars['tagProjectName']           = "miztiik-vpc-demo"
-globalVars['EC2-RH-AMI-ID']            = "ami-cdbdd7a2"
-globalVars['EC2-Amazon-AMI-ID']        = "ami-3c89f653"
-globalVars['EC2-InstanceType']         = "t2.micro"
-globalVars['EC2-KeyName']              = "valaxy-key"
-globalVars['EC2-InstanceType']         = "t2.micro"
-```
-
-_ToDo: Create the subnet split as variables, and remaining can be automated_
-
-## Create VPC, Subnet, and Internet Gateway
 ```py
 ec2         = boto3.resource ( 'ec2', region_name = globalVars['REGION_NAME'] )
 ec2Client   = boto3.client   ( 'ec2', region_name = globalVars['REGION_NAME'] )
@@ -155,6 +123,14 @@ ec2Client.authorize_security_group_ingress( GroupId  = elbSecGrp.id ,
                                         ToPort=80,
                                         CidrIp='0.0.0.0/0'
                                         )
+
+ec2Client.authorize_security_group_ingress( GroupId = pubSecGrp.id,
+                                            IpPermissions = [{'IpProtocol': 'tcp',
+                                                               'FromPort': 80,
+                                                               'ToPort': 80,
+                                                               'UserIdGroupPairs': [{ 'GroupId':elbSecGrp.id}]
+                                                             }]
+                                           )
 
 ec2Client.authorize_security_group_ingress( GroupId  = pubSecGrp.id ,
                                         IpProtocol= 'tcp',

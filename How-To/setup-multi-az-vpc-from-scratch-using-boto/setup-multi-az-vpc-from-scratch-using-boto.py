@@ -102,6 +102,14 @@ ec2Client.authorize_security_group_ingress( GroupId  = elbSecGrp.id ,
                                         CidrIp='0.0.0.0/0'
                                         )
 
+ec2Client.authorize_security_group_ingress( GroupId = pubSecGrp.id,
+                                            IpPermissions = [{'IpProtocol': 'tcp',
+                                                               'FromPort': 80,
+                                                               'ToPort': 80,
+                                                               'UserIdGroupPairs': [{ 'GroupId':elbSecGrp.id}]
+                                                             }]
+                                           )
+
 ec2Client.authorize_security_group_ingress( GroupId  = pubSecGrp.id ,
                                         IpProtocol= 'tcp',
                                         FromPort=80,
