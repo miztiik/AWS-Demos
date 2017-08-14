@@ -149,6 +149,13 @@ As this is a demo, We will configure three ports,
  - Port 80 - _For HTTP Traffic_
  - Port 443 - _For HTTPS Traffic_
 ```py
+ec2Client.authorize_security_group_ingress( GroupId  = elbSecGrp.id ,
+                                        IpProtocol= 'tcp',
+                                        FromPort=80,
+                                        ToPort=80,
+                                        CidrIp='0.0.0.0/0'
+                                        )
+
 ec2Client.authorize_security_group_ingress( GroupId  = pubSecGrp.id ,
                                         IpProtocol= 'tcp',
                                         FromPort=80,
