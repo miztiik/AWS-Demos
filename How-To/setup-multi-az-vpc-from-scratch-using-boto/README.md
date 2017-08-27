@@ -29,7 +29,7 @@ az1_sparesubnet = vpc.create_subnet( CidrBlock = globalVars['az1_sparesubnet_CID
 ```
 
 ### In Availability Zone 02
-For AZ2, We will allocated the CIDR `10.240.1.0/24` , i,e 256 IPs
+For AZ2, We will allocated the CIDR `10.240.1.0/25` , i,e 256 IPs
 ```py
 az2_pvtsubnet   = vpc.create_subnet( CidrBlock = globalVars['az2_pvtsubnet_CIDRange'], AvailabilityZone = globalVars['AZ2'] )
 az2_pubsubnet   = vpc.create_subnet( CidrBlock = globalVars['az2_pubsubnet_CIDRange'], AvailabilityZone = globalVars['AZ2'] )
@@ -70,15 +70,15 @@ intRoute = ec2Client.create_route( RouteTableId = routeTable.id , DestinationCid
 ## Tag the resources
 It is always a good idea to tag the resources. It allows for easier resource identification, classification and helps in billing.
 ```py
-tag = vpc.create_tags               ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-vpc'}] )
-tag = az1_pvtsubnet.create_tags     ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-az1-private-subnet'}] )
-tag = az1_pubsubnet.create_tags     ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-az1-public-subnet'}] )
-tag = az1_sparesubnet.create_tags   ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-az1-spare-subnet'}] )
-tag = az2_pvtsubnet.create_tags     ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-az2-private-subnet'}] )
-tag = az2_pubsubnet.create_tags     ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-az2-public-subnet'}] )
-tag = az2_sparesubnet.create_tags   ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-az2-spare-subnet'}] )
-tag = intGateway.create_tags        ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-igw'}] )
-tag = routeTable.create_tags        ( Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key':'Name', 'Value':globalVars['tagProjectName']+'-rtb'}] )
+vpc.create_tags               ( Tags = [{'Key':'Name', 'Value':globalVars['Project']['Value']+'-vpc'}] )
+az1_pvtsubnet.create_tags     ( Tags = [{'Key':'Name', 'Value':globalVars['Project']['Value']+'-az1-private-subnet'}] )
+az1_pubsubnet.create_tags     ( Tags = [{'Key':'Name', 'Value':globalVars['Project']['Value']+'-az1-public-subnet'}] )
+az1_sparesubnet.create_tags   ( Tags = [{'Key':'Name', 'Value':globalVars['Project']['Value']+'-az1-spare-subnet'}] )
+az2_pvtsubnet.create_tags     ( Tags = [{'Key':'Name', 'Value':globalVars['Project']['Value']+'-az2-private-subnet'}] )
+az2_pubsubnet.create_tags     ( Tags = [{'Key':'Name', 'Value':globalVars['Project']['Value']+'-az2-public-subnet'}] )
+az2_sparesubnet.create_tags   ( Tags = [{'Key':'Name', 'Value':globalVars['Project']['Value']+'-az2-spare-subnet'}] )
+intGateway.create_tags        ( Tags = [{'Key':'Name', 'Value':globalVars['Project']['Value']+'-igw'}] )
+routeTable.create_tags        ( Tags = [{'Key':'Name', 'Value':globalVars['Project']['Value']+'-rtb'}] )
 ```
 
 ## Let create the Public & Private Security Groups
@@ -96,7 +96,7 @@ pubSecGrp = ec2.create_security_group( DryRun = False,
                               VpcId= vpc.id
                             )
 
-pvtSecGrp = ec2.create_security_group( DryRun = False, 
+pvtSecGrp = ec2.create_security_group( DryRun = False,
                               GroupName='pvtSecGrp',
                               Description='Private_Security_Group',
                               VpcId= vpc.id
@@ -104,9 +104,9 @@ pvtSecGrp = ec2.create_security_group( DryRun = False,
 ```
 #### Tag the Security Groups
 ```py
-elbSecGrp.create_tags(Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key': 'Name' ,'Value': globalVars['tagProjectName']+'-elb-security-group'}])
-pubSecGrp.create_tags(Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key': 'Name' ,'Value': globalVars['tagProjectName']+'-public-security-group'}])
-pvtSecGrp.create_tags(Tags=[{'Key':globalVars['tagProject'], 'Value':globalVars['tagProjectName']}, {'Key': 'Name' ,'Value': globalVars['tagProjectName']+'-private-security-group'}])
+elbSecGrp.create_tags(Tags=[{'Key': 'Name' ,'Value': globalVars['Project']['Value']+'-elb-security-group'}])
+pubSecGrp.create_tags(Tags=[{'Key': 'Name' ,'Value': globalVars['Project']['Value']+'-public-security-group'}])
+pvtSecGrp.create_tags(Tags=[{'Key': 'Name' ,'Value': globalVars['Project']['Value']+'-private-security-group'}])
 ```
 
 #### Add a rule that allows inbound SSH, HTTP, HTTPS traffic ( from any source )
@@ -117,6 +117,7 @@ As this is a demo, We will configure three ports,
  - Port 80 - _For HTTP Traffic_
  - Port 443 - _For HTTPS Traffic_
 ```py
+# Add a rule that allows inbound SSH, HTTP, HTTPS traffic ( from any source )
 ec2Client.authorize_security_group_ingress( GroupId  = elbSecGrp.id ,
                                         IpProtocol= 'tcp',
                                         FromPort=80,
@@ -124,11 +125,20 @@ ec2Client.authorize_security_group_ingress( GroupId  = elbSecGrp.id ,
                                         CidrIp='0.0.0.0/0'
                                         )
 
+# Allow Public Security Group to receive traffic from ELB Security group
 ec2Client.authorize_security_group_ingress( GroupId = pubSecGrp.id,
                                             IpPermissions = [{'IpProtocol': 'tcp',
                                                                'FromPort': 80,
                                                                'ToPort': 80,
                                                                'UserIdGroupPairs': [{ 'GroupId':elbSecGrp.id}]
+                                                             }]
+                                           )
+# Allow Private Security Group to receive traffic from Application Security group
+ec2Client.authorize_security_group_ingress( GroupId = pvtSecGrp.id,
+                                            IpPermissions = [{'IpProtocol': 'tcp',
+                                                               'FromPort': 80,
+                                                               'ToPort': 80,
+                                                               'UserIdGroupPairs': [{ 'GroupId':pubSecGrp.id}]
                                                              }]
                                            )
 
