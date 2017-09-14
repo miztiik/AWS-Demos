@@ -18,14 +18,14 @@ globalVars['az1_sparesubnet_CIDRange'] = "10.240.0.192/26"
 globalVars['az2_pvtsubnet_CIDRange']   = "10.240.1.0/25"
 globalVars['az2_pubsubnet_CIDRange']   = "10.240.1.128/26"
 globalVars['az2_sparesubnet_CIDRange'] = "10.240.1.192/26"
-globalVars['Project']                  = { 'Key':'Name',        'Value':'ELB-Demo'}
+globalVars['Project']                  = { 'Key':'Name',        'Value':'VPC-Demo'}
 globalVars['tags']                     = [{'Key':'Owner',       'Value':'Miztiik'},
                                           {'Key':'Environment', 'Value':'Test'},
                                           {'Key':'Department',  'Value':'Valaxy-Training'}]
 globalVars['EC2-RH-AMI-ID']            = "ami-cdbdd7a2"
 globalVars['EC2-Amazon-AMI-ID']        = "ami-3c89f653"
 globalVars['EC2-InstanceType']         = "t2.micro"
-globalVars['EC2-KeyName']              = "valaxy-key"
+globalVars['EC2-KeyName']              = globalVars['Project']['Value']+'-Key'
 globalVars['EC2-InstanceType']         = "t2.micro"
 
 
