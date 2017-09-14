@@ -22,11 +22,7 @@ globalVars['Project']                  = { 'Key':'Name',        'Value':'VPC-Dem
 globalVars['tags']                     = [{'Key':'Owner',       'Value':'Miztiik'},
                                           {'Key':'Environment', 'Value':'Test'},
                                           {'Key':'Department',  'Value':'Valaxy-Training'}]
-globalVars['EC2-RH-AMI-ID']            = "ami-cdbdd7a2"
-globalVars['EC2-Amazon-AMI-ID']        = "ami-3c89f653"
-globalVars['EC2-InstanceType']         = "t2.micro"
 globalVars['EC2-KeyName']              = globalVars['Project']['Value']+'-Key'
-globalVars['EC2-InstanceType']         = "t2.micro"
 
 
 # Creating a VPC, Subnet, and Gateway
