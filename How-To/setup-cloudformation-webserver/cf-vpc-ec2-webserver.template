@@ -271,8 +271,6 @@ Resources:
               - '-'
               - [{Ref: 'AWS::StackName'}, "RDS", {Ref: privAvailabilityZone}]
 
-
-
   webServer:
     Type: AWS::EC2::Instance
     Properties:
@@ -290,7 +288,7 @@ Resources:
             systemctl start httpd
             echo "<h1> Welcome to Valaxy Cloudformation Demo</h1>" >> /var/www/html/index.html
 
-  MyDB:
+  DBServer:
     Type: AWS::RDS::DBInstance
     Properties:
       DBInstanceIdentifier:
@@ -315,8 +313,12 @@ Resources:
 
 
 Outputs:
-  IPAddress:
+  WebServerPublicIPAddress:
     Description: 'The public IP address of the EC2 Instance.'
     Value: !GetAtt webServer.PublicDnsName
     Export:
       Name: !Sub '${AWS::StackName}-Public-DNS-Address'
+
+  RDSEndPoint:
+    Description: 'The RDS Endpoint of MySQL DB'
+    Value: !GetAtt DBServer.Endpoint.Address
