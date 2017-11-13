@@ -6,9 +6,9 @@
 import boto3
 
 globalVars  = {}
-globalVars['REGION_NAME']              = "ap-south-1"
-globalVars['AZ1']                      = "ap-south-1a"
-globalVars['AZ2']                      = "ap-south-1b"
+globalVars['REGION_NAME']              = "us-east-1"
+globalVars['AZ1']                      = "us-east-1a"
+globalVars['AZ2']                      = "us-east-1b"
 globalVars['CIDRange']                 = "10.240.0.0/23"
 
 globalVars['az1_pvtsubnet_CIDRange']   = "10.240.0.0/25"
@@ -23,7 +23,6 @@ globalVars['tags']                     = [{'Key':'Owner',       'Value':'Miztiik
                                           {'Key':'Environment', 'Value':'Test'},
                                           {'Key':'Department',  'Value':'Valaxy-Training'}]
 globalVars['EC2-KeyName']              = globalVars['Project']['Value']+'-Key'
-
 
 # Creating a VPC, Subnet, and Gateway
 ec2         = boto3.resource ( 'ec2', region_name = globalVars['REGION_NAME'] )
