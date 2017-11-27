@@ -12,7 +12,7 @@ Lets setup up the EC2 Logstash
 ### Install Java v8
 Get the latest version of Open JDK from [http://openjdk.java.net/install/](http://openjdk.java.net/install/)
 ```sh
-yum -y install java-1.8.0-openjdk
+yum -yy install java-1.8.0-openjdk
 # Confirm version of java
 java - version
 ```
