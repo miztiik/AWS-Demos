@@ -67,6 +67,26 @@ output {
   }
 }
 EOF
+
+cat > /etc/logstash/conf.d/logstash-apache.conf << "EOF"
+input {
+  file {
+    path => ["/var/log/httpd/access.log"]
+    type => "apache_access"
+  }
+  file {
+    path => ["/var/log/httpd/error.log"]
+    type => "apache_error"
+  }
+}
+output {
+ elasticsearch {
+   hosts => ["https://search-es-demo-3gviw2elk2rgqmrllw5jihusqy.ap-south-1.es.amazonaws.com:443"]
+   index => "apache-%{+YYYY.MM.dd}"
+ }
+ stdout { codec => rubydebug }
+}
+EOF
 ```
 
 ###### You MUST add the following config lines to your /etc/logstash/logstash.yml
