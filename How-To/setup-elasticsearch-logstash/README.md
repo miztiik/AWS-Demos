@@ -91,13 +91,15 @@ systemctl status logstash
 
 
 ### Confirm logstash configuration
+The `--config.test_and_exit` option parses your configuration file and reports any errors
 ```sh
-/usr/share/logstash/bin/logstash -t --path.settings=/etc/logstash -f /etc/logstash/conf.d/logstash-syslog.conf
+/usr/share/logstash/bin/logstash --path.settings=/etc/logstash -f /etc/logstash/conf.d/logstash-syslog.conf --config.test_and_exit
 ```
 
 ### Start sending logs to Elastisearch
+If the configuration file passes the configuration test, start Logstash with the following command,
 ```sh
-/usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/logstash-syslog.conf  --path.settings=/etc/logstash
+/usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/logstash-syslog.conf  --path.settings=/etc/logstash --config.reload.automatic
 ```
 
 ### Logstash `logs`
@@ -106,3 +108,30 @@ tail -f /var/log/logstash/logstash-plain.log
 ```
 
 **PLEASE NOTE**: You may have to give permissions to `logstash` user to the log files you want to push to elasticsearch
+
+# Install `Filebeat`
+```sh
+curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-6.0.0-x86_64.rpm
+sudo rpm -vi filebeat-6.0.0-x86_64.rpm
+```
+
+### Apache2 module
+The `apache2` module parses access and error logs created by the Apache HTTP server.
+
+When you run the module, it performs a few tasks under the hood:
+
+- Sets the default paths to the log files (but don’t worry, you can override the defaults)
+- Makes sure each multiline log event gets sent as a single event
+- Uses ingest node to parse and process the log lines, shaping the data into a structure suitable for visualizing in Kibana
+- Deploys dashboards for visualizing the log data
+
+```sh
+filebeat modules enable apache2
+```
+
+List of enabled and disabled modules,
+```sh
+filebeat modules list
+```
+
+## Configure Filebeat to use Logstash
