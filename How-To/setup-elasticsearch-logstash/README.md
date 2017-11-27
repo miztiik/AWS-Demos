@@ -135,3 +135,6 @@ filebeat modules list
 ```
 
 ## Configure Filebeat to use Logstash
+```sh
+
+```
