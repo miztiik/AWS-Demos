@@ -284,8 +284,29 @@ Resources:
         Fn::Base64:
           !Sub |
             #!/bin/bash -x
-            yum -y install httpd
+            yum install -y httpd php php-mysql mysql-server
             systemctl start httpd
+            systemctl start mysqld
+            groupadd www
+            usermod -a -G www ec2-user
+
+            # Download wordpress site & move to http
+            cd /var/www/
+            curl -O https://wordpress.org/latest.tar.gz && tar -zxf latest.tar.gz
+            rm -rf /var/www/html
+            mv wordpress /var/www/html
+
+            # Set the permissions
+            chown -R root:www /var/www
+            chmod 2775 /var/www
+            find /var/www -type d -exec chmod 2775 {} +
+            find /var/www -type f -exec chmod 0664 {} +
+
+            # SE Linux permissive
+            # needed to make wp connect to DB over newtork
+            setsebool -P httpd_can_network_connect=1
+            setsebool httpd_can_network_connect_db on
+
             echo "<h1> Welcome to Valaxy Cloudformation Demo</h1>" >> /var/www/html/index.html
 
   DBServer:
