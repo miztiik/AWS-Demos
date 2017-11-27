@@ -4,12 +4,17 @@ You can have your own VPC and run Elasticsearch and Logstash inside the VPC, but
 Lets setup up the EC2 Logstash
 
 ## Start EC2
-We will use `RHEL 7` AMI for our logstash client.
+- AMI: `RHEL 7`
+- VPC: Internet access with  public IP, so we can connect to it.
+  - Security Group: Open Ports `22`, `80`, `443`
+- Instance Type: `t2.micro` works, but more resources the better.
 
 ### Install Java v8
 Get the latest version of Open JDK from [http://openjdk.java.net/install/](http://openjdk.java.net/install/)
 ```sh
-yum install java-1.8.0-openjdk
+yum -y install java-1.8.0-openjdk
+# Confirm version of java
+java - version
 ```
 
 #### Set Java version to the latest
@@ -38,7 +43,7 @@ EOF
 
 #### Install Logstash
 ```sh
-yum install logstash
+yum -y install logstash
 ```
 
 # Create Logstash Configuration file
@@ -76,15 +81,18 @@ xpack.monitoring.elasticsearch.url: https://search-es-on-aws-oxcuuf5uw7ksakr6s2q
 # /usr/share/logstash/bin/logstash -t -f logstash-syslog.conf
 ```
 
-### Confirm logstash configuration
-```sh
-/usr/share/logstash/bin/logstash -t -f /etc/logstash/conf.d/logstash-syslog.conf
-```
 
-### Start logstash Service
+### Start Logstash Service
 ```sh
 systemctl start logstash
+# To check status
 systemctl status logstash
+```
+
+
+### Confirm logstash configuration
+```sh
+/usr/share/logstash/bin/logstash -t --path.settings=/etc/logstash -f /etc/logstash/conf.d/logstash-syslog.conf
 ```
 
 ### Start sending logs to Elastisearch
@@ -94,5 +102,7 @@ systemctl status logstash
 
 ### Logstash `logs`
 ```sh
-tail -f /var/logs/logstash/logstash*`
+tail -f /var/log/logstash/logstash-plain.log
 ```
+
+**PLEASE NOTE**: You may have to give permissions to `logstash` user to the log files you want to push to elasticsearch
