@@ -51,6 +51,8 @@ yum -y install logstash
 ```sh
 # Logstash `bin` location
 # /usr/share/logstash/bin/logstash -t -f logstash-syslog.conf
+export PATH=$PATH:/usr/share/logstash/bin/
+source ~/.bash_profile
 ```
 
 #### Install `logstash-beats-plugin`
@@ -69,9 +71,8 @@ input {
 }
 output {
   elasticsearch {
-    hosts => "https://search-es-on-aws-c3qarpcewwgjndhddv4k7kyrzq.ap-south-1.es.amazonaws.com:443"
+    hosts => "https://search-es-on-aws-xx.ap-south-1.es.amazonaws.com:443"
     manage_template => false
-    index => "%{[@metadata][beat]}-%{+YYYY.MM.dd}"
   }
 }
 EOF
