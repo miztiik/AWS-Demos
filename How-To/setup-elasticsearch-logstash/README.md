@@ -2,7 +2,7 @@
 
 You can have your own VPC and run Elasticsearch and Logstash inside the VPC, but we are going to use a public version.
 Lets setup up the EC2 Logstash
-
+![Data Source > Filebeat > Logstash > Elasticsearch](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/img/DataSource-Filebeat-Logstash-ElasticSearch.png "Data Source > Filebeat > Logstash > Elasticsearch")
 ## Start EC2
 - AMI: `RHEL 7`
 - VPC: Internet access with  public IP, so we can connect to it.
@@ -61,25 +61,6 @@ yum -y install logstash
 # Create Logstash Configuration file
 Be mindful of the hosts URL along with the port. By default Logstash _attempts_ to connect to elasticsearch over ports `9200/9300`. But AWS managed Elasticsearch services runs on protocol/port `HTTPS/443`
 ```sh
-cat > /etc/logstash/conf.d/logstash-syslog.conf << "EOF"
-
-input {
-  file {
-    type => syslog
-    path => [ "/var/log/messages", "/var/log/*.log" ]
-  }
-}
-
-output {
-  stdout {
-    codec => rubydebug
-  }
-  elasticsearch {
-    hosts => ["https://search-xxx-oxcuuxxx.us-east-1.es.amazonaws.com:443"]
-  }
-}
-EOF
-
 cat > /etc/logstash/conf.d/logstash-apache.conf << "EOF"
 input {
   beats {
@@ -91,37 +72,11 @@ output {
     hosts => "https://search-es-on-aws-c3qarpcewwgjndhddv4k7kyrzq.ap-south-1.es.amazonaws.com:443"
     manage_template => false
     index => "%{[@metadata][beat]}-%{+YYYY.MM.dd}"
-    document_type => "%{[@metadata][type]}"
   }
 }
 EOF
 ```
 
-### Start Logstash Service
-```sh
-systemctl start logstash
-# To check status
-systemctl status logstash
-```
-
-### Confirm logstash configuration
-The `--config.test_and_exit` option parses your configuration file and reports any errors
-```sh
-/usr/share/logstash/bin/logstash --path.settings=/etc/logstash -f /etc/logstash/conf.d/logstash-syslog.conf --config.test_and_exit
-```
-
-### Start sending logs to Elastisearch
-If the configuration file passes the configuration test, start Logstash with the following command,
-```sh
-/usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/logstash-syslog.conf  --path.settings=/etc/logstash --config.reload.automatic
-```
-
-### Logstash `logs`
-```sh
-tail -f /var/log/logstash/logstash-plain.log
-```
-
-**PLEASE NOTE**: You may have to give permissions to `logstash` user to the log files you want to push to elasticsearch
 
 # Install `Filebeat`
 ```sh
@@ -164,7 +119,33 @@ filebeat modules list
 ```
 
 
-### Start `Filebeat`
+### Start `Filebeat` Service
 ```sh
 systemctl start filebeat
 ```
+
+### Start `Logstash` Service
+```sh
+systemctl start logstash
+# To check status
+systemctl status logstash
+```
+
+### Confirm logstash configuration
+The `--config.test_and_exit` option parses your configuration file and reports any errors
+```sh
+/usr/share/logstash/bin/logstash --path.settings=/etc/logstash -f /etc/logstash/conf.d/logstash-syslog.conf --config.test_and_exit
+```
+
+### Start sending logs to Elastisearch
+If the configuration file passes the configuration test, start Logstash with the following command,
+```sh
+/usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/logstash-apache.conf  --path.settings=/etc/logstash --config.reload.automatic
+```
+
+### Logstash `logs`
+```sh
+tail -f /var/log/logstash/logstash-plain.log
+```
+
+**PLEASE NOTE**: You may have to give permissions to `logstash` user to the log files you want to push to elasticsearch
