@@ -1,7 +1,7 @@
 # AWS API Gateway Demo
 A small RESTful API to provide information about products. In this demo we are going to provide agricultural commodity information from a prebuilt python dictionary(_hard coded_)
 
-![Fig 1 : API GW + Lambda=FrontEnd + BackEnd](https://raw.githubusercontent.com/miztiik/serverless-image-processor/master/img/API GW + Lambda=FrontEnd + BackEnd.png)
+![Fig 1 : API GW + Lambda=FrontEnd + BackEnd](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/img/API%20GW%20%2B%20Lambda%3DFrontEnd%20%2B%20BackEnd.png)
 ## Pre-Requisities
  - We will RHEL AMI
  - AWS CLI Installed and Configured
