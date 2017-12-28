@@ -45,4 +45,8 @@ openssl rsautl -encrypt \
 ### Import Key material into KMS
 Choose **I am ready to upload…** & click **Next**. Upload the encrypted key `enc.aes.key` and choose the expiry date as needed.  Clicked on **Finish** and the key is _Enabled_ and ready for me to use.
 
-![Custom-Key-Import-To-KMS-SSE-C]()
+![Custom-Key-Import-To-KMS-SSE-C](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-custom-kms/images/kms_spec_key_materials_1.png)
+
+### Encrypt with Custom SSE-C in S3
+Now you are ready to use your custom Key. Upload an `Object` to any bucket in the region you created the `key` and under encryption you should be able to use the new key.
+
