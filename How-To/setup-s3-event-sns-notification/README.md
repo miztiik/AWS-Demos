@@ -10,6 +10,7 @@ To enable notifications, you must,
 
 ### Granting Permissions for S3 to Publish Messages to an SNS Topic
 IAM policy that needs to be attached to the destination SNS topic,
+_**Note:** Dont forget to update to the `ARN` and `Bucketname` in the below policy
 ```json
 {
  "Version": "2008-10-17",
