@@ -23,7 +23,7 @@ IAM policy that needs to be attached to the destination SNS topic,
    "Action": [
     "SNS:Publish"
    ],
-   "Resource": "```***<UPDATE-YOUR-SNS-ARN-HERE>***```json",
+   "Resource": "<UPDATE-YOUR-SNS-ARN-HERE>",
    "Condition": {
       "ArnLike": {          
       "aws:SourceArn": "arn:aws:s3:*:*:<UPDATE-YOUR-BUCKET-NAME-HERE>"
