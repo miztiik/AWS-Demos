@@ -2,6 +2,7 @@
 The Amazon S3 notification feature enables you to receive notifications when certain events happen in your bucket. 
 
 ![Amazon S3 Event Notifications](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-s3-event-sns-notification/images/AWS-S3-Events.png)
+
 ## Configuring Notifications
 To enable notifications, you must,
 - First, Add a notification configuration(`SNS`) identifying the events you want Amazon S3 to publish,
@@ -10,7 +11,8 @@ To enable notifications, you must,
 
 ### Granting Permissions for S3 to Publish Messages to an SNS Topic
 IAM policy that needs to be attached to the destination SNS topic,
-_**Note:** Dont forget to update to the `ARN` and `Bucketname` in the below policy
+
+_**Note:** Dont forget to update to the `ARN` and `Bucketname` in the below policy_
 ```json
 {
  "Version": "2008-10-17",
