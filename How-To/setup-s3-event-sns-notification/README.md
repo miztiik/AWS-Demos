@@ -1,6 +1,7 @@
 # Amazon S3 Event Notifications
 The Amazon S3 notification feature enables you to receive notifications when certain events happen in your bucket. 
 
+![Amazon S3 Event Notifications](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-s3-event-sns-notification/images/AWS-S3-Events.png)
 ## Configuring Notifications
 To enable notifications, you must,
 - First, Add a notification configuration(`SNS`) identifying the events you want Amazon S3 to publish,
