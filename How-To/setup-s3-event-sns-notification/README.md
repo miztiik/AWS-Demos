@@ -32,4 +32,3 @@ IAM policy that needs to be attached to the destination SNS topic,
   }
  ]
 }
-```
