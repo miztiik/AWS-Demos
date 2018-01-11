@@ -15,13 +15,14 @@ A managed instance is any Amazon EC2 instance or on-premises machine in your hyb
    1. `Default Instance Name`: _Assign a name that will help you to track the Managed Instances in the Console_
 1. Click, **Create Activation**
 
-```
+```sh
 You have successfully created a new activation (4ae70cf6-65fd-46fa-9547-b85dbe4d10a1).
 Your activation code is listed below. Copy this code and keep it in a safe place as you will not be able to access it again.
-```
-        **Activation Code:** `regAPcZL4voSsK2z5bTI`
-        **Activation ID:** `4ae70cf6-65fd-46fa-9547-b85dbe4d10a1`
 
+        Activation Code: regAPcZL4voSsK2z5bTI
+        Activation ID: 4ae70cf6-65fd-46fa-9547-b85dbe4d10a1
+
+```
 
 ## Install SSM Client on On-Prem Server(s)
 ```sh
