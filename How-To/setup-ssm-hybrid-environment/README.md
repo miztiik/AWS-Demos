@@ -29,7 +29,7 @@ mkdir -p /tmp/ssm
 curl https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm -o /tmp/ssm/amazon-ssm-agent.rpm
 sudo yum install -y /tmp/ssm/amazon-ssm-agent.rpm
 sudo systemctl stop amazon-ssm-agent
-sudo amazon-ssm-agent -register -code "doBT/mCwrwCK7OT6j5AE" -id "21088ce4-1df6-4f69-bb44-14328d94e35d" -region "ap-south-1" &
+sudo amazon-ssm-agent -register -code "regAPcZL4voSsK2z5bTI" -id "4ae70cf6-65fd-46fa-9547-b85dbe4d10a1" -region "ap-south-1" &
 sudo systemctl start amazon-ssm-agent
 ```
 
