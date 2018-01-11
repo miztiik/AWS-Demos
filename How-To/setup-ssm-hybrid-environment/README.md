@@ -1,57 +1,46 @@
 # AWS EC2 Systems Manager for Hybrid Cloud Management
 
-## Resources Required
-1. IAM Role for SSM 
-   1. `AmazonSSMFullAccess`; _(You can also configure with more restrictive policies)_
-1. _Atleast_ one Linux/Windows "On-Prem" Instance - _This demo uses a RHEL7 Instances_
-   1. _Preferably this instance should not in AWS Cloud_ 
-   1. _For AWS Instances you can run them with with IAM Role to connect with AWS SSM_
+AWS Systems Manager is a new way to manage your cloud and hybrid IT environments. AWS Systems Manager provides a unified user interface that simplifies resource and application management, shortens the time to detect and resolve operational problems, and makes it easy to operate and manage your infrastructure securely at scale. This service is absolutely packed full of features. It defines a new experience around grouping, visualizing, and reacting to problems using features from products like Amazon EC2 Systems Manager (SSM) to enable rich operations across your resources.
 
 ![AWS EC2 SSM for Hybrid Cloud Management](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ssm-hybrid-environment/images/AWS-SSM-On-Prem.png)
 
-## Create IAM Role for Hybrid Resource Management
-1. Create `EC2` Service
-   1. Under `Select your use case`, Choose `EC2 Role for Simple Systems Manager`
-1. Review & Update role name as `ssm-role-for-hybrid`
-1. Add the following code under "Trust Relationships" -> "Edit trust relationship"
-     ```json
-     {
-        "Version":"2012-10-17",
-        "Statement":[
-           {
-              "Sid":"HybridSSM",
-              "Effect":"Allow",
-              "Principal":{
-                 "Service":[
-                    "ec2.amazonaws.com",
-                    "ssm.amazonaws.com"
-                 ]
-              },
-              "Action":"sts:AssumeRole"
-           }
-        ]
-     }   
-     ```
-
-
 ## AWS SSM Managed Instances Activations
-A managed instance is any Amazon EC2 instance or on-premises machine in your hybrid environment that has been configured for Systems Manager. Create activations for the required number of instances and note down the activation code and ID.
-```sh
-Activation Code   gVT8h+ROLaaXsNmR5sqo
-Activation ID   a3dc1300-3356-4cff-8aa7-491a80c651f6
+A managed instance is any Amazon EC2 instance or on-premises machine in your hybrid environment that has been configured for Systems Manager. `Create Activation` for the required number of instances and note down the activation code and ID.
+1. Click **Create Activation** : Update Activation Description
+1. Choose **Instance Limit**
+1. For **IAM Role Name**: Choose _Create a system default command execution role that has the required permissions_
+   1. If you select this option, AWS creates a new role for you named `AmazonEC2RunCommandRoleForManagedInstances`
+1. _Optional_: 
+   1. Updated expiry date for activation
+   1. `Default Instance Name`: _Assign a name that will help you to track the Managed Instances in the Console_
+Your activation code is listed below. Copy this code and keep it in a safe place as you will not be able to access it again.
 ```
+Success
+You have successfully created a new activation (4ae70cf6-65fd-46fa-9547-b85dbe4d10a1).
+Your activation code is listed below. Copy this code and keep it in a safe place as you will not be able to access it again.
+        Activation Code: regAPcZL4voSsK2z5bTI
+        Activation ID: 4ae70cf6-65fd-46fa-9547-b85dbe4d10a1
+You can now install amazon-ssm-agent and manage your instance using Run Command.Learn more
+```
+
 ## Install SSM Client in On-Prem Server
 ```sh
 mkdir -p /tmp/ssm
 curl https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm -o /tmp/ssm/amazon-ssm-agent.rpm
 sudo yum install -y /tmp/ssm/amazon-ssm-agent.rpm
 sudo systemctl stop amazon-ssm-agent
-sudo amazon-ssm-agent -register -code "gVT8h+ROLaaXsNmR5sqo" -id "a3dc1300-3356-4cff-8aa7-491a80c651f6" -region "ap-south-1" &
+sudo amazon-ssm-agent -register -code "doBT/mCwrwCK7OT6j5AE" -id "21088ce4-1df6-4f69-bb44-14328d94e35d" -region "ap-south-1" &
 sudo systemctl start amazon-ssm-agent
 ```
 
 _**Note:** In the Amazon EC2 console, however, your on-premises instances are distinguished from Amazon EC2 instances with the prefix "**mi-**"._
 
+## Validation: EC2 Run Command – Hybrid and Cross-Cloud Management
+Now that your instances are managed by AWS, you can run commands on them. For example:
+```
+uptime
+more /tmp/aws-ssm-hybrid-demo
+```
 
 ### Troubleshooting
 The SSM Agent logs information in the following files. The information in these files can help you troubleshoot problems,
