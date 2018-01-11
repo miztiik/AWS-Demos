@@ -1,12 +1,39 @@
-# Amazon EC2 Systems Manager for Hybrid Cloud Management
+# AWS EC2 Systems Manager for Hybrid Cloud Management
 
-## Pre-Requisites
-1. IAM Role for SSM - `AmazonSSMFullAccess`; _(You can also configure with more restrictive policies)_
+## Resources Required
+1. IAM Role for SSM 
+   1. `AmazonSSMFullAccess`; _(You can also configure with more restrictive policies)_
 1. _Atleast_ one Linux/Windows "On-Prem" Instance - _This demo uses a RHEL7 Instances_
    1. _Preferably this instance should not in AWS Cloud_ 
    1. _For AWS Instances you can run them with with IAM Role to connect with AWS SSM_
 
 ![AWS EC2 SSM for Hybrid Cloud Management](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ssm-hybrid-environment/images/AWS-SSM-On-Prem.png)
+
+## Create IAM Role for Hybrid Resource Management
+1. Create `EC2` Service
+   1. Under `Select your use case`, Choose `EC2 Role for Simple Systems Manager`
+1. Review & Update role name as `ssm-role-for-hybrid`
+1. Add the following code under "Trust Relationships" -> "Edit trust relationship"
+     ```json
+     {
+        "Version":"2012-10-17",
+        "Statement":[
+           {
+              "Sid":"HybridSSM",
+              "Effect":"Allow",
+              "Principal":{
+                 "Service":[
+                    "ec2.amazonaws.com",
+                    "ssm.amazonaws.com"
+                 ]
+              },
+              "Action":"sts:AssumeRole"
+           }
+        ]
+     }   
+     ```
+
+
 ## AWS SSM Managed Instances Activations
 A managed instance is any Amazon EC2 instance or on-premises machine in your hybrid environment that has been configured for Systems Manager. Create activations for the required number of instances and note down the activation code and ID.
 ```sh
