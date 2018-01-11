@@ -4,6 +4,8 @@ AWS Systems Manager is a new way to manage your cloud and hybrid IT environments
 
 ![AWS EC2 SSM for Hybrid Cloud Management](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ssm-hybrid-environment/images/AWS-EC2-Systems-Manager.png)
 
+Follow this article in youtube: ![AWS EC2 SSM for Hybrid Cloud Management in Action](https://youtu.be/7GnxWvv8Z_M)
+
 ## AWS SSM Managed Instances Activations
 A managed instance is any Amazon EC2 instance or on-premises machine in your hybrid environment that has been configured for Systems Manager. `Create Activation` for the required number of instances and note down the activation code and ID.
 1. Click **Create Activation** : Update Activation Description
