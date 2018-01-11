@@ -21,7 +21,7 @@ Your activation code is listed below. Copy this code and keep it in a safe place
 ```
         **Activation Code:** `regAPcZL4voSsK2z5bTI`
         **Activation ID:** `4ae70cf6-65fd-46fa-9547-b85dbe4d10a1`
-```
+
 
 ## Install SSM Client on On-Prem Server(s)
 ```sh
