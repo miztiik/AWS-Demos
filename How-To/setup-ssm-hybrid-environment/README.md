@@ -1,6 +1,6 @@
 # AWS EC2 Systems Manager for Hybrid Cloud Management
 
-AWS Systems Manager is a new way to manage your cloud and hybrid IT environments. AWS Systems Manager provides a unified user interface that simplifies resource and application management, shortens the time to detect and resolve operational problems, and makes it easy to operate and manage your infrastructure securely at scale. This service is absolutely packed full of features. It defines a new experience around grouping, visualizing, and reacting to problems using features from products like Amazon EC2 Systems Manager (SSM) to enable rich operations across your resources.
+AWS Systems Manager is a new way to manage your cloud and hybrid IT environments. It provides a unified user interface that simplifies resource and application management, shortens the time to detect and resolve operational problems, and makes it easy to operate and manage your infrastructure securely at scale.
 
 ![AWS EC2 SSM for Hybrid Cloud Management](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ssm-hybrid-environment/images/AWS-SSM-On-Prem.png)
 
