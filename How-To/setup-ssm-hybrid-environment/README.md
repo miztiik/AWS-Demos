@@ -13,6 +13,8 @@ A managed instance is any Amazon EC2 instance or on-premises machine in your hyb
 1. _Optional_: 
    1. Updated expiry date for activation
    1. `Default Instance Name`: _Assign a name that will help you to track the Managed Instances in the Console_
+1. Click, **Create Activation**
+
 Your activation code is listed below. Copy this code and keep it in a safe place as you will not be able to access it again.
 ```
 Success
