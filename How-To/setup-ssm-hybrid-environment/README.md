@@ -49,38 +49,7 @@ The SSM Agent logs information in the following files. The information in these 
 /var/log/amazon/ssm/errors.log
 ```
 
-
-
-
-#### Describe Registration
+##### Describe Registration
 ```sh
 aws ssm describe-instance-information --instance-information-filter-list key=InstanceIds,valueSet=mi-00722d1fcb2c55ef8
 ```
-
-
-
-cat > SSMService-Trust.json << "EOF"
-{
-   "Version":"2012-10-17",
-   "Statement":[
-      {
-         "Sid":"HybridSSM",
-         "Effect":"Allow",
-         "Principal":{
-            "Service":[
-               "ec2.amazonaws.com",
-               "ssm.amazonaws.com"
-            ]
-         },
-         "Action":"sts:AssumeRole"
-      }
-   ]
-}
-EOF
-
-aws iam create-role --role-name SSMServiceRole --assume-role-policy-document file://SSMService-Trust.json
-
-
-aws ssm create-activation --default-instance-name centos --iam-role SSMServiceRole --registration-limit 1 --region region ap-south-1
-
-
