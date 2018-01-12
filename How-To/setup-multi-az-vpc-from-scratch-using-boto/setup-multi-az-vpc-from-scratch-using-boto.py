@@ -6,9 +6,9 @@
 import boto3
 
 globalVars  = {}
-globalVars['REGION_NAME']              = "us-east-1"
-globalVars['AZ1']                      = "us-east-1a"
-globalVars['AZ2']                      = "us-east-1b"
+globalVars['REGION_NAME']              = "ap-south-1"
+globalVars['AZ1']                      = "ap-south-1a"
+globalVars['AZ2']                      = "ap-south-1b"
 globalVars['CIDRange']                 = "10.240.0.0/23"
 
 globalVars['az1_pvtsubnet_CIDRange']   = "10.240.0.0/25"
