@@ -58,7 +58,7 @@ pvtRouteTable.associate_with_subnet( SubnetId = az1_pvtsubnet.id )
 pvtRouteTable.associate_with_subnet( SubnetId = az2_pvtsubnet.id )
 
 # Create a route for internet traffic to flow out
-intRoute = ec2Client.create_route( pubRouteTableId = pubRouteTable.id , DestinationCidrBlock = '0.0.0.0/0' , GatewayId = intGateway.id )
+intRoute = ec2Client.create_route( RouteTableId = pubRouteTable.id , DestinationCidrBlock = '0.0.0.0/0' , GatewayId = intGateway.id )
 
 # Tag the resources
 vpc.create_tags               ( Tags = globalVars['tags'] )

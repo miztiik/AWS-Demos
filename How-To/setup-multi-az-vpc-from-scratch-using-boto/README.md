@@ -68,7 +68,7 @@ pvtRouteTable.associate_with_subnet( SubnetId = az2_pvtsubnet.id )
 ## Create a route for internet traffic to flow out
 Create route in our table to allow internet traffic to pass through to any destination through our internet gateway.
 ```py
-intRoute = ec2Client.create_route( RouteTableId = routeTable.id , DestinationCidrBlock = '0.0.0.0/0' , GatewayId = intGateway.id )
+intRoute = ec2Client.create_route( RouteTableId = pubRouteTable.id , DestinationCidrBlock = '0.0.0.0/0' , GatewayId = intGateway.id )
 ```
 
 ## Tag the resources
