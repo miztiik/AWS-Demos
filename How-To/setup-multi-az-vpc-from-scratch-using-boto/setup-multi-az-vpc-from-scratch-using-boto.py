@@ -47,15 +47,18 @@ vpc.modify_attribute( EnableDnsHostnames = { 'Value': True } )
 intGateway  = ec2.create_internet_gateway()
 intGateway.attach_to_vpc( VpcId = vpc.id )
 
-# Create another route table for Public & Private traffic
-routeTable = ec2.create_route_table( VpcId = vpc.id )
-routeTable.associate_with_subnet( SubnetId = az1_pubsubnet.id )
-routeTable.associate_with_subnet( SubnetId = az1_pvtsubnet.id )
-routeTable.associate_with_subnet( SubnetId = az2_pubsubnet.id )
-routeTable.associate_with_subnet( SubnetId = az2_pvtsubnet.id )
+# Create another route table for Public traffic
+pubRouteTable = ec2.create_route_table( VpcId = vpc.id )
+pubRouteTable.associate_with_subnet( SubnetId = az1_pubsubnet.id )
+pubRouteTable.associate_with_subnet( SubnetId = az2_pubsubnet.id )
+
+# Create another route table for Private traffic
+pvtRouteTable = ec2.create_route_table( VpcId = vpc.id )
+pvtRouteTable.associate_with_subnet( SubnetId = az1_pvtsubnet.id )
+pvtRouteTable.associate_with_subnet( SubnetId = az2_pvtsubnet.id )
 
 # Create a route for internet traffic to flow out
-intRoute = ec2Client.create_route( RouteTableId = routeTable.id , DestinationCidrBlock = '0.0.0.0/0' , GatewayId = intGateway.id )
+intRoute = ec2Client.create_route( pubRouteTableId = pubRouteTable.id , DestinationCidrBlock = '0.0.0.0/0' , GatewayId = intGateway.id )
 
 # Tag the resources
 vpc.create_tags               ( Tags = globalVars['tags'] )
@@ -66,7 +69,8 @@ az2_pvtsubnet.create_tags     ( Tags = globalVars['tags'] )
 az2_pubsubnet.create_tags     ( Tags = globalVars['tags'] )
 az2_sparesubnet.create_tags   ( Tags = globalVars['tags'] )
 intGateway.create_tags        ( Tags = globalVars['tags'] )
-routeTable.create_tags        ( Tags = globalVars['tags'] )
+pubRouteTable.create_tags     ( Tags = globalVars['tags'] )
+pvtRouteTable.create_tags     ( Tags = globalVars['tags'] )
 
 vpc.create_tags               ( Tags = [{'Key':'Name', 'Value':globalVars['Project']['Value']+'-vpc'}] )
 az1_pvtsubnet.create_tags     ( Tags = [{'Key':'Name', 'Value':globalVars['Project']['Value']+'-az1-private-subnet'}] )
@@ -76,7 +80,8 @@ az2_pvtsubnet.create_tags     ( Tags = [{'Key':'Name', 'Value':globalVars['Proje
 az2_pubsubnet.create_tags     ( Tags = [{'Key':'Name', 'Value':globalVars['Project']['Value']+'-az2-public-subnet'}] )
 az2_sparesubnet.create_tags   ( Tags = [{'Key':'Name', 'Value':globalVars['Project']['Value']+'-az2-spare-subnet'}] )
 intGateway.create_tags        ( Tags = [{'Key':'Name', 'Value':globalVars['Project']['Value']+'-igw'}] )
-routeTable.create_tags        ( Tags = [{'Key':'Name', 'Value':globalVars['Project']['Value']+'-rtb'}] )
+pubRouteTable.create_tags     ( Tags = [{'Key':'Name', 'Value':globalVars['Project']['Value']+'-rtb'}] )
+pvtRouteTable.create_tags     ( Tags = [{'Key':'Name', 'Value':globalVars['Project']['Value']+'-rtb'}] )
 # Let create the Public & Private Security Groups
 elbSecGrp = ec2.create_security_group( DryRun = False,
                               GroupName='elbSecGrp',

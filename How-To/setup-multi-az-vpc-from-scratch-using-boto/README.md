@@ -54,11 +54,15 @@ intGateway.attach_to_vpc( VpcId = vpc.id )
 ## Create route table for Public & Private traffic
 Although there is a default route table for the VPC, it is advisable to have your own routable to allow for specific rules within the subnet. We will need to associate the route table with subnets specifically.
 ```py
-routeTable = ec2.create_route_table( VpcId = vpc.id )
-routeTable.associate_with_subnet( SubnetId = az1_pubsubnet.id )
-routeTable.associate_with_subnet( SubnetId = az1_pvtsubnet.id )
-routeTable.associate_with_subnet( SubnetId = az2_pubsubnet.id )
-routeTable.associate_with_subnet( SubnetId = az2_pvtsubnet.id )
+# Create another route table for Public traffic
+pubRouteTable = ec2.create_route_table( VpcId = vpc.id )
+pubRouteTable.associate_with_subnet( SubnetId = az1_pubsubnet.id )
+pubRouteTable.associate_with_subnet( SubnetId = az2_pubsubnet.id )
+
+# Create another route table for Private traffic
+pvtRouteTable = ec2.create_route_table( VpcId = vpc.id )
+pvtRouteTable.associate_with_subnet( SubnetId = az1_pvtsubnet.id )
+pvtRouteTable.associate_with_subnet( SubnetId = az2_pvtsubnet.id )
 ```
 
 ## Create a route for internet traffic to flow out
@@ -70,6 +74,18 @@ intRoute = ec2Client.create_route( RouteTableId = routeTable.id , DestinationCid
 ## Tag the resources
 It is always a good idea to tag the resources. It allows for easier resource identification, classification and helps in billing.
 ```py
+# Tag the resources
+vpc.create_tags               ( Tags = globalVars['tags'] )
+az1_pvtsubnet.create_tags     ( Tags = globalVars['tags'] )
+az1_pubsubnet.create_tags     ( Tags = globalVars['tags'] )
+az1_sparesubnet.create_tags   ( Tags = globalVars['tags'] )
+az2_pvtsubnet.create_tags     ( Tags = globalVars['tags'] )
+az2_pubsubnet.create_tags     ( Tags = globalVars['tags'] )
+az2_sparesubnet.create_tags   ( Tags = globalVars['tags'] )
+intGateway.create_tags        ( Tags = globalVars['tags'] )
+pubRouteTable.create_tags     ( Tags = globalVars['tags'] )
+pvtRouteTable.create_tags     ( Tags = globalVars['tags'] )
+
 vpc.create_tags               ( Tags = [{'Key':'Name', 'Value':globalVars['Project']['Value']+'-vpc'}] )
 az1_pvtsubnet.create_tags     ( Tags = [{'Key':'Name', 'Value':globalVars['Project']['Value']+'-az1-private-subnet'}] )
 az1_pubsubnet.create_tags     ( Tags = [{'Key':'Name', 'Value':globalVars['Project']['Value']+'-az1-public-subnet'}] )
@@ -78,7 +94,8 @@ az2_pvtsubnet.create_tags     ( Tags = [{'Key':'Name', 'Value':globalVars['Proje
 az2_pubsubnet.create_tags     ( Tags = [{'Key':'Name', 'Value':globalVars['Project']['Value']+'-az2-public-subnet'}] )
 az2_sparesubnet.create_tags   ( Tags = [{'Key':'Name', 'Value':globalVars['Project']['Value']+'-az2-spare-subnet'}] )
 intGateway.create_tags        ( Tags = [{'Key':'Name', 'Value':globalVars['Project']['Value']+'-igw'}] )
-routeTable.create_tags        ( Tags = [{'Key':'Name', 'Value':globalVars['Project']['Value']+'-rtb'}] )
+pubRouteTable.create_tags     ( Tags = [{'Key':'Name', 'Value':globalVars['Project']['Value']+'-rtb'}] )
+pvtRouteTable.create_tags     ( Tags = [{'Key':'Name', 'Value':globalVars['Project']['Value']+'-rtb'}] )
 ```
 
 ## Let create the Public & Private Security Groups
