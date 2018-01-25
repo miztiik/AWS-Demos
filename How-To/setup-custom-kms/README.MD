@@ -2,6 +2,8 @@
 
 Server-side encryption(SSE) is about protecting data at rest. AWS allows to protect data at rest within Amazon data centers by using AWS KMS. Using server-side encryption with customer-provided encryption keys (SSE-C) allows you to set your own encryption keys.
 
+![AWS-Custom-Key](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-custom-kms/images/AWS-Custom-KMS.png)
+
 _**Note**: AWS KMS SSE-C are region specific. If you create a custom encryption key in `us-east-1` i.e Virginia, then that key will be available only in `us-east-1` - Virginia Region only._
 
 ### How to `Bring Your Own Keys` into AWS KMS
