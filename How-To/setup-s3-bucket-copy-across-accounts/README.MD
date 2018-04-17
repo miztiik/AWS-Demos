@@ -6,7 +6,7 @@ You can copy AWS S3 objects from one AWS account to another by using the S3 `COP
 - **Sign in** to the AWS Management Console for the destination AWS account.
 - In the navigation bar, click **Support**, and then click **Support Center**. The account number (for example, `222222222222`) is displayed in the upper-right corner of the Support Center.
 
-### Step 2: Attach the policy to 'Source S3 Bucket`
+### Step 2: Attach the policy to `Source S3 Bucket`
 The Bucket policy set up in the source AWS account. _Do NOT forget to change the account number and bucket name in the below policy, otherwise it will not work_
 ###### For help on setting the ACL [check here](https://docs.aws.amazon.com/AmazonS3/latest/user-guide/set-permissions.html)
 ```json
