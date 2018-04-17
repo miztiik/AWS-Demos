@@ -1,7 +1,7 @@
 # Copy S3 Bucket Objects Across AWS Accounts
 
 You can copy AWS S3 objects from one AWS account to another by using the S3 `COPY` operation. You must grant the destination AWS account access to the source AWS account's resources by using Amazon S3 `Access Control Lists (ACLs)` or `bucket policies`. 
-
+![Copy S3 Bucket Objects Across AWS Accounts](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/img/setup-s3-bucket-copy-across-accounts.png)
 ### Step 1: Get the 12 digit number of the  `Destination AWS Account`
 - **Sign in** to the AWS Management Console for the destination AWS account.
 - In the navigation bar, click **Support**, and then click **Support Center**. The account number (for example, `222222222222`) is displayed in the upper-right corner of the Support Center.
