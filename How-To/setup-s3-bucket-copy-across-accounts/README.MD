@@ -65,6 +65,9 @@ When the abovee steps are completed, the "destination" account can copy objects 
 _**Note:** Successful execution of the following command assumes that the AWS CLI has been correctly configured for the `IAM user`(in step 3) in the destination AWS account._
 
 ```sh
-aws s3 sync s3://YOUR-SOURCE-BUCKET-NAME-HERE s3://YOUR-DESTINATION-BUCKET-NAME-HERE
+aws s3 sync s3://YOUR-SOURCE-BUCKET-NAME-HERE s3://YOUR-DESTINATION-BUCKET-NAME-HERE --source-region SOURCE-REGION-NAME --region DESTINATION-REGION-NAME
+
+# For Example,
+aws s3 sync s3://my-us-west-2-bucket s3://my-us-east-1-bucket --source-region us-west-2 --region us-east-1
 ```
 
