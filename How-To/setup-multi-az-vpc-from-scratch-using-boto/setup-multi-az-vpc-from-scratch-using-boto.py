@@ -18,7 +18,7 @@ globalVars['az1_sparesubnet_CIDRange'] = "10.82.0.192/26"
 globalVars['az2_pvtsubnet_CIDRange']   = "10.82.1.0/25"
 globalVars['az2_pubsubnet_CIDRange']   = "10.82.1.128/26"
 globalVars['az2_sparesubnet_CIDRange'] = "10.82.1.192/26"
-globalVars['Project']                  = { 'Key':'Name',        'Value':'VPC-Test-01'}
+globalVars['Project']                  = { 'Key':'Name',        'Value':'Test-01'}
 globalVars['tags']                     = [{'Key':'Owner',       'Value':'Miztiik'},
                                           {'Key':'Environment', 'Value':'Test'},
                                           {'Key':'Department',  'Value':'Training'}]
