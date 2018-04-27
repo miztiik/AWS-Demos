@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# VPC design for multi az deployments
+# VPC design for Multi AZ deployments & Tag all resources.
 
 import boto3
 
