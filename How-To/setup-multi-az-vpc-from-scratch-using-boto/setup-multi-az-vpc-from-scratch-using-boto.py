@@ -6,22 +6,22 @@
 import boto3
 
 globalVars  = {}
-globalVars['REGION_NAME']              = "ap-south-1"
-globalVars['AZ1']                      = "ap-south-1a"
-globalVars['AZ2']                      = "ap-south-1b"
-globalVars['CIDRange']                 = "10.240.0.0/23"
+globalVars['REGION_NAME']              = "us-east-1"
+globalVars['AZ1']                      = "us-east-1a"
+globalVars['AZ2']                      = "us-east-1b"
+globalVars['CIDRange']                 = "10.82.0.0/23"
 
-globalVars['az1_pvtsubnet_CIDRange']   = "10.240.0.0/25"
-globalVars['az1_pubsubnet_CIDRange']   = "10.240.0.128/26"
-globalVars['az1_sparesubnet_CIDRange'] = "10.240.0.192/26"
+globalVars['az1_pvtsubnet_CIDRange']   = "10.82.0.0/25"
+globalVars['az1_pubsubnet_CIDRange']   = "10.82.0.128/26"
+globalVars['az1_sparesubnet_CIDRange'] = "10.82.0.192/26"
 
-globalVars['az2_pvtsubnet_CIDRange']   = "10.240.1.0/25"
-globalVars['az2_pubsubnet_CIDRange']   = "10.240.1.128/26"
-globalVars['az2_sparesubnet_CIDRange'] = "10.240.1.192/26"
-globalVars['Project']                  = { 'Key':'Name',        'Value':'VPC-Demo'}
+globalVars['az2_pvtsubnet_CIDRange']   = "10.82.1.0/25"
+globalVars['az2_pubsubnet_CIDRange']   = "10.82.1.128/26"
+globalVars['az2_sparesubnet_CIDRange'] = "10.82.1.192/26"
+globalVars['Project']                  = { 'Key':'Name',        'Value':'VPC-Test-01'}
 globalVars['tags']                     = [{'Key':'Owner',       'Value':'Miztiik'},
                                           {'Key':'Environment', 'Value':'Test'},
-                                          {'Key':'Department',  'Value':'Valaxy-Training'}]
+                                          {'Key':'Department',  'Value':'Training'}]
 globalVars['EC2-KeyName']              = globalVars['Project']['Value']+'-Key'
 
 # Creating a VPC, Subnet, and Gateway
