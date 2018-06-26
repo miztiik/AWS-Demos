@@ -21,7 +21,8 @@ globalVars['az2_sparesubnet_CIDRange'] = "10.82.1.192/26"
 globalVars['Project']                  = { 'Key':'Name',        'Value':'Test-01'}
 globalVars['tags']                     = [{'Key':'Owner',       'Value':'Miztiik'},
                                           {'Key':'Environment', 'Value':'Test'},
-                                          {'Key':'Department',  'Value':'Training'}]
+                                          {'Key':'Department',  'Value':'Training'},
+                                          {'Key':'CostCenter',  'Value':'NL-Labs'}]
 globalVars['EC2-KeyName']              = globalVars['Project']['Value']+'-Key'
 
 # Creating a VPC, Subnet, and Gateway
