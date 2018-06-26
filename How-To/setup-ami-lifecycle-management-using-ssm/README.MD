@@ -14,7 +14,7 @@ We will need two roles to automate the AMI LifeCycle Management.
                 "Sid": "VisualEditor0",
                 "Effect": "Allow",
                 "Action": "iam:PassRole",
-                "Resource":     "arn:aws:iam::<YOUR-ACCOUNT-NUMBER>:role/<your-ManagedInstanceRole-name"
+                "Resource": "arn:aws:iam::<YOUR-ACCOUNT-NUMBER>:role/<your-ManagedInstanceRole-name"
             }
         ]
     }
@@ -45,10 +45,10 @@ If this is all too much for you, you can use this [cloudformation template to cr
 ### Creation of AMI
 1. In the EC2 console, choose **Systems Manager Services,** **Automations**.![](https://media.amazonwebservices.com/blog/2017/EC2Sys-Console-1.png)
 1. Choose **Execution automation** and scroll down to update details.
-1.  Expand **Document Details** and choose **Latest version at runtime**.![]
+1. Expand **Document Details** and choose **Latest version at runtime**.![](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ami-lifecycle-management-using-ssm/images/AWS-UpdateLinux-Ami.png)
 1. Choose the latest document version.
 1. For **Input Parameters**
-   1. **SourceAmiId**, enter the ID of the Linux AMI to update.![](https://media.amazonwebservices.com/blog/2017/EC2Sys-Console-3.png)
+   1. **SourceAmiId**, enter the ID of the Linux AMI to update.![](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ami-lifecycle-management-using-ssm/images/AWS-UpdateLinux-Input-Parameters.png)
    1. For **InstanceProfileName**, enter the name of the managed instance. i.e `ManagedInstanceRole`
    1. For **AutomationAssumeRole**, enter the [**ARN**](http://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns) of the service role you created for Automation.
 1.  Choose **Execute Automation**.
