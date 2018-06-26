@@ -54,8 +54,12 @@ If this is all too much for you, you can use this [cloudformation template to cr
 1.  Choose **Execute Automation**.
 1.  Monitor progress in the **Automation Steps** tab, and view step-level outputs.
 
-**Note:** - By default SSM Automation runs either the `AWS-UpdateLinuxAmi` document or the `AWS-UpdateWindowsAmi` in the default VPC. If you want it to run in a different VPC, then you should provide the subnets in the document, as shown in the [Example here](https://docs.aws.amazon.com/systems-manager/latest/userguide/automation-troubleshooting.html)
+**Note:** - By default SSM Automation runs either the `AWS-UpdateLinuxAmi` document or the `AWS-UpdateWindowsAmi` in the default VPC. If you want it to run in a different VPC, then you should provide the subnets in the document, as shown in the [example here](https://docs.aws.amazon.com/systems-manager/latest/userguide/automation-troubleshooting.html)
 
 
+### Pre-Update Script
+Any packages/libraries/scripts that needs to be copied to the server before the update process begins.
 
-
+### Post-Update Script
+1. **AMI Validation SCripts:**If you have any testing to be done on the newly created AMI, this is the place, where you will have to do it. 
+1. **Update Parameter Store:**After successful completion of test, update the AMI value into the parameter store

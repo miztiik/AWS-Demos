@@ -1,0 +1,4 @@
+# Ignoring VS Code Files
+.vscode
+.git
+slnx*
