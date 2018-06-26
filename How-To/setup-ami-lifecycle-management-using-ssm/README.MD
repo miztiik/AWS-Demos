@@ -1,10 +1,12 @@
 # AMI LifeCycle Management Using EC2 Systems Manager | Automation
 
 We will need two roles to automate the AMI LifeCycle Management.
-1. **ManagedInstanceRole** - Role to allow SSM to start instances, create images etc,
-   1. Add this managed policy `AmazonEC2RoleforSSM`
-1. **AutomationServiceRole** - To Allow SSM to run documents and allow it to assume `ManagedInstanceRole`
-   1. Add this managed policy `AmazonSSMAutomationRole`
+1. RoleName: **lambda-ssm-role** - 
+   1. Permissions: Managed Policies `AWSLambdaExecute` and `AmazonSSMFullAccess`
+1. RoleName: **ManagedInstanceRole** - An EC2 Role to allow SSM to start instances, create images etc,
+   1. Permissions: Managed Policies `AmazonEC2RoleforSSM`
+1. RoleName: **AutomationServiceRole** - An EC2 Role to Allow SSM to run documents and allow it to assume `ManagedInstanceRole`
+   1. Permissions: Managed Policies `AmazonSSMAutomationRole`
    1. Inline Policy to attach the `iam:PassRole`
     ```
     {
@@ -42,6 +44,74 @@ Make the below trust relationship to both the roles
 ```
 If this is all too much for you, you can use this [cloudformation template to create the same](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Systems-Manager-AMI-Automation-Setup&templateURL=https://s3.amazonaws.com/aws-ssm-downloads-us-east-1/templates/automationsetup.yaml)
 
+
+### Create [Lambda](https://docs.aws.amazon.com/systems-manager/latest/userguide/automation-simpatch.html#automation-pet1) to update SSM Parameter Store
+
+**Customizations:**
+_Modify as required for your environment_
+1. SSM Parameter Name for `Golden AMI` - Default is `BastionHost-Linux-AMI` 
+1. Lambda Function Name: Default is `Automation-UpdateSsmParam`
+
+
+```py
+from __future__ import print_function
+
+import json
+import boto3
+
+print('Loading function')
+
+
+#Updates an SSM parameter
+#Expects parameterName, parameterValue
+def lambda_handler(event, context):
+    print("Received event: " + json.dumps(event, indent=2))
+
+    # get SSM client
+    client = boto3.client('ssm')
+
+    #confirm  parameter exists before updating it
+    response = client.describe_parameters(
+       Filters=[
+          {
+           'Key': 'Name',
+           'Values': [ event['parameterName'] ]
+          },
+        ]
+    )
+
+    if not response['Parameters']:
+        print('No such parameter')
+        return 'SSM parameter not found.'
+
+    #if parameter has a Descrition field, update it PLUS the Value
+    if 'Description' in response['Parameters'][0]:
+        description = response['Parameters'][0]['Description']
+        
+        response = client.put_parameter(
+          Name=event['parameterName'],
+          Value=event['parameterValue'],
+          Description=description,
+          Type='String',
+          Overwrite=True
+        )
+    
+    #otherwise just update Value
+    else:
+        response = client.put_parameter(
+          Name=event['parameterName'],
+          Value=event['parameterValue'],
+          Type='String',
+          Overwrite=True
+        )
+        
+    reponseString = 'Updated parameter %s with value %s.' % (event['parameterName'], event['parameterValue'])
+        
+    return reponseString
+    ```
+
+
+
 ### Creation of AMI
 1. In the EC2 console, choose **Systems Manager Services,** **Automations**.![](https://media.amazonwebservices.com/blog/2017/EC2Sys-Console-1.png)
 1. Choose **Execution automation** and scroll down to update details.
@@ -61,5 +131,7 @@ If this is all too much for you, you can use this [cloudformation template to cr
 Any packages/libraries/scripts that needs to be copied to the server before the update process begins.
 
 ### Post-Update Script
-1. **AMI Validation SCripts:**If you have any testing to be done on the newly created AMI, this is the place, where you will have to do it. 
-1. **Update Parameter Store:**After successful completion of test, update the AMI value into the parameter store
+1. **AMI Validation Scripts:** If you have any testing to be done on the newly created AMI, this is the place, where you will have to do it. 
+1. **Update Parameter Store:** After successful completion of test, update the AMI value into the parameter store using Lambda functions
+
+
