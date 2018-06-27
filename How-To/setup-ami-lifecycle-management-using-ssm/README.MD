@@ -1,13 +1,13 @@
 # AMI LifeCycle Management Using EC2 Systems Manager | Automation
 
 We will need two roles to automate the AMI LifeCycle Management.
-1. RoleName: **lambda-ssm-role** - 
-   1. Permissions: Managed Policies `AWSLambdaExecute` and `AmazonSSMFullAccess`
-1. RoleName: **ManagedInstanceRole** - An EC2 Role to allow SSM to start instances, create images etc,
-   1. Permissions: Managed Policies `AmazonEC2RoleforSSM`
-1. RoleName: **AutomationServiceRole** - An EC2 Role to Allow SSM to run documents and allow it to assume `ManagedInstanceRole`
-   1. Permissions: Managed Policies `AmazonSSMAutomationRole`
-   1. Inline Policy to attach the `iam:PassRole`
+1. RoleName: **lambda-ssm-role**: 
+   - Permissions: Managed Policies `AWSLambdaExecute` and `AmazonSSMFullAccess`
+1. RoleName: **ManagedInstanceRole**: - An EC2 Role to allow SSM to start instances, create images etc,
+   - Permissions: Managed Policies `AmazonEC2RoleforSSM`
+1. RoleName: **AutomationServiceRole**: - An EC2 Role to Allow SSM to run documents and allow it to assume _ManagedInstanceRole_ we just created.
+   - Permissions: Managed Policies `AmazonSSMAutomationRole`
+   - Inline Policy to attach the `iam:PassRole`
     ```
     {
         "Version": "2012-10-17",
