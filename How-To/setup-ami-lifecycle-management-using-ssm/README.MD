@@ -21,9 +21,7 @@ We will need two roles to automate the AMI LifeCycle Management.
         ]
     }
     ```
-
-## Trust Relationships
-Make the below trust relationship to both the roles
+1. **Trust Relationships**: Make the below trust relationship to both the roles
 
 ```
 {
@@ -42,79 +40,39 @@ Make the below trust relationship to both the roles
   ]
 }
 ```
-If this is all too much for you, you can use this [cloudformation template to create the same](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Systems-Manager-AMI-Automation-Setup&templateURL=https://s3.amazonaws.com/aws-ssm-downloads-us-east-1/templates/automationsetup.yaml)
+If this role creation and attaching trust policies, that part alone can be done using this [cloudformation template](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Systems-Manager-AMI-Automation-Setup&templateURL=https://s3.amazonaws.com/aws-ssm-downloads-us-east-1/templates/automationsetup.yaml).
 
+
+### Create Parameter for Golden AMI
+Use the AWS CLI or GUI to create a parameter store entry, here is the CLI command. `BastionHost-Linux-AMI` is the parameter name that we will use in our _Automation_ Document and lambda will use the same to update the AMI Upon completion of the AMI.
+```sh
+aws ssm put-parameter --name BastionHost-Linux-AMI --value "ami-9a91b371" --type String
+```
 
 ### Create [Lambda](https://docs.aws.amazon.com/systems-manager/latest/userguide/automation-simpatch.html#automation-pet1) to update SSM Parameter Store
+This function will helps us to automatically update the parameter store with the latest AMI when the _Automation Document_ successfully create a new image.
+
+
 
 **Customizations:**
 _Modify as required for your environment_
-1. SSM Parameter Name for `Golden AMI` - Default is `BastionHost-Linux-AMI` 
-1. Lambda Function Name: Default is `Automation-UpdateSsmParam`
+
+1. Lambda Function Name: Choose it as `Automation-UpdateSsmParam`. If you change here, update the _Automation Document_ also with the same name.
+   - Runtime should be `Python 2.7`
+1. Choose the `lambda-ssm-role` you created earlier.
+1. The `code` for lambda function is provided in this file `Automation-UpdateSsmParam.py`
 
 
-```py
-from __future__ import print_function
+### Create custom Automation Document
 
-import json
-import boto3
+1. [Create Document](https://eu-central-1.console.aws.amazon.com/systems-manager/documents/create-document?region=eu-central-1), Give a **Name**, like "`BastionHost-Linux-AMI-Builder`.
+1. Add the contents of the `BastionHost-Linux-AMI-Builder.json` file in the field.
 
-print('Loading function')
-
-
-#Updates an SSM parameter
-#Expects parameterName, parameterValue
-def lambda_handler(event, context):
-    print("Received event: " + json.dumps(event, indent=2))
-
-    # get SSM client
-    client = boto3.client('ssm')
-
-    #confirm  parameter exists before updating it
-    response = client.describe_parameters(
-       Filters=[
-          {
-           'Key': 'Name',
-           'Values': [ event['parameterName'] ]
-          },
-        ]
-    )
-
-    if not response['Parameters']:
-        print('No such parameter')
-        return 'SSM parameter not found.'
-
-    #if parameter has a Descrition field, update it PLUS the Value
-    if 'Description' in response['Parameters'][0]:
-        description = response['Parameters'][0]['Description']
-        
-        response = client.put_parameter(
-          Name=event['parameterName'],
-          Value=event['parameterValue'],
-          Description=description,
-          Type='String',
-          Overwrite=True
-        )
-    
-    #otherwise just update Value
-    else:
-        response = client.put_parameter(
-          Name=event['parameterName'],
-          Value=event['parameterValue'],
-          Type='String',
-          Overwrite=True
-        )
-        
-    reponseString = 'Updated parameter %s with value %s.' % (event['parameterName'], event['parameterValue'])
-        
-    return reponseString
-    ```
-
-
+**_Note:_** By default SSM Automation runs in the default VPC, If you are going to run in a different VPC, you **must** provide the subnet id, which has internet access.
 
 ### Creation of AMI
 1. In the EC2 console, choose **Systems Manager Services,** **Automations**.![](https://media.amazonwebservices.com/blog/2017/EC2Sys-Console-1.png)
-1. Choose **Execution automation** and scroll down to update details.
+1. Choose **Execution automation** and pick the one we just created. Easiest way is to search by "_Owned by Me"_.
 1. Expand **Document Details** and choose **Latest version at runtime**.![](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ami-lifecycle-management-using-ssm/images/AWS-UpdateLinux-Ami.png)
 1. Choose the latest document version.
 1. For **Input Parameters**
@@ -124,14 +82,12 @@ def lambda_handler(event, context):
 1.  Choose **Execute Automation**.
 1.  Monitor progress in the **Automation Steps** tab, and view step-level outputs.
 
-**Note:** - By default SSM Automation runs either the `AWS-UpdateLinuxAmi` document or the `AWS-UpdateWindowsAmi` in the default VPC. If you want it to run in a different VPC, then you should provide the subnets in the document, as shown in the [example here](https://docs.aws.amazon.com/systems-manager/latest/userguide/automation-troubleshooting.html)
+**Note:** - By default SSM Automation runs either the `AWS-UpdateLinuxAmi` document or the `AWS-UpdateWindowsAmi` in the default VPC.
 
 
 ### Pre-Update Script
 Any packages/libraries/scripts that needs to be copied to the server before the update process begins.
 
 ### Post-Update Script
-1. **AMI Validation Scripts:** If you have any testing to be done on the newly created AMI, this is the place, where you will have to do it. 
-1. **Update Parameter Store:** After successful completion of test, update the AMI value into the parameter store using Lambda functions
-
+Optional: I have written a crude `post-ami-build.sh` script to install httpd and update the _index.html_ to test everything is working fine. Store the file in S3 and ensure the user who run SSM has access to the s3 bucket.
 
