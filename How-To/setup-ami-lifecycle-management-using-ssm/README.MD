@@ -1,5 +1,7 @@
 # AMI LifeCycle Management Using EC2 Systems Manager | Automation
+Automatically apply operating system (OS) patches to a Linux AMI that is already considered to be the most up-to-date or latest AMI. The default value of the parameter `SourceAmiId` is defined by a Systems Manager Parameter Store parameter called `BastionHost-Linux-AMI`. This value is updated by an AWS Lambda function invoked at the end of the Automation workflow.
 
+## Pre-Requisites
 We will need two roles to automate the AMI LifeCycle Management.
 1. RoleName: **lambda-ssm-role**: 
    - Permissions: Managed Policies `AWSLambdaExecute` and `AmazonSSMFullAccess`
@@ -93,3 +95,5 @@ Optional: I have written a crude `post-ami-build.sh` script to install httpd and
 
 For production usage, you might want to consider writing some more robust validation scripts
 
+### ToDo
+Optionally, CloudWatch Events to trigger Automation

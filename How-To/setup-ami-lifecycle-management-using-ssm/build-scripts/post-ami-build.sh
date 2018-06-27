@@ -10,7 +10,8 @@ systemctl enable httpd
 # Create our index file
 cat > /var/www/html/index.html <<- "EOF"
 <html>
-<br /><br />                             
+<br /><br />
+<pre>                         
                                                              
                                           __  __   ___   .--.
                                          |  |/  `.'   `. |__|
@@ -37,6 +38,7 @@ cat > /var/www/html/index.html <<- "EOF"
 / /   | |_|   `'.  |   |  '.'                              / /   | |_  |  '.'                   |  |   |  |
 \ \._,\ '/'   .'|  '/  |   /                               \ \._,\ '/  |   /                    |  |   |  |
  `--'  `"  `-'  `--'   `'-'                                 `--'  `"   `'-'                     '--'   '--'
+</pre>
 <br />
 </html>
 EOF
