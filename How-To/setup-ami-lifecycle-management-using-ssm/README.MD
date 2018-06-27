@@ -91,3 +91,5 @@ Any packages/libraries/scripts that needs to be copied to the server before the 
 ### Post-Update Script
 Optional: I have written a crude `post-ami-build.sh` script to install httpd and update the _index.html_ to test everything is working fine. Store the file in S3 and ensure the user who run SSM has access to the s3 bucket.
 
+For production usage, you might want to consider writing some more robust validation scripts
+
