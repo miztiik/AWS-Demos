@@ -80,3 +80,6 @@ cat > /etc/update-motd.d/30-banner <<- "EOF"
  `--'  `"  `-'  `--'   `'-'                                 `--'  `"   `'-'                     '--'   '--'
 
 EOF
+
+# lets copy over the banner to the other location as well
+cp -rf 30-banner /var/lib/update-motd/motd
