@@ -11,7 +11,7 @@
     "InstanceIamRole": {
       "type": "String",
       "description": "(Required) The name of the role that enables Systems Manager (SSM) to manage the instance.",
-      "default": "ManagedInstanceProfile"
+      "default": "ManagedInstanceRole"
     },
     "AutomationAssumeRole": {
       "type": "String",
@@ -41,7 +41,7 @@
     "PostUpdateScript": {
       "type": "String",
       "description": "(Optional) URL of a script to run after package updates are applied. Default (\"none\") is to not run a script.",
-      "default": "https://s3.eu-central-1.amazonaws.com/ami-automation-scripts-eneco/post-ami-build.sh"
+      "default": "https://s3.eu-central-1.amazonaws.com/eneco-automation-scripts/post-ami-build.sh"
     },
     "IncludePackages": {
       "type": "String",
@@ -100,6 +100,40 @@
       }
     },
     {
+      "name": "installCustomizations",
+      "action": "aws:runCommand",
+      "maxAttempts": 3,
+      "timeoutSeconds": 600,
+      "onFailure": "Abort",
+      "inputs": {
+        "DocumentName": "AWS-RunShellScript",
+        "InstanceIds": [
+          "{{launchInstance.InstanceIds}}"
+        ],
+        "Parameters": {
+          "commands":[
+            "curl -O http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm",
+            "rpm -ivh epel-release-latest-7.noarch.rpm",
+            "yum -y install httpd",
+            "systemctl enable httpd",
+            "systemctl restart httpd",
+            "sudo yum --enablerepo=epel install -y clamav",
+            "yum-config-manager --disable epel",
+            "cat /etc/motd >> /var/www/html/index.html",
+            "echo 'Welcome' >> /var/www/html/index.html",            
+            "cat > /etc/motd <<- EOF",
+            "           __  __ _                 _                        _   _             ",
+            "     /\\   |  \\/  (_)     /\\        | |                      | | (_)            ",
+            "    /  \\  | \\  / |_     /  \\  _   _| |_ ___  _ __ ___   __ _| |_ _  ___  _ __  ",
+            "   / /\\ \\ | |\\/| | |   / /\\ \\| | | | __/ _ \\| '_ ` _ \\ / _` | __| |/ _ \\| '_ \\ ",
+            "  / ____ \\| |  | | |  / ____ \\ |_| | || (_) | | | | | | (_| | |_| | (_) | | | |",
+            " /_/    \\_\\_|  |_|_| /_/    \\_\\__,_|\\__\\___/|_| |_| |_|\\__,_|\\__|_|\\___/|_| |_|",
+            "EOF"
+            ]
+        }
+      }
+    },    
+    {
       "name": "installInspectorAgent",
       "action": "aws:runCommand",
       "maxAttempts": 3,
@@ -114,7 +148,7 @@
           "Operation": "Install"
         }
       }
-    },
+    },    
     {
       "name": "stopInstance",
       "action": "aws:changeInstanceState",
