@@ -15,7 +15,8 @@ We will need two roles to automate the AMI LifeCycle Management.
 1. SSM Parameter Store:
    - Parameter Name: `/GoldenAMI/Linux/RedHat-7/latest`
    - Parameter Value: _Any linux based AMI of your choice_
-1. _Optional:_ An S3 bucket with `Post-Update-Scripts` with public access.
+1. An S3 bucket with `Post-Update-Scripts` with S3 Read access.
+   - Permissions: Managed Policies `S3ReadOnlyAccess`
 1. RoleName: **lambda-ssm-role**: 
    - Permissions: Managed Policies `AWSLambdaExecute` and `AmazonSSMFullAccess`
 1. RoleName: **ManagedInstanceRole**: - An EC2 Role to allow SSM to start instances, create images etc,
@@ -90,10 +91,10 @@ _Modify as required for your environment_
 ### Creation of AMI
 1. In the EC2 console, choose **Systems Manager Services,** **Automations**.![](https://media.amazonwebservices.com/blog/2017/EC2Sys-Console-1.png)
 1. Choose **Execution automation** and pick the one we just created. Easiest way is to search by "_Owned by Me"_.
-1. Expand **Document Details** and choose **Latest version at runtime**.![](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ami-lifecycle-management-using-ssm/images/AWS-UpdateLinux-Ami.png)
-1. Choose the latest document version.
+1. Expand **Document Details** and choose **Latest version at runtime**.![](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ami-lifecycle-management-using-ssm/images/AWS-UpdateLinux-Ami-00.png)
+1. Choose the latest document version.![](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ami-lifecycle-management-using-ssm/images/AWS-UpdateLinux-Ami-01.png)
 1. For **Input Parameters**
-   1. **SourceAmiId**, enter the ID of the Linux AMI to update.![](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ami-lifecycle-management-using-ssm/images/AWS-UpdateLinux-Input-Parameters.png)
+   1. **SourceAmiId**, enter the ID of the Linux AMI to update.![](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ami-lifecycle-management-using-ssm/images/AWS-UpdateLinux-Ami-02.png)
    1. For **InstanceProfileName**, enter the name of the managed instance. i.e `ManagedInstanceRole`
    1. For **AutomationAssumeRole**, enter the [**ARN**](http://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns) of the service role you created for Automation.
 1.  Choose **Execute Automation**.
@@ -109,6 +110,10 @@ Any packages/libraries/scripts that needs to be copied to the server before the 
 Optional: I have written a crude `post-ami-build.sh` script to install httpd and update the _index.html_ to test everything is working fine. Store the file in S3 and ensure the user who run SSM has access to the s3 bucket.
 
 For production usage, you might want to consider writing some more robust validation scripts
+
+### Boot New Instance,
+if you boot the new instance, and login, you should get a welcome message like this,
+![](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ami-lifecycle-management-using-ssm/images/AWS-UpdateLinux-Ami-Automatically.png)
 
 ### ToDo
 Optionally, CloudWatch Events to trigger Automation
