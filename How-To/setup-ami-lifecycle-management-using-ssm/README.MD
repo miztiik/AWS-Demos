@@ -32,7 +32,7 @@ We will need two roles to automate the AMI LifeCycle Management.
                 "Sid": "VisualEditor0",
                 "Effect": "Allow",
                 "Action": "iam:PassRole",
-                "Resource": "arn:aws:iam::<YOUR-ACCOUNT-NUMBER>:role/<your-ManagedInstanceRole-name"
+                "Resource": "arn:aws:iam::<YOUR-ACCOUNT-NUMBER>:role/<your-ManagedInstanceRole-name>"
             }
         ]
     }
@@ -60,12 +60,14 @@ If this role creation and attaching trust policies, that part alone can be done 
 
 
 ### Create Parameter for Golden AMI
-Use the AWS CLI or GUI to create a parameter store entry, here is the CLI command. `/GoldenAMI/Linux/RedHat-7/latest` is the parameter name that we will use in our _Automation_ Document and lambda will use the same to update the AMI Upon completion of the AMI.
+Use the AWS CLI or GUI to create a parameter store entry, here is the CLI command. 
+ - `/GoldenAMI/Linux/RedHat-7/source` - The OEM Imaged Id will be stored here
+ - `/GoldenAMI/Linux/RedHat-7/latest` - The golden AMI will be updated .
 ```sh
-aws ssm put-parameter --name /GoldenAMI/Linux/RedHat-7/latest --value "ami-c86c3f23" --type String
+aws ssm put-parameter --name /GoldenAMI/Linux/RedHat-7/source --value "ami-c86c3f23" --type String
 ```
 
-### Create [Lambda](https://docs.aws.amazon.com/systems-manager/latest/userguide/automation-simpatch.html#automation-pet1) to update SSM Parameter Store
+## Create [Lambda](https://docs.aws.amazon.com/systems-manager/latest/userguide/automation-simpatch.html#automation-pet1) to update SSM Parameter Store
 This function will helps us to automatically update the parameter store with the latest AMI when the _Automation Document_ successfully create a new image.
 
 
@@ -78,7 +80,7 @@ _Modify as required for your environment_
 1. The `code` for lambda function is provided in this file `Automation-UpdateSsmParam.py`
 
 
-### Create custom Automation Document
+## Create custom Automation Document
 
 **_Note:_** By default SSM Automation runs in the default VPC, If you are going to run in a different VPC, you **must** provide the subnet id, which has internet access.
 
@@ -87,7 +89,7 @@ _Modify as required for your environment_
 1. After succesful creation of the document, you should be able view,modify versions,![](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ami-lifecycle-management-using-ssm/images/Create-Automation-Document-01.png)
 
 
-### Creation of AMI
+## Creation of AMI
 1. In the EC2 console, choose **Systems Manager Services,** **Automations**.![](https://media.amazonwebservices.com/blog/2017/EC2Sys-Console-1.png)
 1. Choose **Execution automation** and pick the one we just created. Easiest way is to search by "_Owned by Me"_.
 1. Expand **Document Details** and choose **Latest version at runtime**.![](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ami-lifecycle-management-using-ssm/images/AWS-UpdateLinux-Ami-00.png)
@@ -110,7 +112,7 @@ Optional: I have written a crude `post-ami-build.sh` script to install httpd and
 
 For production usage, you might want to consider writing some more robust validation scripts
 
-### Boot New Instance,
+## Boot New Instance,
 if you boot the new instance, and login, you should get a welcome message like this,
 ![](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ami-lifecycle-management-using-ssm/images/AWS-UpdateLinux-Ami-Automatically.png)
 
