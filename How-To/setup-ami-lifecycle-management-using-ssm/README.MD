@@ -1,8 +1,21 @@
 # AMI LifeCycle Management Using EC2 Systems Manager | Automation
-Automatically apply operating system (OS) patches to a Linux AMI that is already considered to be the most up-to-date or latest AMI. The default value of the parameter `SourceAmiId` is defined by a Systems Manager Parameter Store parameter called `BastionHost-Linux-AMI`. This value is updated by an AWS Lambda function invoked at the end of the Automation workflow.
+
+This walkthrough shows you how to create and run a custom Golden AMI Automation document.
+ - Launches an instance from a specified AMI from [SSM Parameter Store]() - _Default:_`/GoldenAMI/Linux/RedHat-7/latest`
+ - Executes a command using Run Command that applies Windows updates to the instance.
+ - Stops the instance.
+ - Creates a new AMI.
+ - Tag the AMI.
+ - Terminates the original instance.
+ - Update the parameter store using Lambda
+
 
 ## Pre-Requisites
 We will need two roles to automate the AMI LifeCycle Management.
+1. SSM Parameter Store:
+   - Parameter Name: `/GoldenAMI/Linux/RedHat-7/latest`
+   - Parameter Value: _Any linux based AMI of your choice_
+1. _Optional:_ An S3 bucket with `Post-Update-Scripts` with public access.
 1. RoleName: **lambda-ssm-role**: 
    - Permissions: Managed Policies `AWSLambdaExecute` and `AmazonSSMFullAccess`
 1. RoleName: **ManagedInstanceRole**: - An EC2 Role to allow SSM to start instances, create images etc,
@@ -46,9 +59,9 @@ If this role creation and attaching trust policies, that part alone can be done 
 
 
 ### Create Parameter for Golden AMI
-Use the AWS CLI or GUI to create a parameter store entry, here is the CLI command. `BastionHost-Linux-AMI` is the parameter name that we will use in our _Automation_ Document and lambda will use the same to update the AMI Upon completion of the AMI.
+Use the AWS CLI or GUI to create a parameter store entry, here is the CLI command. `/GoldenAMI/Linux/RedHat-7/latest` is the parameter name that we will use in our _Automation_ Document and lambda will use the same to update the AMI Upon completion of the AMI.
 ```sh
-aws ssm put-parameter --name BastionHost-Linux-AMI --value "ami-9a91b371" --type String
+aws ssm put-parameter --name /GoldenAMI/Linux/RedHat-7/latest --value "ami-c86c3f23" --type String
 ```
 
 ### Create [Lambda](https://docs.aws.amazon.com/systems-manager/latest/userguide/automation-simpatch.html#automation-pet1) to update SSM Parameter Store
@@ -67,10 +80,12 @@ _Modify as required for your environment_
 
 ### Create custom Automation Document
 
+**_Note:_** By default SSM Automation runs in the default VPC, If you are going to run in a different VPC, you **must** provide the subnet id, which has internet access.
+
 1. [Create Document](https://eu-central-1.console.aws.amazon.com/systems-manager/documents/create-document?region=eu-central-1), Give a **Name**, like "`BastionHost-Linux-AMI-Builder`.
 1. Add the contents of the `BastionHost-Linux-AMI-Builder.json` file in the field.![](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ami-lifecycle-management-using-ssm/images/Create-Automation-Document-00.png)
 1. After succesful creation of the document, you should be able view,modify versions,![](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ami-lifecycle-management-using-ssm/images/Create-Automation-Document-01.png)
-**_Note:_** By default SSM Automation runs in the default VPC, If you are going to run in a different VPC, you **must** provide the subnet id, which has internet access.
+
 
 ### Creation of AMI
 1. In the EC2 console, choose **Systems Manager Services,** **Automations**.![](https://media.amazonwebservices.com/blog/2017/EC2Sys-Console-1.png)

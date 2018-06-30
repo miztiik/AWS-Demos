@@ -2,6 +2,7 @@
 
 # Install httpd server
 yum -y install httpd
+sudo yum --enablerepo=epel install -y clamav
 
 # Enable the httpd server to start at boot
 systemctl enable httpd
@@ -49,8 +50,8 @@ systemctl restart httpd
 
 
 ## Edit the MOTD to display something nice
->>/etc/update-motd.d/30-banner
-cat > /etc/update-motd.d/30-banner <<- "EOF"
+>>/etc/motd
+cat > /etc/motd <<- "EOF"
                             
                                                              
                                           __  __   ___   .--.
@@ -81,5 +82,3 @@ cat > /etc/update-motd.d/30-banner <<- "EOF"
 
 EOF
 
-# lets copy over the banner to the other location as well
-cp -rf 30-banner /var/lib/update-motd/motd
