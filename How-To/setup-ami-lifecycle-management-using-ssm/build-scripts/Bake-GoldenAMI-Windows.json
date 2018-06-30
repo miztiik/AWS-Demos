@@ -1,0 +1,530 @@
+{
+  "schemaVersion": "0.3",
+  "description": "Updates a Microsoft Windows AMI. By default it will install all Windows updates, Amazon software, and Amazon drivers. It will then sysprep and create a new AMI. Supports Windows Server 2008 R2 and greater.For details,see https://github.com/miztiik/AWS-Demos/tree/master/How-To/setup-ami-lifecycle-management-using-ssm",
+  "assumeRole": "{{ AutomationAssumeRole }}",
+  "parameters": {
+    "SourceAmiId": {
+      "type": "String",
+      "description": "(Required) The source Amazon Machine Image ID.",
+      "default": "{{ssm:/GoldenAMI/Windows/Server-2016/source}}"
+          },
+    "IamInstanceProfileName": {
+      "type": "String",
+      "description": "(Required) The name of the role that enables Systems Manager to manage the instance.",
+      "default": "ManagedInstanceRole"
+    },
+    "AutomationAssumeRole": {
+      "type": "String",
+      "description": "(Required) The ARN of the role that allows Automation to perform the actions on your behalf.",
+      "default": "arn:aws:iam::{{global:ACCOUNT_ID}}:role/AutomationServiceRole"
+    },
+    "TargetAmiName": {
+      "type": "String",
+      "description": "(Optional) The name of the new AMI that will be created. Default is a system-generated string including the source AMI id, and the creation time and date.",
+      "default": "GoldenAMI-Windows2016-7_on_{{global:DATE_TIME}}"
+    },
+    "InstanceType": {
+      "type": "String",
+      "description": "(Optional) Type of instance to launch as the workspace host. Instance types vary by region. Default is t2.medium.",
+      "default": "t2.medium"
+    },
+    "SubnetId": {
+      "type": "String",
+      "description": "(Optional) Specify the SubnetId if you want to launch into a specific subnet.",
+      "default": "subnet-051c923b00b2cb98a"
+    },
+    "IncludeKbs": {
+      "type": "String",
+      "description": "(Optional) Specify one or more Microsoft Knowledge Base (KB) article IDs to include. You can install multiple IDs using comma-separated values. Valid formats: KB9876543 or 9876543.",
+      "default": ""
+    },
+    "ExcludeKbs": {
+      "type": "String",
+      "description": "(Optional) Specify one or more Microsoft Knowledge Base (KB) article IDs to exclude. You can exclude multiple IDs using comma-separated values. Valid formats: KB9876543 or 9876543.",
+      "default": ""
+    },
+    "Categories": {
+      "type": "String",
+      "description": "(Optional) Specify one or more update categories. You can filter categories using comma-separated values. Options: Application, Connectors, CriticalUpdates, DefinitionUpdates, DeveloperKits, Drivers, FeaturePacks, Guidance, Microsoft, SecurityUpdates, ServicePacks, Tools, UpdateRollups, Updates. Valid formats include a single entry, for example: CriticalUpdates. Or you can specify a comma separated list: CriticalUpdates,SecurityUpdates. NOTE: There cannot be any spaces around the commas.",
+      "default": "CriticalUpdates"
+    },
+    "SeverityLevels": {
+      "type": "String",
+      "description": "(Optional) Specify one or more MSRC severity levels associated with an update. You can filter severity levels using comma-separated values. By default patches for all security levels are selected. If value supplied, the update list is filtered by those values. Options: Critical, Important, Low, Moderate or Unspecified. Valid formats include a single entry, for example: Critical. Or, you can specify a comma separated list: Critical,Important,Low.",
+      "default": ""
+    },
+    "PublishedDaysOld": {
+      "type": "String",
+      "default": "16",
+      "description": "(Optional) Specify the amount of days old the updates must be from the published date.  For example, if 10 is specified, any updates that were found during the Windows Update search that have been published 10 or more days ago will be returned."
+    },
+    "PublishedDateAfter": {
+      "type": "String",
+      "default": "",
+      "description": "(Optional) Specify the date that the updates should be published after.  For example, if 01/01/2017 is specified, any updates that were found during the Windows Update search that have been published on or after 01/01/2017 will be returned."
+    },
+    "PublishedDateBefore": {
+      "type": "String",
+      "default": "",
+      "description": "(Optional) Specify the date that the updates should be published before.  For example, if 01/01/2017 is specified, any updates that were found during the Windows Update search that have been published on or before 01/01/2017 will be returned."
+    },
+    "PreUpdateScript": {
+      "type": "String",
+      "description": "(Optional) A script provided as a string. It will execute prior to installing OS updates.",
+      "default": ""
+    },
+    "PostUpdateScript": {
+      "type": "String",
+      "description": "(Optional) A script provided as a string. It will execute after installing OS updates.",
+      "default": ""
+    },
+    "lambdaFunctionName": {
+      "type": "String",
+      "description": "(Required) The name of the lambda function. Default ('none') is to not run a script.",
+      "default": "Automation-UpdateSsmParam"
+    }    
+  },
+  "mainSteps": [
+    {
+      "name": "LaunchInstance",
+      "action": "aws:runInstances",
+      "timeoutSeconds": 1800,
+      "maxAttempts": 3,
+      "onFailure": "Abort",
+      "inputs": {
+        "ImageId": "{{ SourceAmiId  }}",
+        "InstanceType": "{{ InstanceType }}",
+        "MinInstanceCount": 1,
+        "MaxInstanceCount": 1,
+        "IamInstanceProfileName": "{{ IamInstanceProfileName }}",
+        "SubnetId": "{{ SubnetId }}"
+      }
+    },
+    {
+      "name": "OSCompatibilityCheck",
+      "action": "aws:runCommand",
+      "maxAttempts": 3,
+      "onFailure": "Abort",
+      "timeoutSeconds": 7200,
+      "inputs": {
+        "DocumentName": "AWS-RunPowerShellScript",
+        "InstanceIds": [
+          "{{LaunchInstance.InstanceIds}}"
+        ],
+        "Parameters": {
+          "executionTimeout": "7200",
+          "commands": [
+            "[System.Version]$osversion = [System.Environment]::OSVersion.Version",
+            "if(($osversion.Major -eq 6 -and $osversion.Minor -ge 1) -or ($osversion.Major -ge 10)) {",
+            "  Write-Host 'This OS is supported for use with this automation document.'",
+            "} else {",
+            "  Write-Host 'This OS is not supported for use with this automation document.'",
+            "  exit -1",
+            "}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "RunPreUpdateScript",
+      "action": "aws:runCommand",
+      "maxAttempts": 3,
+      "onFailure": "Abort",
+      "timeoutSeconds": 1800,
+      "inputs": {
+        "DocumentName": "AWS-RunPowerShellScript",
+        "InstanceIds": [
+          "{{ LaunchInstance.InstanceIds }}"
+        ],
+        "Parameters": {
+          "commands": "{{ PreUpdateScript }}"
+        }
+      }
+    },
+    {
+      "name": "UpdateEC2Config",
+      "action": "aws:runCommand",
+      "maxAttempts": 3,
+      "onFailure": "Abort",
+      "timeoutSeconds": 7200,
+      "inputs": {
+        "DocumentName": "AWS-RunPowerShellScript",
+        "InstanceIds": [
+          "{{ LaunchInstance.InstanceIds }}"
+        ],
+        "Parameters": {
+          "commands": [
+            "$zipFilename = 'AWSUpdateWindowsInstance_1_4_3_1.zip'",
+            "$zipFileHash = '9FC935717FFC2CB5476B06DFAC07B6133F483AE5402CAE8035F39A2D74FBB1BF'",
+            "$moduleName = 'AWSUpdateWindowsInstance'",
+            "$tempPath = $env:TEMP",
+            "$moduleDirectory = Join-Path $tempPath -ChildPath $moduleName",
+            "$moduleZipFilePath = Join-Path $tempPath -ChildPath $zipFilename",
+            "$moduleManifestPath = Join-Path $moduleDirectory -ChildPath ('{0}.psd1' -f $moduleName)",
+            "[string[]] $includeList = ('{{ IncludeKbs }}').Split(',',[System.StringSplitOptions]::RemoveEmptyEntries)",
+            "[string[]] $excludeList = ('{{ ExcludeKbs }}').Split(',',[System.StringSplitOptions]::RemoveEmptyEntries)",
+            "[string[]] $categoryList = ('{{ Categories }}').Split(',',[System.StringSplitOptions]::RemoveEmptyEntries)",
+            "[string[]] $severityLevelList = ('{{ SeverityLevels }}').Split(',',[System.StringSplitOptions]::RemoveEmptyEntries)",
+            "[string]$publishedDateAfter = '{{ PublishedDateAfter }}'",
+            "[string]$publishedDateBefore = '{{ PublishedDateBefore }}'",
+            "[string]$publishedDaysOld = '{{ PublishedDaysOld }}'",
+            "",
+            "function Main {",
+            "  Test-PreCondition",
+            "  Clear-WindowsUpdateModule",
+            "  Get-WindowsUpdateModule",
+            "  Expand-WindowsUpdateModule",
+            "  if ([Environment]::OSVersion.Version.Major -ge 10) {",
+            "    Invoke-UpdateEC2Launch",
+            "  } else {",
+            "    Invoke-UpdateEC2Config",
+            "  }",
+            "}",
+            "",
+            "function Test-PreCondition {",
+            "  $osversion = [Environment]::OSVersion.Version",
+            "  if ($osversion.Major -le 5) {",
+            "    Write-Host 'This document is not supported on Windows Server 2003 or earlier.'",
+            "    Exit -1",
+            "  }",
+            "",
+            "  if ($osversion.Version -ge '10.0') {",
+            "    $sku = (Get-CimInstance -ClassName Win32_OperatingSystem).OperatingSystemSKU",
+            "    if ($sku -eq 143 -or $sku -eq 144) {",
+            "      Write-Host 'This document is not supported on Windows 2016 Nano Server.'",
+            "      Exit -1",
+            "    }",
+            "  }",
+            "",
+            "}",
+            "",
+            "function Clear-WindowsUpdateModule {",
+            "  try {",
+            "    if (Test-Path $moduleDirectory) {",
+            "      Remove-Item $moduleDirectory -Force -Recurse",
+            "    }",
+            "    if (Test-Path $moduleZipFilePath) {",
+            "      Remove-Item $moduleZipFilePath -Force",
+            "    }",
+            "  } catch {",
+            "    Write-Host \"Cleaning Windows update module resulted in error: $($_)\"",
+            "  }",
+            "}",
+            "",
+            "function Get-WindowsUpdateModule {",
+            "  try {",
+            "    $ssmAgentService = Get-ItemProperty 'HKLM:SYSTEM\\CurrentControlSet\\Services\\AmazonSSMAgent\\' -ErrorAction SilentlyContinue",
+            "    if($ssmAgentService -and $ssmAgentService.Version -ge '2.0.533.0') {",
+            "      $region = $env:AWS_SSM_REGION_NAME",
+            "    }",
+            "",
+            "    if(-not $region) {",
+            "      try {",
+            "        $identityDocumentUrl = 'http://169.254.169.254/latest/dynamic/instance-identity/document'",
+            "        $region = ((Invoke-WebRequest -UseBasicParsing -uri $identityDocumentUrl).Content | ConvertFrom-Json).region",
+            "      } catch {",
+            "        $region = 'us-east-1'",
+            "      }",
+            "    }",
+            "",
+            "    if ($region.StartsWith('cn-')) {",
+            "      $s3Location = 'https://s3.{0}.amazonaws.com.cn/aws-windows-downloads-{0}/PSModules/AWSUpdateWindowsInstance/{1}'",
+            "    } elseif($region.StartsWith('us-gov-')) {",
+            "      $s3Location = 'https://s3-fips-{0}.amazonaws.com/aws-windows-downloads-{0}/PSModules/AWSUpdateWindowsInstance/{1}'",
+            "    } elseif($region -eq 'us-east-1') {",
+            "      $s3Location = 'https://s3.amazonaws.com/aws-windows-downloads-{0}/PSModules/AWSUpdateWindowsInstance/{1}'",
+            "    } else {",
+            "      $s3Location = 'https://aws-windows-downloads-{0}.s3.amazonaws.com/PSModules/AWSUpdateWindowsInstance/{1}'",
+            "    }",
+            "",
+            "    $source = $s3Location -f $region, $zipFilename",
+            "    $moduleLocalPath = Join-Path $tempPath -ChildPath $zipFilename",
+            "    Start-BitsTransfer -Source $source -Destination $moduleLocalPath",
+            "",
+            "    $fileStream = New-Object System.IO.FileStream($moduleLocalPath, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read)",
+            "    $sha256 = [System.Security.Cryptography.HashAlgorithm]::Create('System.Security.Cryptography.SHA256CryptoServiceProvider')",
+            "    $currentHash = [System.BitConverter]::ToString($sha256.ComputeHash($fileStream), 0).Replace('-', '').ToLowerInvariant()",
+            "    $sha256.Dispose()",
+            "    $fileStream.Dispose()",
+            "",
+            "    if ($currentHash -ne $zipFileHash) {",
+            "      Write-Host 'The SHA hash of the module does not match the expected value.'",
+            "      Exit -1",
+            "    }",
+            "  } catch {",
+            "    Write-Host ('Error encountered while getting the module: {0}.' -f $_.Exception.Message)",
+            "    Exit -1",
+            "  }",
+            "}",
+            "",
+            "function Expand-WindowsUpdateModule {",
+            "  try {",
+            "    [System.Reflection.Assembly]::LoadWithPartialName('System.IO.Compression.FileSystem') | Out-Null",
+            "    $zip = [System.IO.Compression.ZipFile]::OpenRead($moduleZipFilePath)",
+            "    foreach ($item in $zip.Entries) {",
+            "      $extractPath = Join-Path $tempPath -ChildPath $item.FullName",
+            "      if ($item.Length -eq 0) {",
+            "        if (-not (Test-Path $extractPath)) {",
+            "          New-Item $extractPath -ItemType Directory | Out-Null",
+            "        }",
+            "      } else {",
+            "        $parentPath = Split-Path $extractPath",
+            "        if (-not (Test-Path $parentPath)) {",
+            "          New-Item $parentPath -ItemType Directory | Out-Null",
+            "        }",
+            "        [System.IO.Compression.ZipFileExtensions]::ExtractToFile($item, $extractPath, $true)",
+            "      }",
+            "    }",
+            "  } catch {",
+            "    Write-Host ('Error encountered when extracting module file: {0}.' -f $_.Exception.Message)",
+            "    Exit -1",
+            "  } finally {",
+            "    $zip.Dispose()",
+            "  }",
+            "}",
+            "",
+            "function Invoke-UpdateEC2Config {",
+            "  Import-Module $moduleManifestPath",
+            "  $command = \"Install-AwsUwiEC2Config -Region $region\"",
+            "  if($id) { $command += \" -Id $($id)\"}",
+            "  Invoke-Expression $command",
+            "}",
+            "",
+            "function Invoke-UpdateEC2Launch {",
+            "  Import-Module $moduleManifestPath",
+            "  $command = 'Install-AwsUwiEC2Launch'",
+            "  if($id) { $command += \" -Id $($id)\" }",
+            "  Invoke-Expression $command",
+            "}",
+            "",
+            "Main"
+          ]
+        }
+      }
+    },
+    {
+      "name": "UpdateSSMAgent",
+      "action": "aws:runCommand",
+      "maxAttempts": 3,
+      "onFailure": "Abort",
+      "timeoutSeconds": 600,
+      "inputs": {
+        "DocumentName": "AWS-UpdateSSMAgent",
+        "InstanceIds": [
+          "{{ LaunchInstance.InstanceIds }}"
+        ],
+        "Parameters": {
+          "allowDowngrade": "false"
+        }
+      }
+    },
+    {
+      "name": "UpdateAWSPVDriver",
+      "action": "aws:runCommand",
+      "maxAttempts": 3,
+      "onFailure": "Abort",
+      "timeoutSeconds": 600,
+      "inputs": {
+        "DocumentName": "AWS-ConfigureAWSPackage",
+        "InstanceIds": [
+          "{{LaunchInstance.InstanceIds}}"
+        ],
+        "Parameters": {
+          "name": "AWSPVDriver",
+          "action": "Install"
+        }
+      }
+    },
+    {
+      "name": "UpdateAWSEnaNetworkDriver",
+      "action": "aws:runCommand",
+      "maxAttempts": 3,
+      "onFailure": "Abort",
+      "timeoutSeconds": 600,
+      "inputs": {
+        "DocumentName": "AWS-ConfigureAWSPackage",
+        "InstanceIds": [
+          "{{LaunchInstance.InstanceIds}}"
+        ],
+        "Parameters": {
+          "name": "AwsEnaNetworkDriver",
+          "action": "Install"
+        }
+      }
+    },
+    {
+      "name": "UpdateAWSNVMe",
+      "action": "aws:runCommand",
+      "maxAttempts": 3,
+      "onFailure": "Abort",
+      "timeoutSeconds": 600,
+      "inputs": {
+        "DocumentName": "AWS-ConfigureAWSPackage",
+        "InstanceIds": [
+          "{{LaunchInstance.InstanceIds}}"
+        ],
+        "Parameters": {
+          "name": "AWSNVMe",
+          "action": "Install"
+        }
+      }
+    },
+    {
+      "name": "InstallWindowsUpdates",
+      "action": "aws:runCommand",
+      "maxAttempts": 3,
+      "onFailure": "Abort",
+      "timeoutSeconds": 14400,
+      "inputs": {
+        "DocumentName": "AWS-InstallWindowsUpdates",
+        "InstanceIds": [
+          "{{ LaunchInstance.InstanceIds }}"
+        ],
+        "Parameters": {
+          "Action": "Install",
+          "IncludeKbs": "{{ IncludeKbs }}",
+          "ExcludeKbs": "{{ ExcludeKbs }}",
+          "Categories": "{{ Categories }}",
+          "SeverityLevels": "{{ SeverityLevels }}",
+          "PublishedDaysOld": "{{ PublishedDaysOld }}",
+          "PublishedDateAfter": "{{ PublishedDateAfter }}",
+          "PublishedDateBefore": "{{ PublishedDateBefore }}"
+        }
+      }
+    },
+    {
+      "name": "installInspectorAgent",
+      "action": "aws:runCommand",
+      "maxAttempts": 3,
+      "timeoutSeconds": 600,
+      "onFailure": "Abort",
+      "inputs": {
+        "DocumentName": "AmazonInspector-ManageAWSAgent",
+        "InstanceIds": [
+          "{{launchInstance.InstanceIds}}"
+        ],
+        "Parameters": {
+          "Operation": "Install"
+        }
+      }
+    },    
+    {
+      "name": "RunPostUpdateScript",
+      "action": "aws:runCommand",
+      "maxAttempts": 3,
+      "onFailure": "Abort",
+      "timeoutSeconds": 1800,
+      "inputs": {
+        "DocumentName": "AWS-RunPowerShellScript",
+        "InstanceIds": [
+          "{{ LaunchInstance.InstanceIds }}"
+        ],
+        "Parameters": {
+          "commands": "{{ PostUpdateScript }}"
+        }
+      }
+    },
+    {
+      "name": "RunSysprepGeneralize",
+      "action": "aws:runCommand",
+      "maxAttempts": 3,
+      "onFailure": "Abort",
+      "timeoutSeconds": 600,
+      "inputs": {
+        "DocumentName": "AWSEC2-RunSysprep",
+        "InstanceIds": [
+          "{{LaunchInstance.InstanceIds}}"
+        ],
+        "Parameters": {
+          "Id": "{{automation:EXECUTION_ID}}"
+        }
+      }
+    },
+    {
+      "name": "StopInstance",
+      "action": "aws:changeInstanceState",
+      "maxAttempts": 3,
+      "timeoutSeconds": 7200,
+      "onFailure": "Abort",
+      "inputs": {
+        "InstanceIds": [
+          "{{ LaunchInstance.InstanceIds }}"
+        ],
+        "CheckStateOnly": false,
+        "DesiredState": "stopped"
+      }
+    },
+    {
+      "name": "CreateImage",
+      "action": "aws:createImage",
+      "maxAttempts": 3,
+      "onFailure": "Abort",
+      "inputs": {
+        "InstanceId": "{{ LaunchInstance.InstanceIds }}",
+        "ImageName": "{{ TargetAmiName }}",
+        "NoReboot": true,
+        "ImageDescription": "Test CreateImage Description"
+      }
+    },
+    {
+      "name": "createTags",
+      "action": "aws:createTags",
+      "maxAttempts": 1,
+      "onFailure": "Continue",
+      "inputs": {
+        "ResourceType": "EC2",
+        "ResourceIds": [
+          "{{createImage.ImageId}}"
+        ],
+        "Tags": [
+          {
+            "Key": "Automation-Id",
+            "Value": "{{automation:EXECUTION_ID}}"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Mystique"
+          },          
+          {
+            "Key": "SourceAMI",
+            "Value": "{{SourceAmiId}}"
+          },
+          {
+            "Key": "Amazon-Inspector",
+            "Value": "true"
+          },
+          {
+            "Key": "Amazon-SSM",
+            "Value": "true"
+          }
+        ]
+      }
+    },
+    {
+      "name": "updateSsmParam",
+      "action": "aws:invokeLambdaFunction",
+      "timeoutSeconds": 1200,
+      "maxAttempts": 1,
+      "onFailure": "Abort",
+      "inputs": {
+        "FunctionName": "Automation-UpdateSsmParam",
+        "Payload": "{\"parameterName\":\"/GoldenAMI/Windows/Server-2016/latest\", \"parameterValue\":\"{{createImage.ImageId}}\"}"
+      }
+    },    
+    {
+      "name": "TerminateInstance",
+      "action": "aws:changeInstanceState",
+      "maxAttempts": 3,
+      "onFailure": "Abort",
+      "inputs": {
+        "InstanceIds": [
+          "{{ LaunchInstance.InstanceIds }}"
+        ],
+        "DesiredState": "terminated"
+      }
+    }
+  ],
+  "outputs": [
+    "CreateImage.ImageId"
+  ]
+}
