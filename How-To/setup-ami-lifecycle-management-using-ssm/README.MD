@@ -117,4 +117,5 @@ if you boot the new instance, and login, you should get a welcome message like t
 ![](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ami-lifecycle-management-using-ssm/images/AWS-UpdateLinux-Ami-Automatically.png)
 
 ### ToDo
-Optionally, CloudWatch Events to trigger Automation
+- Optionally, CloudWatch Events to trigger Automation
+- Encrypt the AMI using `aws:encrypedCopy`
