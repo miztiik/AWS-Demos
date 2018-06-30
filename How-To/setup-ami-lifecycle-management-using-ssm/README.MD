@@ -16,7 +16,7 @@ We will need two roles to automate the AMI LifeCycle Management.
    - Parameter Name: `/GoldenAMI/Linux/RedHat-7/latest`
    - Parameter Value: _Any linux based AMI of your choice_
 1. An S3 bucket with `Post-Update-Scripts` with S3 Read access.
-   - Permissions: Managed Policies `S3ReadOnlyAccess`
+   - Permissions: Managed Policies `AmazonS3ReadOnlyAccess`
 1. RoleName: **lambda-ssm-role**: 
    - Permissions: Managed Policies `AWSLambdaExecute` and `AmazonSSMFullAccess`
 1. RoleName: **ManagedInstanceRole**: - An EC2 Role to allow SSM to start instances, create images etc,
