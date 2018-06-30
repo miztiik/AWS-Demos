@@ -2,7 +2,6 @@
 
 # Install httpd server
 yum -y install httpd
-sudo yum --enablerepo=epel install -y clamav
 
 # Enable the httpd server to start at boot
 systemctl enable httpd
@@ -82,3 +81,6 @@ cat > /etc/motd <<- "EOF"
 
 EOF
 
+
+# Install the clam Antivirus
+sudo yum --enablerepo=epel install -y clamav
