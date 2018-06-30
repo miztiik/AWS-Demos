@@ -1,0 +1,56 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWS CloudFormation template IAM Roles for Systems Manager | Automation Service
+
+Resources:
+  ManagedInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ssm.amazonaws.com
+            - ec2.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+      - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+      Path: "/"
+
+  ManagedInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+      - !Ref ManagedInstanceRole
+      InstanceProfileName: ManagedInstanceProfile 
+
+  AutomationServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ssm.amazonaws.com
+            - ec2.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonSSMAutomationRole
+      Path: "/"
+      RoleName: AutomationServiceRole
+      Policies:
+      - PolicyName: passrole
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - iam:PassRole
+            Resource:
+            - !GetAtt ManagedInstanceRole.Arn
+
