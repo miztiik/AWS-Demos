@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Install epel
+yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+
 # Install httpd server
 yum -y install httpd
 
@@ -84,3 +87,6 @@ EOF
 
 # Install the clam Antivirus
 sudo yum --enablerepo=epel install -y clamav
+
+# Disable epel
+yum-config-manager --disable epel
