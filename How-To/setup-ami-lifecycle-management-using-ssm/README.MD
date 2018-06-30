@@ -56,7 +56,7 @@ We will need two roles to automate the AMI LifeCycle Management.
   ]
 }
 ```
-If this role creation and attaching trust policies, that part alone can be done using this [cloudformation template](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Systems-Manager-AMI-Automation-Setup&templateURL=https://s3.amazonaws.com/aws-ssm-downloads-us-east-1/templates/automationsetup.yaml).
+If this role creation and attaching trust policies, that part alone can be done using this [cloudformation template](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Systems-Manager-AMI-Automation-Setup&templateURL=https://github.com/miztiik/AWS-Demos/blob/master/How-To/setup-ami-lifecycle-management-using-ssm/build-scripts/create-iam-roles-for-build.yaml).
 
 
 ### Create Parameter for Golden AMI
