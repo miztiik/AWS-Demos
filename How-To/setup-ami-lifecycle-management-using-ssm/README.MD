@@ -15,12 +15,12 @@ We will need two roles to automate the AMI LifeCycle Management.
 1. SSM Parameter Store:
    - Parameter Name: `/GoldenAMI/Linux/RedHat-7/latest`
    - Parameter Value: _Any linux based AMI of your choice_
-1. An S3 bucket with `Post-Update-Scripts` with S3 Read access.
-   - Permissions: Managed Policies `AmazonS3ReadOnlyAccess`
+1. An S3 bucket with the file `Post-Update-Scripts`
 1. RoleName: **lambda-ssm-role**: 
    - Permissions: Managed Policies `AWSLambdaExecute` and `AmazonSSMFullAccess`
 1. RoleName: **ManagedInstanceRole**: - An EC2 Role to allow SSM to start instances, create images etc,
    - Permissions: Managed Policies `AmazonEC2RoleforSSM`
+   - Permissions: Managed Policies `AmazonS3ReadOnlyAccess`   
 1. RoleName: **AutomationServiceRole**: - An EC2 Role to Allow SSM to run documents and allow it to assume _ManagedInstanceRole_ we just created.
    - Permissions: Managed Policies `AmazonSSMAutomationRole`
    - Inline Policy to attach the `iam:PassRole`
@@ -56,7 +56,7 @@ We will need two roles to automate the AMI LifeCycle Management.
   ]
 }
 ```
-If this role creation and attaching trust policies, that part alone can be done using this [cloudformation template](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Systems-Manager-AMI-Automation-Setup&templateURL=https://github.com/miztiik/AWS-Demos/blob/master/How-To/setup-ami-lifecycle-management-using-ssm/build-scripts/create-iam-roles-for-build.yaml).
+If this role creation and attaching trust policies, that part alone can be done using this [cloudformation template](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=Systems-Manager-AMI-Automation-Setup&templateURL=https://github.com/miztiik/AWS-Demos/blob/master/How-To/setup-ami-lifecycle-management-using-ssm/build-scripts/create-iam-roles-for-build.yaml). It doesn't create the lambda roles though. [W.I.P](https://docs.aws.amazon.com/systems-manager/latest/userguide/automation-permissions.html)
 
 
 ### Create Parameter for Golden AMI
@@ -67,7 +67,6 @@ aws ssm put-parameter --name /GoldenAMI/Linux/RedHat-7/latest --value "ami-c86c3
 
 ### Create [Lambda](https://docs.aws.amazon.com/systems-manager/latest/userguide/automation-simpatch.html#automation-pet1) to update SSM Parameter Store
 This function will helps us to automatically update the parameter store with the latest AMI when the _Automation Document_ successfully create a new image.
-
 
 
 **Customizations:**
