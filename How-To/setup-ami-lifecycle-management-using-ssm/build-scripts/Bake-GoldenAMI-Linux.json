@@ -6,7 +6,7 @@
     "SourceAmiId": {
       "type": "String",
       "description": "(Required) The source Amazon Machine Image ID.",
-      "default": "{{ssm:/GoldenAMI/Linux/RedHat-7/latest}}"
+      "default": "{{ssm:/GoldenAMI/Linux/RedHat-7/source}}"
     },
     "InstanceIamRole": {
       "type": "String",
