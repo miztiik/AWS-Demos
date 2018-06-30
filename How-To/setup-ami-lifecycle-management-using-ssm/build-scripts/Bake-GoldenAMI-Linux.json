@@ -1,6 +1,6 @@
 {
   "schemaVersion": "0.3",
-  "description": "Create a Golden AMI with Linux distribution packages and Amazon software. For details,see https://github.com/miztiik/AWS-Demos/tree/master/How-To/setup-ami-lifecycle-management-using-ssm",
+  "description": "Create a Golden AMI with Linux distribution packages(ClamAV) and Amazon software(SSM & Inspector). For details,see https://github.com/miztiik/AWS-Demos/tree/master/How-To/setup-ami-lifecycle-management-using-ssm",
   "assumeRole": "{{AutomationAssumeRole}}",
   "parameters": {
     "SourceAmiId": {
