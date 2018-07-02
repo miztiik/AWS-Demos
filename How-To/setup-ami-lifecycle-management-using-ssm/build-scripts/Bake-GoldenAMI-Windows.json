@@ -82,7 +82,7 @@
       "type": "String",
       "description": "(Required) The name of the lambda function. Default ('none') is to not run a script.",
       "default": "Automation-UpdateSsmParam"
-    }    
+    }
   },
   "mainSteps": [
     {
@@ -401,7 +401,7 @@
       "inputs": {
         "DocumentName": "AmazonInspector-ManageAWSAgent",
         "InstanceIds": [
-          "{{launchInstance.InstanceIds}}"
+          "{{LaunchInstance.InstanceIds}}"
         ],
         "Parameters": {
           "Operation": "Install"
@@ -467,14 +467,27 @@
       }
     },
     {
-      "name": "createTags",
+        "name": "createEncryptedCopy",
+        "action": "aws:copyImage",
+        "maxAttempts": 3,
+        "onFailure": "Abort",
+        "inputs": {
+            "SourceImageId": "{{ CreateImage.ImageId }}",
+            "SourceRegion": "{{ global:REGION }}",
+            "ImageName": "Encrypted-{{ TargetAmiName }}",
+            "ImageDescription":"Encrypted GoldenAMI by SSM Automation on {{ global:DATE_TIME }} from source AMI {{ CreateImage.ImageId }}",
+            "Encrypted": true
+        }
+    },
+    {
+      "name": "createTagsForEncryptedImage",
       "action": "aws:createTags",
       "maxAttempts": 1,
       "onFailure": "Continue",
       "inputs": {
         "ResourceType": "EC2",
         "ResourceIds": [
-          "{{createImage.ImageId}}"
+          "{{createEncryptedCopy.ImageId}}"
         ],
         "Tags": [
           {
@@ -496,6 +509,10 @@
           {
             "Key": "Amazon-SSM",
             "Value": "true"
+          },
+          {
+            "Key": "Encrypted",
+            "Value": "true"
           }
         ]
       }
@@ -508,7 +525,7 @@
       "onFailure": "Abort",
       "inputs": {
         "FunctionName": "Automation-UpdateSsmParam",
-        "Payload": "{\"parameterName\":\"/GoldenAMI/Windows/Server-2016/latest\", \"parameterValue\":\"{{createImage.ImageId}}\"}"
+        "Payload": "{\"parameterName\":\"/GoldenAMI/Windows/Server-2016/latest\", \"parameterValue\":\"{{CreateImage.ImageId}}\"}"
       }
     },    
     {
@@ -522,6 +539,16 @@
         ],
         "DesiredState": "terminated"
       }
+    },
+    {
+        "name": "deleteUnEcryptedImage",
+        "action": "aws:deleteImage",
+        "maxAttempts": 3,
+        "timeoutSeconds": 180,
+        "onFailure": "Abort",
+        "inputs": {
+            "ImageId": "{{CreateImage.ImageId}}"
+        }
     }
   ],
   "outputs": [
