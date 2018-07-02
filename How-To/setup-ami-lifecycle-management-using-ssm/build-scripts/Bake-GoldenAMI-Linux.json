@@ -114,13 +114,8 @@
           "commands":[
             "curl -O http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm",
             "rpm -ivh epel-release-latest-7.noarch.rpm",
-            "yum -y install httpd",
-            "systemctl enable httpd",
-            "systemctl restart httpd",
             "sudo yum --enablerepo=epel install -y clamav",
             "yum-config-manager --disable epel",
-            "cat /etc/motd >> /var/www/html/index.html",
-            "echo 'Welcome' >> /var/www/html/index.html",            
             "cat > /etc/motd <<- EOF",
             "           __  __ _                 _                        _   _             ",
             "     /\\   |  \\/  (_)     /\\        | |                      | | (_)            ",
@@ -128,6 +123,8 @@
             "   / /\\ \\ | |\\/| | |   / /\\ \\| | | | __/ _ \\| '_ ` _ \\ / _` | __| |/ _ \\| '_ \\ ",
             "  / ____ \\| |  | | |  / ____ \\ |_| | || (_) | | | | | | (_| | |_| | (_) | | | |",
             " /_/    \\_\\_|  |_|_| /_/    \\_\\__,_|\\__\\___/|_| |_| |_|\\__,_|\\__|_|\\___/|_| |_|",
+            "   ",
+            "   ",
             "EOF"
             ]
         }
@@ -175,14 +172,27 @@
       }
     },
     {
-      "name": "createTags",
+        "name": "createEncryptedCopy",
+        "action": "aws:copyImage",
+        "maxAttempts": 3,
+        "onFailure": "Abort",
+        "inputs": {
+            "SourceImageId": "{{createImage.ImageId}}",
+            "SourceRegion": "{{global:REGION}}",
+            "ImageName": "Encrypted-{{TargetAmiName}}",
+            "ImageDescription":"Encrypted GoldenAMI by SSM Automation on {{global:DATE_TIME}} from source AMI {{createImage.ImageId}}",
+            "Encrypted": true
+        }
+    },
+    {
+      "name": "createTagsForEncryptedImage",
       "action": "aws:createTags",
       "maxAttempts": 1,
       "onFailure": "Continue",
       "inputs": {
         "ResourceType": "EC2",
         "ResourceIds": [
-          "{{createImage.ImageId}}"
+          "{{createEncryptedCopy.ImageId}}"
         ],
         "Tags": [
           {
@@ -204,6 +214,10 @@
           {
             "Key": "Amazon-SSM",
             "Value": "true"
+          },
+          {
+            "Key": "Encrypted",
+            "Value": "true"
           }
         ]
       }
@@ -216,7 +230,7 @@
       "onFailure": "Abort",
       "inputs": {
         "FunctionName": "Automation-UpdateSsmParam",
-        "Payload": "{\"parameterName\":\"/GoldenAMI/Linux/RedHat-7/latest\", \"parameterValue\":\"{{createImage.ImageId}}\"}"
+        "Payload": "{\"parameterName\":\"/GoldenAMI/Linux/RedHat-7/latest\", \"parameterValue\":\"{{createEncryptedCopy.ImageId}}\"}"
       }
     },
     {
@@ -230,6 +244,16 @@
         ],
         "DesiredState": "terminated"
       }
+    },
+    {
+        "name": "deleteUnEcryptedImage",
+        "action": "aws:deleteImage",
+        "maxAttempts": 3,
+        "timeoutSeconds": 180,
+        "onFailure": "Abort",
+        "inputs": {
+            "ImageId": "{{createImage.ImageId}}"
+        }
     }
   ],
   "outputs": [
