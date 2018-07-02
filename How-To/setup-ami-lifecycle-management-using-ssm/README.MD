@@ -1,26 +1,28 @@
 # AMI LifeCycle Management Using EC2 Systems Manager | Automation
 
-This walkthrough shows you how to create and run a custom Golden AMI Automation document.
- - Launches an instance from a specified AMI from [SSM Parameter Store]() - _Default:_`/GoldenAMI/Linux/RedHat-7/latest`
- - Executes a command using Run Command that applies Windows updates to the instance.
- - Stops the instance.
- - Creates a new AMI.
- - Tag the AMI.
- - Terminates the original instance.
+This walkthrough shows you how to create a custom Golden AMI using AWS SSM Automation document. The high level steps are shown below,
+ - Launch an instance from Source AMI mentioned in [SSM Parameter Store]()
+    - _Default:_`/GoldenAMI/Linux/RedHat-7/latest`
+ - Executes SSM `Run Command` that applies the vendor updates to the instance
+ - Stops the instance
+ - Creates a new AMI
+ - Encrypt the AMI
+ - Tag the AMI
  - Update the parameter store using Lambda
+ - Delete unencrypted AMI
+ - Terminates the original instance
 
 
 ## Pre-Requisites
-We will need two roles to automate the AMI LifeCycle Management.
 1. SSM Parameter Store:
    - Parameter Name: `/GoldenAMI/Linux/RedHat-7/latest`
    - Parameter Value: _Any linux based AMI of your choice_
-1. An S3 bucket with the file `Post-Update-Scripts`
+1. _Optional_: An S3 bucket with the file `Post-Update-Scripts`
+   - Make sure this bucket is publicly accessible or having VPC Endpoint
 1. RoleName: **lambda-ssm-role**: 
    - Permissions: Managed Policies `AWSLambdaExecute` and `AmazonSSMFullAccess`
 1. RoleName: **ManagedInstanceRole**: - An EC2 Role to allow SSM to start instances, create images etc,
-   - Permissions: Managed Policies `AmazonEC2RoleforSSM`
-   - Permissions: Managed Policies `AmazonS3ReadOnlyAccess`   
+   - Permissions: Managed Policies `AmazonEC2RoleforSSM` 
 1. RoleName: **AutomationServiceRole**: - An EC2 Role to Allow SSM to run documents and allow it to assume _ManagedInstanceRole_ we just created.
    - Permissions: Managed Policies `AmazonSSMAutomationRole`
    - Inline Policy to attach the `iam:PassRole`
@@ -32,7 +34,7 @@ We will need two roles to automate the AMI LifeCycle Management.
                 "Sid": "VisualEditor0",
                 "Effect": "Allow",
                 "Action": "iam:PassRole",
-                "Resource": "arn:aws:iam::<YOUR-ACCOUNT-NUMBER>:role/<your-ManagedInstanceRole-name>"
+                "Resource": "arn:aws:iam::YOUR-ACCOUNT-NUMBER:role/YOUR-ManagedInstanceRole-name"
             }
         ]
     }
@@ -61,15 +63,16 @@ If this role creation and attaching trust policies, that part alone can be done 
 
 ### Create Parameter for Golden AMI
 Use the AWS CLI or GUI to create a parameter store entry, here is the CLI command. 
- - `/GoldenAMI/Linux/RedHat-7/source` - The OEM Imaged Id will be stored here
- - `/GoldenAMI/Linux/RedHat-7/latest` - The golden AMI will be updated .
+ - OEM Source AMI - `/GoldenAMI/Linux/RedHat-7/source`
+ - Updated Golden AMI - `/GoldenAMI/Linux/RedHat-7/latest`
+
 ```sh
+# For example
 aws ssm put-parameter --name /GoldenAMI/Linux/RedHat-7/source --value "ami-c86c3f23" --type String
 ```
 
 ## Create [Lambda](https://docs.aws.amazon.com/systems-manager/latest/userguide/automation-simpatch.html#automation-pet1) to update SSM Parameter Store
 This function will helps us to automatically update the parameter store with the latest AMI when the _Automation Document_ successfully create a new image.
-
 
 **Customizations:**
 _Modify as required for your environment_
@@ -82,7 +85,7 @@ _Modify as required for your environment_
 
 ## Create custom Automation Document
 
-**_Note:_** By default SSM Automation runs in the default VPC, If you are going to run in a different VPC, you **must** provide the subnet id, which has internet access.
+**_Note:_** By default SSM Automation runs in the default VPC, If you are going to run in a different VPC, you **must** provide the subnet id, which has internet access(directly or through NAT).
 
 1. [Create Document](https://eu-central-1.console.aws.amazon.com/systems-manager/documents/create-document?region=eu-central-1), Give a **Name**, like "`BastionHost-Linux-AMI-Builder`.
 1. Add the contents of the `BastionHost-Linux-AMI-Builder.json` file in the field.![](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ami-lifecycle-management-using-ssm/images/Create-Automation-Document-00.png)
@@ -101,14 +104,12 @@ _Modify as required for your environment_
 1.  Choose **Execute Automation**.
 1.  Monitor progress in the **Automation Steps** tab, and view step-level outputs.
 
-**Note:** - By default SSM Automation runs either the `AWS-UpdateLinuxAmi` document or the `AWS-UpdateWindowsAmi` in the default VPC.
-
 
 ### Pre-Update Script
 Any packages/libraries/scripts that needs to be copied to the server before the update process begins.
 
 ### Post-Update Script
-Optional: I have written a crude `post-ami-build.sh` script to install httpd and update the _index.html_ to test everything is working fine. Store the file in S3 and ensure the user who run SSM has access to the s3 bucket.
+**Optional**: I have written a crude `post-ami-build.sh` script to install httpd and update the _index.html_ to test everything is working fine. Store the file in S3 and ensure the user who run SSM has access to the s3 bucket.
 
 For production usage, you might want to consider writing some more robust validation scripts
 
@@ -118,4 +119,3 @@ if you boot the new instance, and login, you should get a welcome message like t
 
 ### ToDo
 - Optionally, CloudWatch Events to trigger Automation
-- Encrypt the AMI using `aws:encrypedCopy`
