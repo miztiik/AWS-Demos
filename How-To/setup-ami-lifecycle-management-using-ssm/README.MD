@@ -87,8 +87,8 @@ _Modify as required for your environment_
 
 **_Note:_** By default SSM Automation runs in the default VPC, If you are going to run in a different VPC, you **must** provide the subnet id, which has internet access(directly or through NAT).
 
-1. [Create Document](https://eu-central-1.console.aws.amazon.com/systems-manager/documents/create-document?region=eu-central-1), Give a **Name**, like "`BastionHost-Linux-AMI-Builder`.
-1. Add the contents of the `BastionHost-Linux-AMI-Builder.json` file in the field.![](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ami-lifecycle-management-using-ssm/images/Create-Automation-Document-00.png)
+1. [Create Document](https://eu-central-1.console.aws.amazon.com/systems-manager/documents/create-document?region=eu-central-1), Give a **Name**, like "`Bake-GoldenAMI-Linux`.
+1. Add the contents of the `Bake-GoldenAMI-Linux.json` file in the field.![](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ami-lifecycle-management-using-ssm/images/Create-Automation-Document-00.png)
 1. After succesful creation of the document, you should be able view,modify versions,![](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ami-lifecycle-management-using-ssm/images/Create-Automation-Document-01.png)
 
 
