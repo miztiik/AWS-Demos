@@ -21,7 +21,7 @@
     "SubnetId": {
       "type": "String",
       "description": "(Required) The subnet that the created instance will be placed into.",
-      "default": "subnet-051c923b00b2cb98a"
+      "default": ""
     },
     "TargetAmiName": {
       "type": "String",
@@ -41,7 +41,7 @@
     "PostUpdateScript": {
       "type": "String",
       "description": "(Optional) URL of a script to run after package updates are applied. Default (\"none\") is to not run a script.",
-      "default": "https://s3.eu-central-1.amazonaws.com/eneco-automation-scripts/post-ami-build.sh"
+      "default": ""
     },
     "IncludePackages": {
       "type": "String",
