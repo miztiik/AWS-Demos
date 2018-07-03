@@ -31,7 +31,7 @@
     "SubnetId": {
       "type": "String",
       "description": "(Optional) Specify the SubnetId if you want to launch into a specific subnet.",
-      "default": "subnet-051c923b00b2cb98a"
+      "default": ""
     },
     "IncludeKbs": {
       "type": "String",
@@ -525,7 +525,7 @@
       "onFailure": "Abort",
       "inputs": {
         "FunctionName": "Automation-UpdateSsmParam",
-        "Payload": "{\"parameterName\":\"/GoldenAMI/Windows/Server-2016/latest\", \"parameterValue\":\"{{CreateImage.ImageId}}\"}"
+        "Payload": "{\"parameterName\":\"/GoldenAMI/Windows/Server-2016/latest\", \"parameterValue\":\"{{createEncryptedCopy.ImageId}}\"}"
       }
     },    
     {
