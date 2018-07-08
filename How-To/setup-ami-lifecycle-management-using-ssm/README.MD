@@ -2,7 +2,7 @@
 
 This walkthrough shows you how to create a custom Golden AMI using AWS SSM Automation document. The high level steps are shown below,
 
-Follow this article in **[youtube]()**
+Follow this article in **[youtube](https://youtu.be/5PJRHxXJo90)**
 
 ![](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ami-lifecycle-management-using-ssm/images/00-Secure-Golden-AMI-Process.png)
 
