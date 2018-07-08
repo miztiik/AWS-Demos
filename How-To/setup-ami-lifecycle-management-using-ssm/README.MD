@@ -1,6 +1,12 @@
 # AMI LifeCycle Management Using EC2 Systems Manager | Automation
 
 This walkthrough shows you how to create a custom Golden AMI using AWS SSM Automation document. The high level steps are shown below,
+
+Follow this article in **[youtube]()**
+
+![](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ami-lifecycle-management-using-ssm/images/00-Secure-Golden-AMI-Process.png)
+
+
  - Launch an instance from Source AMI mentioned in [SSM Parameter Store]()
     - _Default:_`/GoldenAMI/Linux/RedHat-7/latest`
  - Executes SSM `Run Command` that applies the vendor updates to the instance
