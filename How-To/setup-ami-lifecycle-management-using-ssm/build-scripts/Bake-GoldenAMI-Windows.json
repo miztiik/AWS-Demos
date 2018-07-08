@@ -21,7 +21,7 @@
     "TargetAmiName": {
       "type": "String",
       "description": "(Optional) The name of the new AMI that will be created. Default is a system-generated string including the source AMI id, and the creation time and date.",
-      "default": "GoldenAMI-Windows2016-7_on_{{global:DATE_TIME}}"
+      "default": "GoldenAMI-Windows-2016_on_{{global:DATE_TIME}}"
     },
     "InstanceType": {
       "type": "String",
