@@ -7,7 +7,7 @@
       "type": "String",
       "description": "(Required) The source Amazon Machine Image ID.",
       "default": "{{ssm:/GoldenAMI/Windows/Server-2016/source}}"
-          },
+    },
     "IamInstanceProfileName": {
       "type": "String",
       "description": "(Required) The name of the role that enables Systems Manager to manage the instance.",
@@ -407,7 +407,24 @@
           "Operation": "Install"
         }
       }
-    },    
+    },
+    {
+      "name": "installUnifiedCloudWatchAgent",
+      "action": "aws:runCommand",
+      "maxAttempts": 3,
+      "timeoutSeconds": 600,
+      "onFailure": "Abort",
+      "inputs": {
+        "DocumentName": "AWS-ConfigureAWSPackage",
+        "InstanceIds": [
+          "{{LaunchInstance.InstanceIds}}"
+        ],
+        "Parameters": {
+          "name": "AmazonCloudWatchAgent",
+          "action": "Install"
+        }
+      }
+    },
     {
       "name": "RunPostUpdateScript",
       "action": "aws:runCommand",
@@ -467,17 +484,17 @@
       }
     },
     {
-        "name": "createEncryptedCopy",
-        "action": "aws:copyImage",
-        "maxAttempts": 3,
-        "onFailure": "Abort",
-        "inputs": {
-            "SourceImageId": "{{ CreateImage.ImageId }}",
-            "SourceRegion": "{{ global:REGION }}",
-            "ImageName": "Encrypted-{{ TargetAmiName }}",
-            "ImageDescription":"Encrypted GoldenAMI by SSM Automation on {{ global:DATE_TIME }} from source AMI {{ CreateImage.ImageId }}",
-            "Encrypted": true
-        }
+      "name": "createEncryptedCopy",
+      "action": "aws:copyImage",
+      "maxAttempts": 3,
+      "onFailure": "Abort",
+      "inputs": {
+        "SourceImageId": "{{ CreateImage.ImageId }}",
+        "SourceRegion": "{{ global:REGION }}",
+        "ImageName": "Encrypted-{{ TargetAmiName }}",
+        "ImageDescription": "Encrypted GoldenAMI by SSM Automation on {{ global:DATE_TIME }} from source AMI {{ CreateImage.ImageId }}",
+        "Encrypted": true
+      }
     },
     {
       "name": "createTagsForEncryptedImage",
@@ -497,7 +514,7 @@
           {
             "Key": "Owner",
             "Value": "Mystique"
-          },          
+          },
           {
             "Key": "SourceAMI",
             "Value": "{{SourceAmiId}}"
@@ -527,7 +544,7 @@
         "FunctionName": "Automation-UpdateSsmParam",
         "Payload": "{\"parameterName\":\"/GoldenAMI/Windows/Server-2016/latest\", \"parameterValue\":\"{{createEncryptedCopy.ImageId}}\"}"
       }
-    },    
+    },
     {
       "name": "TerminateInstance",
       "action": "aws:changeInstanceState",
@@ -541,14 +558,14 @@
       }
     },
     {
-        "name": "deleteUnEcryptedImage",
-        "action": "aws:deleteImage",
-        "maxAttempts": 3,
-        "timeoutSeconds": 180,
-        "onFailure": "Abort",
-        "inputs": {
-            "ImageId": "{{CreateImage.ImageId}}"
-        }
+      "name": "deleteUnEcryptedImage",
+      "action": "aws:deleteImage",
+      "maxAttempts": 3,
+      "timeoutSeconds": 180,
+      "onFailure": "Abort",
+      "inputs": {
+        "ImageId": "{{CreateImage.ImageId}}"
+      }
     }
   ],
   "outputs": [

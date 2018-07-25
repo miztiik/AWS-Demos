@@ -111,11 +111,16 @@
           "{{launchInstance.InstanceIds}}"
         ],
         "Parameters": {
-          "commands":[
+          "commands": [
             "curl -O http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm",
             "rpm -ivh epel-release-latest-7.noarch.rpm",
+            "yum -y install httpd",
+            "systemctl enable httpd",
+            "systemctl restart httpd",
             "sudo yum --enablerepo=epel install -y clamav",
             "yum-config-manager --disable epel",
+            "cat /etc/motd >> /var/www/html/index.html",
+            "echo 'Welcome' >> /var/www/html/index.html",
             "cat > /etc/motd <<- EOF",
             "           __  __ _                 _                        _   _             ",
             "     /\\   |  \\/  (_)     /\\        | |                      | | (_)            ",
@@ -126,10 +131,10 @@
             "   ",
             "   ",
             "EOF"
-            ]
+          ]
         }
       }
-    },    
+    },
     {
       "name": "installInspectorAgent",
       "action": "aws:runCommand",
@@ -145,7 +150,24 @@
           "Operation": "Install"
         }
       }
-    },    
+    },
+    {
+      "name": "installUnifiedCloudWatchAgent",
+      "action": "aws:runCommand",
+      "maxAttempts": 3,
+      "timeoutSeconds": 600,
+      "onFailure": "Abort",
+      "inputs": {
+        "DocumentName": "AWS-ConfigureAWSPackage",
+        "InstanceIds": [
+          "{{launchInstance.InstanceIds}}"
+        ],
+        "Parameters": {
+          "name": "AmazonCloudWatchAgent",
+          "action": "Install"
+        }
+      }
+    },
     {
       "name": "stopInstance",
       "action": "aws:changeInstanceState",
@@ -172,17 +194,17 @@
       }
     },
     {
-        "name": "createEncryptedCopy",
-        "action": "aws:copyImage",
-        "maxAttempts": 3,
-        "onFailure": "Abort",
-        "inputs": {
-            "SourceImageId": "{{createImage.ImageId}}",
-            "SourceRegion": "{{global:REGION}}",
-            "ImageName": "Encrypted-{{TargetAmiName}}",
-            "ImageDescription":"Encrypted GoldenAMI by SSM Automation on {{global:DATE_TIME}} from source AMI {{createImage.ImageId}}",
-            "Encrypted": true
-        }
+      "name": "createEncryptedCopy",
+      "action": "aws:copyImage",
+      "maxAttempts": 3,
+      "onFailure": "Abort",
+      "inputs": {
+        "SourceImageId": "{{createImage.ImageId}}",
+        "SourceRegion": "{{global:REGION}}",
+        "ImageName": "Encrypted-{{TargetAmiName}}",
+        "ImageDescription": "Encrypted GoldenAMI by SSM Automation on {{global:DATE_TIME}} from source AMI {{createImage.ImageId}}",
+        "Encrypted": true
+      }
     },
     {
       "name": "createTagsForEncryptedImage",
@@ -202,7 +224,7 @@
           {
             "Key": "Owner",
             "Value": "Mystique"
-          },          
+          },
           {
             "Key": "SourceAMI",
             "Value": "{{SourceAmiId}}"
@@ -246,14 +268,14 @@
       }
     },
     {
-        "name": "deleteUnEcryptedImage",
-        "action": "aws:deleteImage",
-        "maxAttempts": 3,
-        "timeoutSeconds": 180,
-        "onFailure": "Abort",
-        "inputs": {
-            "ImageId": "{{createImage.ImageId}}"
-        }
+      "name": "deleteUnEcryptedImage",
+      "action": "aws:deleteImage",
+      "maxAttempts": 3,
+      "timeoutSeconds": 180,
+      "onFailure": "Abort",
+      "inputs": {
+        "ImageId": "{{createImage.ImageId}}"
+      }
     }
   ],
   "outputs": [
