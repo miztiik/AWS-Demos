@@ -9,7 +9,7 @@ Follow this article in **[Youtube](https://www.youtube.com/channel/UC_evcfxhjjui
 ## Securing MySQL: Using SSL with a MySQL DB Instance
 Amazon RDS creates an SSL certificate and installs the certificate on the DB instance when Amazon RDS provisions the instance. These certificates are signed by a certificate authority. The SSL certificate includes the DB instance endpoint as the Common Name (CN) for the SSL certificate to guard against spoofing attacks. The public key is stored at `https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem`.
 
-#### Prerequisite
+#### Prerequisites
  - An AWS RDS Instance running MySQL DB - [Click here to set it up](https://youtu.be/iwTHRT9p6fI?t=30)
  - An `mysql` client - An [EC2 instance](https://youtu.be/N_mP4mIqK8A) with `mysql` pre-installed
 
