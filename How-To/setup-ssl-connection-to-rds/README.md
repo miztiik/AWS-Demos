@@ -11,12 +11,7 @@ Amazon RDS creates an SSL certificate and installs the certificate on the DB ins
 
 #### Prerequisite
  - An AWS RDS Instance running MySQL DB - [Click here to set it up](https://youtu.be/iwTHRT9p6fI?t=30)
-
-For For MySQL 5.7 and later:
-```sh
-mysql -h myinstance.c9akciq32.rds-us-east-1.amazonaws.com
---ssl-ca=[full path]rds-combined-ca-bundle.pem --ssl-mode=REQUIRED
-```
+ - An `mysql` client - An [EC2 instance](https://youtu.be/N_mP4mIqK8A) with `mysql` pre-installed
 
 ##### Optional
 Try to connect to the db, and check if ssl is enforced,
@@ -77,6 +72,16 @@ If you want to force SSL, use the `rds.force_ssl` parameter. By default, the `rd
 1. Start your DB instance with the _custom parameter group_
 1. Check connection from your client.
 
+
+###### Creating Users in MySQL
+```sh
+CREATE USER 'USER_NAME'@'%' IDENTIFIED BY 'PASSWORD';
+GRANT ALL PRIVILEGES ON YOUR_DATABASE_NAME_HERE.* TO 'USER_NAME'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
+ALTER USER 'USER_NAME'@'%' REQUIRE SSL;
+FLUSH PRIVILEGES;
+```
 
 ##### References
 [1] - [AWS Docs - Using SSL to Encrypt a Connection to a DB Instance](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.SSL.html)
