@@ -2,9 +2,9 @@
 
 It is good practice to use SSL to encrypt a connection from your application to a DB instance running MySQL, MariaDB, Amazon Aurora, SQL Server, Oracle, or PostgreSQL. Each DB engine has its own process for implementing SSL.
 
-We will see two use cases, One with `MySQL` and another with `MSSQL`
+![](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ssl-connection-to-rds/images/SSL-to-RDS.png)
 
-Follow this article in [Youtube](https://www.youtube.com/channel/UC_evcfxhjjui5hChhLE08tQ/playlists)
+Follow this article in **[Youtube](https://www.youtube.com/channel/UC_evcfxhjjui5hChhLE08tQ/playlists)**
 
 ## Securing MySQL: Using SSL with a MySQL DB Instance
 Amazon RDS creates an SSL certificate and installs the certificate on the DB instance when Amazon RDS provisions the instance. These certificates are signed by a certificate authority. The SSL certificate includes the DB instance endpoint as the Common Name (CN) for the SSL certificate to guard against spoofing attacks. The public key is stored at `https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem`.
@@ -34,7 +34,7 @@ You can require SSL connections for specific users accounts. For example, you ca
 ALTER USER 'encrypted_user'@'%' REQUIRE SSL; 
 ```
 
-## Connect to DB with SSL
+### Connect to DB with SSL
 Download the AWS RDS Certificate `pem` file,
 ```sh
 mkdir -p /var/mysql-certs/
@@ -77,3 +77,6 @@ If you want to force SSL, use the `rds.force_ssl` parameter. By default, the `rd
 1. Start your DB instance with the _custom parameter group_
 1. Check connection from your client.
 
+
+##### References
+[1] - [AWS Docs - Using SSL to Encrypt a Connection to a DB Instance](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.SSL.html)
