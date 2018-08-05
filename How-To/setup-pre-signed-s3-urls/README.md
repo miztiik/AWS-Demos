@@ -4,7 +4,7 @@ Pre-signed URLs are useful if you want your user/customer to be able to upload a
 
 You can generate a pre-signed URL programmatically, We will be using python SDK
 
-![](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ssl-connection-to-rds/images/SSL-to-RDS.png)
+![](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-pre-signed-s3-urls/images/signed-url-upload-flow.png)
 
 Follow this article in **[Youtube](https://www.youtube.com/channel/UC_evcfxhjjui5hChhLE08tQ/playlists)**
 
