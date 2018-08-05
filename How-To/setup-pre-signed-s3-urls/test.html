@@ -1,419 +1,291 @@
 <html>
-    <meta charset="utf-8">
-    <title>S3 PreSigned Url Generator</title>
-    <meta name="description" content="S3 PreSigned Url Generator">
-    <meta name="keywords" content="S3 PreSigned Url Generator">
-
+<meta charset="utf-8">
+<title>S3 PreSigned Url Generator</title>
+<meta name="description" content="S3 PreSigned Url Generator">
+<meta name="keywords" content="S3 PreSigned Url Generator">
 <style>
-input[type=text], select {
-    width: 100%;
-    padding: 12px 20px;
-    margin: 8px 0;
-    display: inline-block;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-    font-size:24px;
-}
-
-div {
-    border-radius: 5px;
-    background-color: #f2f2f2;
-    padding: 50px;
-    width: 40%;
-    margin: auto;
-    padding: 10px;
-    text-align: left;
-}
-
-label {
-  font-size: 25px;
-  color:#666;
-}
-.UrlSignerBtn:hover {
-    background-color: #45a049;
-}
-.UrlSignerBtn{
-    width: 100%;
-    background-color: #4CAF50;
-    color: white;
-    padding: 14px 20px;
-    margin: 8px 0;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-.ObjectUploadBtn:hover {
-    background-color: #45a049;
-}
-.ObjectUploadBtn{
-    width: 100%;
-    background-color: #4CAF50;
-    color: white;
-    padding: 14px 20px;
-    margin: 8px 0;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-img {
-    max-width: 100%;
-    max-height: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    display: block;
-}
-
-.div-obj-holder{
-    height: 200px;
-    width: 40%;
-    display:none;    
-}
-a{
-  text-align: left;
-}
-.urlText{
-  overflow-x: hidden;
-  float:left;
-  font-size: small;
-  font-style: italic;
-  text-align: center;
-  white-space:nowrap;
-  width: 95%;
-}
-.urlText:hover{
-  overflow-x: auto;
-}
-body {
-  font-family: Helvetica;
-  text-align: center;
-}
+    input[type=text],
+    select {
+        width: 100%;
+        padding: 12px 20px;
+        margin: 8px 0;
+        display: inline-block;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 24px;
+    }
+    
+    .div-page {
+        border-radius: 5px;
+        background-color: #f2f2f2;
+        width: 40%;
+        margin: auto;
+        padding: 10px;
+        text-align: left;
+    }
+    
+    .div-form {
+        border-radius: 5px;
+        background-color: #f2f2f2;
+        margin: auto;
+        text-align: center;
+    }
+    
+    .div-obj-holder {
+        border-radius: 5px;
+        background-color: #f2f2f2;
+        width: 40%;
+        margin: auto;
+        padding: 10px;
+        height: 200px;
+        display: none;
+    }
+    
+    label {
+        font-size: 25px;
+        color: #666;
+    }
+    
+    .UrlSignerBtn:hover {
+        background-color: #45a049;
+    }
+    
+    .UrlSignerBtn {
+        width: 100%;
+        background-color: #4CAF50;
+        color: white;
+        padding: 14px 20px;
+        margin: 8px 0;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .ObjectUploadBtn:hover {
+        background-color: #45a049;
+    }
+    
+    .ObjectUploadBtn {
+        width: 100%;
+        background-color: #4CAF50;
+        color: white;
+        padding: 14px 20px;
+        margin: 8px 0;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    img {
+        max-width: 100%;
+        max-height: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+    }
+    
+    a {
+        text-align: left;
+    }
+    
+    .urlText {
+        overflow-x: hidden;
+        float: left;
+        font-size: small;
+        font-style: italic;
+        text-align: center;
+        white-space: nowrap;
+        width: 95%;
+    }
+    
+    .urlText:hover {
+        overflow-x: auto;
+    }
+    
+    body {
+        font-family: Helvetica;
+        text-align: center;
+    }
 </style>
+
 <body>
-
-  <h1 align="center">PreSigned Url Generator</h1>
-
-<div>
-    <label for="bktNameLbl">Bucket Name</label>
-    <input type="text" id="BucketNameId" name="BucketName" placeholder="secure-pvt-bucket" value="secure-pvt-bucket">
-
-    <label for="bktObjectLbl">Bucket Object Name</label>
-    <input type="text" id="ObjectNameId" name="ObjectName" placeholder="2.jpg" value="2.jpg">
-
-    <input type="text" id="FileNameId" name="FileNameId">
-
-    <label for="OperationTypeLbl">What do you want to do?</label>
-    <select id="methodTypeId" name="methodType">
-      <option value="GET" selected="selected">Read from Bucket</option>
-      <option value="POST" >Write to Bucket</option>
-    </select>
-    
-      <div style='display:none;' id='uploadFileDiv'>
-          <form enctype="multipart/form-data" method="POST" name="formS3ObjManager" id="formS3ObjManagerId">
-            <input type="file" name="file" required />
-          </form>
-      </div>
-    <button class="UrlSignerBtn" id='UrlSignerBtnId'><span>Get Pre Signed Url </span></button>
-    <button style='display:none;' class="UrlSignerBtn" id='ObjectUploadBtnId'><span>Upload File </span></button>
-    
-</div>
-
-<br />
-<div id="div-obj-holderId" class="div-obj-holder">
-<div id="urlTextId" class="urlText">Url Text Goes here ...</div>
-<div id="SignedUrlId"></div>
-</div>
-
+    <h1 align="center">PreSigned Url Generator</h1>
+    <div class="div-page">
+        <label for="bktNameLbl">Bucket Name</label>
+        <input type="text" id="BucketNameId" name="BucketName" placeholder="secure-pvt-bucket" value="">
+        <label for="bktObjectLbl">Bucket Object Name</label>
+        <input type="text" id="ObjectNameId" name="ObjectName" placeholder="2.jpg" value="">
+        <input style='display:none;' type="text" id="FileNameId" name="FileNameId">
+        <label for="OperationTypeLbl">What do you want to do?</label>
+        <select id="methodTypeId" name="methodType">
+            <option value="GET" selected="selected">Read from Bucket</option>
+            <option value="POST">Write to Bucket</option>
+        </select>
+        <div class="div-form" style='display:none;' id='uploadFileDiv'>
+            <form enctype="multipart/form-data" method="POST" name="formS3ObjManager" id="formS3ObjManagerId">
+                <input type="file" name="file" required />
+            </form>
+            <button class="UrlSignerBtn" id='ObjectUploadBtnId'><span>Upload File </span></button>
+        </div>
+        <button class="UrlSignerBtn" id='UrlSignerBtnId'><span>Get Pre Signed Url </span></button>
+    </div>
+    <br />
+    <div class="div-obj-holder" id="div-obj-holderId">
+        <div id="urlTextId" class="urlText">Url Text Goes here ...</div>
+        <div id="SignedUrlId"></div>
+    </div>
 </body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script>
-/*
-$.ajax({
-    url: 'https://s6zm8l0hal.execute-api.eu-central-1.amazonaws.com/prod?BucketName=secure-pvt-bucket&ObjectName=1.png',
-    type: 'POST',
-    contentType: "application/json; charset=utf-8",
-    data:{"BucketName":"secure-pvt-bucket","ObjectName":"1.png"},
-    beforeSend: function(){ $( '#loader' ).show();},
-    success: function( res ) { alert( "Success:"+ res.PreSignedUrl ); },
-    //success: function( res ) { alert( JSON.stringify(res) ); },
-    error:function(e){ alert('Lambda returned error\n\n' + e.responseText); },
-    complete:function(){ $('#loader').hide(); }
-});
-*/
+    /*
 
+              // Sample AJAX Upload function
 
-function uploadFileToS3(res){
+              $.ajax({
+                  url: 'https://s6zm8l0hal.execute-api.eu-central-1.amazonaws.com/prod',
+                  type: 'POST',
+                  contentType: "application/json; charset=utf-8",
+                  data:{"BucketName":"secure-pvt-bucket","ObjectName":"1.png"},
+                  beforeSend: function(){ $( '#loader' ).show();},
+                  success: function( res ) { alert( "Success:"+ res.PreSignedUrl ); },
+                  //success: function( res ) { alert( JSON.stringify(res) ); },
+                  error:function(e){ alert('Lambda returned error\n\n' + e.responseText); },
+                  complete:function(){ $('#loader').hide(); }
+              });
+              */
 
-  var formData = new FormData('#formS3ObjManagerId');
-          //Add the post fields from signed url
-          $.each(res.fields, function(key, value){
-            formData.append(key, value);
+    /*
+    Function called when the GET Object Event Button is triggered.
+    Images will be loaded automaticaly at the bottom div, For files, it will just show a null image icon(which is an error, if you have time fix it)
+    */
+
+    $(document).ready(function() {
+        $("#UrlSignerBtnId").click(function() {
+            $.ajax({
+                url: 'https://s6zm8l0hal.execute-api.eu-central-1.amazonaws.com/prod',
+                type: 'POST',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({
+                    "BucketName": $('#BucketNameId').val(),
+                    "ObjectName": $('#ObjectNameId').val(),
+                    "methodType": $('#methodTypeId option:selected').attr('value'),
+                }, ),
+                dataType: "json",
+                //beforeSend: function(){ $( '#loader' ).show();},
+                success: function(res) {
+                    $("#urlTextId").html("<a href=" + res.PreSignedUrl + ">PreSignedUrL</a>:" + res.PreSignedUrl);
+                    $("#SignedUrlId").html("<img src='" + res.PreSignedUrl + "'>");
+                    $("#div-obj-holderId").show();                    
+                },
+                error: function(e) {
+                    $("#urlTextId").html("Unable to Retrieve Image, Check Object Key name.");
+                    $("#SignedUrlId").html("<i>"+ e.responseText + "</i>");
+                    $("#div-obj-holderId").show();
+                },
+                // complete: function() { $('#loader').hide(); }
             });
-
-$.ajax({
-  url: res.url,
-    type: 'POST',
-    data: formData,
-    success: function (data) {
-      alert('running inside form submet');
-      alert(res.url);
-
-    },
-    cache: false,
-    contentType: false,
-    processData: false
-});
-
-}
-
-
-
-
-
-$(document).ready(function(){
-    $("#UrlSignerBtnId").click(function(){
-      $.ajax({
-        url: 'https://s6zm8l0hal.execute-api.eu-central-1.amazonaws.com/prod',
-        type: 'POST',
-        contentType: "application/json; charset=utf-8",
-        data:JSON.stringify( { "BucketName": $('#BucketNameId').val(),
-                               "ObjectName": $('#ObjectNameId').val(),
-                               "methodType": $('#methodTypeId option:selected').attr('value'),
-                               },
-                            ),
-        dataType: "json",
-        //beforeSend: function(){ $( '#loader' ).show();},
-        success: function( res ) {
-          $("#urlTextId").html("<a href="+ res.PreSignedUrl + ">PreSignedUrL</a>:" + res.PreSignedUrl);
-          $("#SignedUrlId").html("<img src='"+ res.PreSignedUrl + "'>"); $("#div-obj-holderId").show();
-          },
-        error:function(e){ alert('Lambda returned error\n\n' + e.responseText); },
-        complete:function(){ $('#loader').hide(); }
-      });
+        });
     });
-  });
 
-
-$(document).ready(function(){
-    $("#ObjectUploadBtnId").click(function(){
-      $.ajax({
-        url: 'https://s6zm8l0hal.execute-api.eu-central-1.amazonaws.com/prod',
-        type: 'POST',
-        contentType: "application/json; charset=utf-8",
-        data:JSON.stringify( { "BucketName": $('#BucketNameId').val(),
-                               "ObjectName": $('#ObjectNameId').val(),
-                               "methodType": $('#methodTypeId option:selected').attr('value'),
-                               "FileName": $('#FileNameId').val()
-                               },
-                            ),
-        dataType: "json",
-        //beforeSend: function(){ $( '#loader' ).show();},
-        success: function( res ) {
-
-          $("#FileNameId").val(res.fields.key);
-
-          $("#urlTextId").html("<a href="+ res.fields.key + ">Object Key</a>:" + res.fields.key);
-          $("#div-obj-holderId").show();
-          uploadFile(res, res.url);
-        },
-
-        error:function(e){ alert('Lambda returned error\n\n' + e.responseText); },
-        complete:function(){ $('#loader').hide(); }
-      });
+    /*
+    Function called when the Upload Object Event Button is triggered.
+    Gets the Pre-Signed Upload Url and Triggers the Upload Function
+    */
+    $(document).ready(function() {
+        $("#ObjectUploadBtnId").click(function() {
+            $.ajax({
+                url: 'https://s6zm8l0hal.execute-api.eu-central-1.amazonaws.com/prod',
+                type: 'POST',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({
+                    "BucketName": $('#BucketNameId').val(),
+                    "ObjectName": $('#ObjectNameId').val(),
+                    "methodType": $('#methodTypeId option:selected').attr('value'),
+                    "FileName": $('#FileNameId').val()
+                }, ),
+                dataType: "json",
+                //beforeSend: function(){ $( '#loader' ).show();},
+                success: function(res) {
+                    uploadFile(res, res.url);
+                },
+                error: function(e) {
+                    $("#urlTextId").html("Failed: Unable to Get Signed Upload Url" + e.responseText);
+                    $("#SignedUrlId").html("");
+                    $("#div-obj-holderId").show();
+                },
+                complete: function() {
+                    $('#loader').hide();
+                }
+            });
+        });
     });
-  }); 
 
     /*
        Function called when file input updated. If there is a file selected, then
        start upload procedure by asking for a signed URL request from Lambda.
     */
-$(document).ready(function(){
-$('input[type="file"]').change(function(e){
-
-      /*
-      const files = document.getElementById('file-input').files;
-      const file =e.target.files[0];
-      if(!file){
-        return alert('No file selected.');
-      }
-      getSignedRequest(file);
-      */
+    $(document).ready(function() {
+        $('input[type="file"]').change(function(e) {
             var fileName = e.target.files[0].name;
-            //$("#uploadFileDiv").show();
             $('#FileNameId').val(fileName);
-          });
         });
+    });
 
+    /*
+    Show the GET / POST buttons based on drop down selection
+    */
+    $(document).ready(function() {
+        $('#methodTypeId').on('change', function() {
+            if (this.value == 'POST') {
+                $("#uploadFileDiv").show();
+                $("#UrlSignerBtnId").hide();
+            } else {
+                $("#UrlSignerBtnId").show();
+                $("#uploadFileDiv").hide();
 
-$(document).ready(function(){
-  $('#methodTypeId').on('change', function() {
-    if ( this.value == 'POST')
-     {
-       $("#uploadFileDiv").show();
-
-       $("#UrlSignerBtnId").hide();
-       $("#ObjectUploadBtnId").show();
-
-       $("#FileNameId").show();
-     }
-    else
-     {
-       $("#uploadFileDiv").hide();
-
-       $("#UrlSignerBtnId").show();
-       $("#ObjectUploadBtnId").hide();
-     }
-   });
-});
+            }
+        });
+    });
 
     /*
       Function to carry out the actual POST request to S3 using the signed request from the Python app.
     */
-    function uploadFile2(s3Data, url){
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', s3Data.url);
-      xhr.setRequestHeader('x-amz-acl', 'public-read');
 
-      var form = document.getElementById('formS3ObjManagerId');
-      var postData = new FormData(form);
+    function uploadFile(s3Data, url) {
+        var formData = new FormData();
+        /*
+        All the PreSigned URL fields to FormData as required by Amazon S3
+        */
+        for (key in s3Data.fields) {
+            formData.append(key, s3Data.fields[key]);
+        };
+        /*
+        Attach the file to be uploaded to FormData
+        */
+        formData.append('file', $('input[type="file"]')[0].files[0]);
 
-      for(key in s3Data.fields){
-        postData.append(key, s3Data.fields[key]);
-      }
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: formData,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function(data, textStatus, request) {
+                if (request.status === 200 || request.status === 204) {
+                    $("#urlTextId").html("Status: Uploaded Successfully.<br /> Object Key:" + s3Data.fields.key);
+                    $("#SignedUrlId").html("");
+                    console.log("Status:" + request.status);
+                    $("#div-obj-holderId").show();
+                } else {
+                    $("#urlTextId").html("Br!! Unable to upload Object. Try again!! <br />Status:" + request.status);
+                }
+            },
+        });
 
-      var data2 = $('#formS3ObjManagerId').serializeArray();
-      alert(data2);
-      console.log( data2 );
-      //postData.append('file', file);
-      xhr.onreadystatechange = () => {
-        if(xhr.readyState === 4){
-          if(xhr.status === 200 || xhr.status === 204){
-            alert('All Went well');
-          }
-          else{
-            alert('Could not upload file.');
-          }
-        }
-      };
-      xhr.send(postData);
     }
-
-
-
-function uploadFile1(s3Data, url){
-
-    $.ajax({
-        // Your server script to process the upload
-        url: url,
-        type: 'POST',
-
-        // Form data
-        data: new FormData($('form')[0]),
-
-
-
-        // Tell jQuery not to process data or worry about content-type
-        // You *must* include these options!
-        cache: false,
-        contentType: false,
-        processData: false,
-
-        // Custom XMLHttpRequest
-        xhr: function() {
-          
-          for(key in s3Data.fields){
-            data.append(key, s3Data.fields[key]);
-            console.log(key+':'+s3Data.fields[key]);
-        };
-            var myXhr = $.ajaxSettings.xhr();
-            if (myXhr.upload) {
-                // For handling the progress of the upload
-                myXhr.upload.addEventListener('progress', function(e) {
-                    if (e.lengthComputable) {
-                        $('progress').attr({
-                            value: e.loaded,
-                            max: e.total,
-                        });
-                    }
-                } , false);
-            }
-            return myXhr;
-        }
-    });
-}
-
-
-
-
-
-function uploadFile(s3Data, url){
-
-
-
-
-
-
-
-
-    var formData = new FormData();
-    //var formData = new FormData($('form')[0]);
-    //formData.append('files[]', $('#formS3ObjManagerId').get(0).files[0]);
-    //formData.append('files[]', $('#formS3ObjManagerId').files[0]);
-
-        for(key in s3Data.fields){
-          formData.append(key, s3Data.fields[key]);
-            console.log(key+':'+s3Data.fields[key]);
-        };
-
-      formData.append('file', $('input[type="file"]')[0].files[0]);
-
-    $.ajax({
-        url: url,
-        type: 'POST',
-        data: formData,
-        cache: false,
-        contentType: false,
-        processData: false,
-    });
-
-
-/*
-var oOutput = document.querySelector("div"),
-    oData = new FormData($('form')[0]);
-
-          for(key in s3Data.fields){
-            oData.append(key, s3Data.fields[key]);
-            console.log(key+':'+s3Data.fields[key]);
-        };
-
-
-
-
-
-
-
-var oReq = new XMLHttpRequest();
-
-oReq.open("PUT", url, true);
-
-oReq.onload = function(oEvent) {
-  if (oReq.status == 200) {
-    oOutput.innerHTML = "Uploaded!";
-    alert('All Went well');
-    console.log("Success: Uploaded");
-  } else {
-    oOutput.innerHTML = "Error " + oReq.status + " occurred when trying to upload your file.<br \/>";
-    console.log("Failed: brrr");
-    alert('brrrr');
-  }
-};
-
-oReq.send(oData);
-
-
-*/
-}
-
 </script>
 </body>
+
 </html>
