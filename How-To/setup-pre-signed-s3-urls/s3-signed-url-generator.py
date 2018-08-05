@@ -13,7 +13,8 @@ globalVars['Environment']           = "Test"
 globalVars['REGION_NAME']           = "eu-central-1"
 globalVars['tagName']               = "Pre-Signed-Url-Generator"
 globalVars['BucketName']            = "secure-pvt-bucket"
-globalVars['DefaultExpiry']         = "10"
+globalVars['GetDefaultExpiry']      = "10"
+globalVars['PostDefaultExpiry']     = "60"
 
 logger = logging.getLogger()
 
@@ -26,14 +27,14 @@ def signed_get_url(event):
     bodyData = json.loads(event['body'])
     try:
         url = s3.generate_presigned_url(ClientMethod='get_object',
-                                        ExpiresIn=int(globalVars['DefaultExpiry']),
                                         Params={'Bucket': bodyData["BucketName"],
                                                 'Key':bodyData["ObjectName"]
-                                               } 
+                                               },
+                                        ExpiresIn=int(globalVars['GetDefaultExpiry'])
                                         )
         # Browser requires this header to allow cross domain requests
         head = {"Access-Control-Allow-Origin" : "*" }
-        body = { 'PreSignedUrl':url }
+        body = { 'PreSignedUrl':url, 'ExpiresIn':globalVars['GetDefaultExpiry'] }
         response = {'statusCode': 200, 'body': json.dumps(body), 'headers':head}
     except Exception as e:
         logger.error('Unable to generate URL')
@@ -53,9 +54,13 @@ def signed_post_url(event):
     # Add random prefix - Although not necessary to improve s3 performance, to avoid overwrite of existing objects.
     fName = uuid.uuid4().hex + '_' + bodyData['FileName']
     try:
-        post = s3.generate_presigned_post(Bucket=bodyData["BucketName"],Key=fName)
+        post = s3.generate_presigned_post(Bucket=bodyData["BucketName"],
+                                          Key=fName,
+                                          ExpiresIn=int(globalVars['PostDefaultExpiry'])
+                                        )
         # Browser requires this header to allow cross domain requests
         head = {"Access-Control-Allow-Origin" : "*" }
+        post['ExpiresIn'] = globalVars['PostDefaultExpiry']
         response = {'statusCode': 200, 'body': json.dumps(post), 'headers':head}
     except Exception as e:
         logger.error('Unable to generate PUT Url')
