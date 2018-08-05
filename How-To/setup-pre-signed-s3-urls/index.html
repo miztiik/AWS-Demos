@@ -173,9 +173,9 @@
                 dataType: "json",
                 //beforeSend: function(){ $( '#loader' ).show();},
                 success: function(res) {
-                    $("#urlTextId").html("<a href=" + res.PreSignedUrl + ">PreSignedUrL</a>: " + res.PreSignedUrl);
+                    $("#urlTextId").html("Your <a href=" + res.PreSignedUrl + ">Pre-Signed Url</a> expires in " + res.ExpiresIn +" Seconds");
                     $("#SignedUrlId").html("<img src='" + res.PreSignedUrl + "'>");
-                    $("#div-obj-holderId").show();                    
+                    $("#div-obj-holderId").show();
                 },
                 error: function(e) {
                     $("#urlTextId").html("Unable to Retrieve Image, Check Object Key name.");
@@ -199,7 +199,6 @@
                 contentType: "application/json; charset=utf-8",
                 data: JSON.stringify({
                     "BucketName": $('#BucketNameId').val(),
-                    "ObjectName": $('#ObjectNameId').val(),
                     "methodType": $('#methodTypeId option:selected').attr('value'),
                     "FileName": $('#FileNameId').val()
                 }, ),
@@ -287,5 +286,4 @@
     }
 </script>
 </body>
-
 </html>
