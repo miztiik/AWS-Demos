@@ -39,7 +39,6 @@
         margin: auto;
         padding: 10px;
         height: 200px;
-        display: none;
     }
     
     label {
@@ -113,9 +112,9 @@
     <h1 align="center">PreSigned Url Generator</h1>
     <div class="div-page">
         <label for="bktNameLbl">Bucket Name</label>
-        <input type="text" id="BucketNameId" name="BucketName" placeholder="secure-pvt-bucket" value="">
+        <input type="text" id="BucketNameId" name="BucketName" placeholder="secure-pvt-bucket" value="secure-pvt-bucket">
         <label for="bktObjectLbl">Bucket Object Name</label>
-        <input type="text" id="ObjectNameId" name="ObjectName" placeholder="2.jpg" value="">
+        <input type="text" id="ObjectNameId" name="ObjectName" placeholder="2.jpg" value="2.jpg">
         <input style='display:none;' type="text" id="FileNameId" name="FileNameId">
         <label for="OperationTypeLbl">What do you want to do?</label>
         <select id="methodTypeId" name="methodType">
@@ -131,7 +130,7 @@
         <button class="UrlSignerBtn" id='UrlSignerBtnId'><span>Get Pre Signed Url </span></button>
     </div>
     <br />
-    <div class="div-obj-holder" id="div-obj-holderId">
+    <div class="div-obj-holder" style='display:none;' id="div-obj-holderId">
         <div id="urlTextId" class="urlText">Url Text Goes here ...</div>
         <div id="SignedUrlId"></div>
     </div>
@@ -174,7 +173,7 @@
                 dataType: "json",
                 //beforeSend: function(){ $( '#loader' ).show();},
                 success: function(res) {
-                    $("#urlTextId").html("<a href=" + res.PreSignedUrl + ">PreSignedUrL</a>:" + res.PreSignedUrl);
+                    $("#urlTextId").html("<a href=" + res.PreSignedUrl + ">PreSignedUrL</a>: " + res.PreSignedUrl);
                     $("#SignedUrlId").html("<img src='" + res.PreSignedUrl + "'>");
                     $("#div-obj-holderId").show();                    
                 },
@@ -240,10 +239,11 @@
             if (this.value == 'POST') {
                 $("#uploadFileDiv").show();
                 $("#UrlSignerBtnId").hide();
+                $("#div-obj-holderId").hide();
             } else {
                 $("#UrlSignerBtnId").show();
                 $("#uploadFileDiv").hide();
-
+                $("#div-obj-holderId").hide();
             }
         });
     });
@@ -274,7 +274,7 @@
             processData: false,
             success: function(data, textStatus, request) {
                 if (request.status === 200 || request.status === 204) {
-                    $("#urlTextId").html("Status: Uploaded Successfully.<br /> Object Key:" + s3Data.fields.key);
+                    $("#urlTextId").html("Status: Uploaded Successfully.<br /> Object Key: " + s3Data.fields.key);
                     $("#SignedUrlId").html("");
                     console.log("Status:" + request.status);
                     $("#div-obj-holderId").show();
