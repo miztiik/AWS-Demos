@@ -112,7 +112,7 @@
     <h1 align="center">PreSigned Url Generator</h1>
     <div class="div-page">
         <label for="bktNameLbl">Bucket Name</label>
-        <input type="text" id="BucketNameId" name="BucketName" placeholder="my-secure-pvt-bkt" value="">
+        <input type="text" id="BucketNameId" name="BucketName" placeholder="our-secure-pvt-bkt" value="">
         <label for="bktObjectLbl">Bucket Object Name</label>
         <input type="text" id="ObjectNameId" name="ObjectName" placeholder="s3.png" value="">
         <input style='display:none;' type="text" id="FileNameId" name="FileNameId">
@@ -162,7 +162,7 @@
     $(document).ready(function() {
         $("#UrlSignerBtnId").click(function() {
             $.ajax({
-                url: 'https://qq76v5y3ri.execute-api.eu-central-1.amazonaws.com/prod',
+                url: 'https://n0v1743ush.execute-api.eu-central-1.amazonaws.com/prod',
                 type: 'POST',
                 contentType: "application/json; charset=utf-8",
                 data: JSON.stringify({
@@ -194,7 +194,7 @@
     $(document).ready(function() {
         $("#ObjectUploadBtnId").click(function() {
             $.ajax({
-                url: 'https://qq76v5y3ri.execute-api.eu-central-1.amazonaws.com/prod',
+                url: 'https://n0v1743ush.execute-api.eu-central-1.amazonaws.com/prod',
                 type: 'POST',
                 contentType: "application/json; charset=utf-8",
                 data: JSON.stringify({
