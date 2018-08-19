@@ -103,5 +103,7 @@ aws s3 ls --profile prod-s3 s3://list-prod-bkt-details-01/
 ##### References
 [1] - [AWS Docs - Delegate Access Across AWS Accounts Using IAM Roles](https://docs.aws.amazon.com/IAM/latest/UserGuide/tutorial_cross-account-with-roles.html)
 
+[2] - [AWS Docs - Access All Your Accounts by Using the AWS CLI](https://aws.amazon.com/blogs/security/how-to-use-a-single-iam-user-to-easily-access-all-your-accounts-by-using-the-aws-cli/)
+
 
 
