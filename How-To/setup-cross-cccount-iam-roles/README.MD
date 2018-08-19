@@ -1,16 +1,18 @@
 # Delegate Access Across AWS Accounts Using IAM Roles
-This tutorial teaches you how to use a role to delegate access to resources that are in different AWS accounts that you own (Production and Acceptance). You share resources in one account with users in a different account.
+Imagine that the `Prod` account is where live applications are managed, and the `Acc` where developers and testers can freely test applications.
 
-In this tutorial, imagine that the `Prod` account is where live applications are managed, and the `Acc` where developers and testers can freely test applications. 
+In the `Acc` account, Lets say you have a IAM groups: `DevGroup`. Users in this groups have permissions to work in the `Acc` account. Sometimes, a developer must update the applications in the `Prod` account, say to S3 bucket called `list-prod-bkt-details-01`.
 
-In each account, application information is stored in Amazon S3 buckets. You manage IAM users in the `Acc` account, where you have a IAM groups: `DevGroup`. Users in this groups have permissions to work in the `Acc` account. From time to time, a developer must update the live applications in the `Prod` account, say to S3 bucket called `list-prod-bkt-details-01`.
+![Delegate Access Across AWS Accounts Using IAM Roles](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-cross-cccount-iam-roles/images/IAM-CROSS-ACCOUNT-ACCESS-DELEGATION.png)
 
-You can also follow this article in **[Youtube](https://www.youtube.com/watch?v=U5nDPagdLPk&t=0s&list=PLxzKY3wu0_FKok5gI1v4g4S-g-PLaW9YD&index=23)**
+This tutorial teaches you how to use a role to delegate access to resources that are in different AWS accounts that you own (`Prod` and `Acc`).
 
-We will accomplish this in 3 simple step,
+We will accomplish this in 3 simple steps,
 1. Create an IAM role in your Prod account.
 1. Create a user in your Acc account to assume that IAM role.
 1. Establish cross-account trust and access from the user in the Acc account to the role in the Prod account.
+
+You can also follow this article in **[Youtube](https://www.youtube.com/watch?v=U5nDPagdLPk&t=0s&list=PLxzKY3wu0_FKok5gI1v4g4S-g-PLaW9YD&index=23)**
 
 ### Pre-Requisites
 - Two AWS Accounts and Account numbers
