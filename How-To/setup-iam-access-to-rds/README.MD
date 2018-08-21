@@ -39,7 +39,6 @@ Run this command to create a database user account that will use an AWS authenti
 ```sh
 # CREATE USER {db username} IDENTIFIED WITH AWSAuthenticationPlugin as 'RDS';
 CREATE USER 'db_iam_user' IDENTIFIED WITH AWSAuthenticationPlugin as 'RDS';
-GRANT ALL PRIVILEGES ON dbinst01.* TO 'usr_wo_ssl'@'%' WITH GRANT OPTION;
 ```
 Optionally, run this command to require the user to connect to the database using SSL: [Learn more here](https://github.com/miztiik/AWS-Demos/tree/master/How-To/setup-ssl-connection-to-rds)
 ```sh
