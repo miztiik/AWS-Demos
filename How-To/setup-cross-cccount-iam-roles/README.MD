@@ -18,7 +18,7 @@ You can also follow this article in **[Youtube](https://www.youtube.com/watch?v=
 - Two AWS Accounts and Account numbers
   - Acc Account Id - 1111 1111 1111
     - IAM Group `Dev Group`
-    - IAM User[ex: UserName=`David`] member of `Dev Group`
+    - IAM User[ex: UserName=`David`] member of `Dev Group` - [Get help here](https://www.youtube.com/watch?v=5g0Cuq-qKA0&index=11&list=PLxzKY3wu0_FLaF9Xzpyd9p4zRCikkD9lE)
     - AWS CLI configured for ACC Account User `David`
   - Prod Account Id - 2222 2222 2222
     - S3 Bucket in Prod Account
