@@ -1,15 +1,21 @@
+# IAM Database Authentication for MySQL
+Amazon RDS for MySQL you can authenticate using AWS Identity and Access Management (IAM) database authentication. With this authentication method, you don't need to use a password when you connect to a DB instance. Instead, you use an authentication token.
+
+An `authentication token` is a unique string of characters that Amazon RDS generates on request. Authentication tokens are generated using AWS Signature Version 4. Each token has a lifetime of 15 minutes. You don't need to store user credentials in the database, because authentication is managed externally using IAM. _You can also still use standard database authentication._
+
+![IAM-Access-To-RDS](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-iam-access-to-rds/images/iam-access-to-rds-00.png)
+
 Follow this article in **[Youtube](https://www.youtube.com/channel/UC_evcfxhjjui5hChhLE08tQ/playlists)**
 
 ## Pre-Requisites
 1. EC2 Instance
-   - AWS CLI Installed. [Get help here](https://www.youtube.com/watch?v=5g0Cuq-qKA0&list=PLxzKY3wu0_FLaF9Xzpyd9p4zRCikkD9lE&index=11)
-1. MySQL RDS Instance - [Get Help Here](https://youtu.be/vLaW6b441x0)
+   - AWS CLI Installed - [Get help here](https://www.youtube.com/watch?v=5g0Cuq-qKA0&list=PLxzKY3wu0_FLaF9Xzpyd9p4zRCikkD9lE&index=11)
+1. MySQL RDS Instance - [Get help here](https://youtu.be/vLaW6b441x0)
    - MySQL Version - 5.7.17
    - Ensure `IAM DB authentication` is enabled
    - EC2 and RDS should be able to communicate with each other at port RDS port( For MySQL 3306 )
 1. IAM RoleName: **ec2-to-rds**: An EC2 Role. [Get help here](https://www.youtube.com/watch?v=5g0Cuq-qKA0&index=11&list=PLxzKY3wu0_FLaF9Xzpyd9p4zRCikkD9lE)
-   - Permissions: Managed Policies `AmazonRDSFullAccess `
-
+   - Permissions: Managed Policies `AmazonRDSFullAccess`
 
 ## Prepare EC2 Instance
 Install the following packages and commands
@@ -91,7 +97,7 @@ mysql --host="${RDS_HOST}" \
 
 
 ### Screenshots
-![IAM-Access-To-RDS](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-pre-signed-s3-urls/images/Screenshot-Valaxy-Miztiik.png)
+![IAM-Access-To-RDS](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-iam-access-to-rds/images/iam-access-to-rds-01.png)
 
 
 ##### References
