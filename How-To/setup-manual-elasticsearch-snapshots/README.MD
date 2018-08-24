@@ -134,8 +134,8 @@ Output should be something like this,
 
 ## Taking Manual Snapshots
 You specify two pieces of information when you create a snapshot:
-- Name of your snapshot repository
-- Name for the snapshot
+- Name of your snapshot repository - Ex: `my-snapshot-repo`
+- Name for the snapshot - Ex: `2018-08-24`
 
 **Note:** _Snapshots are not instantaneous; they take some time to complete._
 ```sh
