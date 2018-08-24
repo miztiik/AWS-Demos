@@ -5,7 +5,7 @@ An `authentication token` is a unique string of characters that Amazon RDS gener
 
 ![IAM-Access-To-RDS](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-iam-access-to-rds/images/iam-access-to-rds-00.png)
 
-Follow this article in **[Youtube](https://www.youtube.com/channel/UC_evcfxhjjui5hChhLE08tQ/playlists)**
+Follow this article in **[Youtube](https://youtu.be/tvXZWhu35PY)**
 
 ## Pre-Requisites
 1. EC2 Instance
