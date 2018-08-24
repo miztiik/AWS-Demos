@@ -74,6 +74,8 @@ You can generate a pre-signed URL programmatically, We will be using python SDK.
       ]
     }
    ```
+1. EC2 running Linux that can connect to the ES Cluster - _Simply host it in the same VPC/subnet as ES_
+   1. AWS CLI Configured with IAM User `my-manual-es-snap-creator-role`
 
 ### Registering a Manual Snapshot Repository
 You must register a snapshot repository with Amazon Elasticsearch Service before you can take manual index snapshots.
