@@ -176,14 +176,28 @@ When you restore, you specify the snapshot, and also any indexes that are in the
 
 The following example restores just one index, `cwl-2018-08-22`, from `2018-08-12` in the `my-snapshot-repo` snapshot repository:
 ```sh
-curl -XPOST 'https://search-es-flowlogs-a1b2c3r4etc.eu-central-1.es.amazonaws.com/_snapshot/my-snapshot-repo/2018-08-12' -d'{
+curl -XPOST 'https://search-es-flowlogs-01-a1b2c3r4etc.eu-central-1.es.amazonaws.com/_snapshot/my-snapshot-repo/2018-08-24/_restore' -d'{
   "indices": "cwl-2018-08-22",
   "ignore_unavailable": false,
   "include_global_state": false
 }' -H 'Content-Type: application/json'
+
+# To restore two indices
+curl -XPOST 'https://search-es-flowlogs-01-a1b2c3r4etc.eu-central-1.es.amazonaws.com/_snapshot/my-snapshot-repo/2018-08-24/_restore' -d'{
+  "indices": "cwl-2018-08-22,cwl-2018-08-23",
+  "ignore_unavailable": false,
+  "include_global_state": false
+}' -H 'Content-Type: application/json'
 ```
-
-
+### Deleting Indices
+The following example shows how to delete all existing indices for a domain:
+```sh
+curl -XDELETE 'https://search-es-flowlogs-01-a1b2c3r4etc.eu-central-1.es.amazonaws.com/_all'
+```
+If you don't plan to restore all indices, though, you might want to delete only one:
+```sh
+curl -XDELETE 'https://search-es-flowlogs-01-a1b2c3r4etc.eu-central-1.es.amazonaws.com/index-name'
+```
 ##### References
 [1] - [AWS Docs - Working with Amazon Elasticsearch Service Index Snapshots](https://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-managedomains-snapshots.html#es-managedomains-snapshot-registerdirectory)
 
