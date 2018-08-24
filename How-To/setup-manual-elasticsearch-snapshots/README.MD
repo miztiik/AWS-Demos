@@ -139,7 +139,7 @@ You specify two pieces of information when you create a snapshot:
 
 **Note:** _Snapshots are not instantaneous; they take some time to complete._
 ```sh
-#curl -XPUT 'elasticsearch-domain-endpoint/_snapshot/repository/snapshot-name'
+# curl -XPUT 'elasticsearch-domain-endpoint/_snapshot/repository/snapshot-name'
 
 curl -XPUT 'https://search-es-flowlogs-a1b2c3r4etc.eu-central-1.es.amazonaws.com/_snapshot/my-snapshot-repo/2018-08-12'
 ```
@@ -150,6 +150,37 @@ curl -XGET 'https://search-es-flowlogs-a1b2c3r4etc.eu-central-1.es.amazonaws.com
 
 Output,
 ![es-manual-snaps](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-manual-elasticsearch-snapshots/images/ElasticSearch-Manual-Snapshots-04.png)
+
+#### Back up an index
+By default, Amazon ES snapshots the entire cluster’s indexes. By snapshotting a single index, you give yourself flexibility in where and when you restore the data. You can alter the default behavior with the `indices` setting.
+```sh
+curl -XPUT 'https://search-es-flowlogs-a1b2c3r4etc.eu-central-1.es.amazonaws.com/_snapshot/my-snapshot-repo/2018-08-12' 
+-d'{
+  "indices": "cwl-2018-07-16",
+  "ignore_unavailable": true,
+  "include_global_state": false
+}'
+```
+You can specify one or more indexes for backup in this snapshot. You can choose to ignore errors if any of the indexes is not available by setting `ignore_unavailable` to false. You also might want to store the cluster's global state. However, for index-level backups, doing this usually won't make sense. Set `include_global_state` to `false`.
+
+You can also use the `_snapshot` API action to check the status of your snapshot or get a list of all snapshots in the repository.
+```sh
+curl -XGET localhost:9200/_snapshot/es-s3-repository/_status
+curl -XGET localhost:9200/_snapshot/es-s3-repository/_all
+```
+### Restoring Snapshots
+To restore, you must ensure that the index is not open. This state is normally the case if you are reloading old data into the same cluster. If the index is open, delete the existing index first, then restore your backup.
+
+When you restore, you specify the snapshot, and also any indexes that are in the snapshot. You do this in much the same way as when you took the snapshot in the first place.
+
+```sh
+curl -XPOST 'https://search-es-flowlogs-a1b2c3r4etc.eu-central-1.es.amazonaws.com/_snapshot/my-snapshot-repo/2018-08-12' -d'{
+  "indices": "cwl-2018-08-22",
+  "ignore_unavailable": false,
+  "include_global_state": false
+}'
+```
+
 
 ##### References
 [1] - [AWS Docs - Working with Amazon Elasticsearch Service Index Snapshots](https://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-managedomains-snapshots.html#es-managedomains-snapshot-registerdirectory)
