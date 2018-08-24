@@ -154,4 +154,4 @@ Output,
 ##### References
 [1] - [AWS Docs - Working with Amazon Elasticsearch Service Index Snapshots](https://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-managedomains-snapshots.html#es-managedomains-snapshot-registerdirectory)
 
-[2] - [Boto Docs - Generating Presigned URLs](https://boto3.readthedocs.io/en/latest/guide/s3.html#generating-presigned-urls)
+[2] - [AWS Blogs - Use Amazon S3 to Store a Single Amazon Elasticsearch Service Index](https://aws.amazon.com/blogs/database/use-amazon-s3-to-store-a-single-amazon-elasticsearch-service-index/)
