@@ -11,7 +11,7 @@ Follow this article in **[Youtube](https://www.youtube.com/channel/UC_evcfxhjjui
 ### Prerequisites
 You can generate a pre-signed URL programmatically, We will be using python SDK. Here are the high level steps
 1. ElasticSearch Domain - [Get help here](https://youtu.be/cahU_A4c-eE)
-1. Create S3 Bucket - `my-manual-es-snaps-bkt-010`
+1. Create S3 Bucket - `my-manual-es-snaps-bkt-001`
    - Get the Bucket ARN - `arn:aws:s3:::my-manual-es-snaps-bkt-001`
 1. IAM Role: `my-manual-es-snap-creator-role` - [Get help here](https://www.youtube.com/watch?v=5g0Cuq-qKA0&index=11&list=PLxzKY3wu0_FLaF9Xzpyd9p4zRCikkD9lE)
     - Attach the following permissions, _Make sure to change the bucket ARNs_
