@@ -2,7 +2,7 @@
 
 Snapshots are backups of a cluster's data and state. State includes cluster settings, node information, index settings, and shard allocation. Elasticsearch snapshots are incremental, meaning that they only store data that has changed since the last successful snapshot. This incremental nature means that the difference in disk usage between frequent and infreqent snapshots is often minimal.
 
-Snapshots provide a convenient way to migrate data across Amazon Elasticsearch Service domains and recover from failure. You cannot use automated snapshots to migrate to new domains. Automated snapshots are read-only from within a given domain. For migrations, you must use manual snapshots.
+Snapshots provide a convenient way to migrate data across Amazon Elasticsearch Service domains and recover from failure. Automated snapshots are read-only from within a given domain. You cannot use automated snapshots to migrate to new domains. For migrations, you must use manual snapshots.
 
 Follow this article in **[Youtube](https://www.youtube.com/channel/UC_evcfxhjjui5hChhLE08tQ/playlists)**
 
