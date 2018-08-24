@@ -107,7 +107,7 @@ url = host + path
 payload = {
   "type": "s3",
   "settings": {
-    "bucket": "my-manual-es-snaps-bkt-010",
+    "bucket": "my-manual-es-snaps-bkt-001",
     "region": "eu-central-1",
     "role_arn": "arn:aws:iam::YOUR-ACCOUNT-ID:role/my-manual-es-snap-creator-role"
   }
