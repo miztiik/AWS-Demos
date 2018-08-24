@@ -188,16 +188,20 @@ curl -XPOST 'https://search-es-flowlogs-01-a1b2c3r4etc.eu-central-1.es.amazonaws
   "ignore_unavailable": false,
   "include_global_state": false
 }' -H 'Content-Type: application/json'
-```
-### Deleting Indices
-The following example shows how to delete all existing indices for a domain:
-```sh
+
+# To restore the entire snapshot
 curl -XDELETE 'https://search-es-flowlogs-01-a1b2c3r4etc.eu-central-1.es.amazonaws.com/_all'
 ```
+### Deleting Indices
 If you don't plan to restore all indices, though, you might want to delete only one:
 ```sh
 curl -XDELETE 'https://search-es-flowlogs-01-a1b2c3r4etc.eu-central-1.es.amazonaws.com/index-name'
 ```
+The following example shows how to delete all existing indices for a domain:
+```sh
+curl -XDELETE 'https://search-es-flowlogs-01-a1b2c3r4etc.eu-central-1.es.amazonaws.com/_all'
+```
+
 ##### References
 [1] - [AWS Docs - Working with Amazon Elasticsearch Service Index Snapshots](https://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-managedomains-snapshots.html#es-managedomains-snapshot-registerdirectory)
 
