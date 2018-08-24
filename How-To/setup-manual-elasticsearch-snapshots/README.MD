@@ -92,7 +92,7 @@ import boto3
 import requests
 from requests_aws4auth import AWS4Auth
 
-host = 'https://search-es-flowlogs-a1b2c3r4etc.eu-central-1.es.amazonaws.com/' # For example, search-my-domain.region.es.amazonaws.com
+host = 'https://search-es-flowlogs-a1b2c3r4etc.eu-central-1.es.amazonaws.com/'
 region = 'eu-central-1' # For example, us-west-1
 service = 'es'
 credentials = boto3.Session().get_credentials()
@@ -134,15 +134,16 @@ Output should be something like this,
 You specify two pieces of information when you create a snapshot:
 - Name of your snapshot repository
 - Name for the snapshot
+
 **Note:** _Snapshots are not instantaneous; they take some time to complete._
 ```sh
 #curl -XPUT 'elasticsearch-domain-endpoint/_snapshot/repository/snapshot-name'
 
-curl -XPUT 'https://search-es-flowlogs-gk3t6bxsrjb2zicwouomnxhk7u.eu-central-1.es.amazonaws.com/_snapshot/my-snapshot-repo/2018-08-12'
+curl -XPUT 'https://search-es-flowlogs-a1b2c3r4etc.eu-central-1.es.amazonaws.com/_snapshot/my-snapshot-repo/2018-08-12'
 ```
 Use the following command to verify the state of snapshots of your domain:
 ```sh
-curl -XGET 'https://search-es-flowlogs-gk3t6bxsrjb2zicwouomnxhk7u.eu-central-1.es.amazonaws.com/_snapshot/my-snapshot-repo/_all?pretty'
+curl -XGET 'https://search-es-flowlogs-a1b2c3r4etc.eu-central-1.es.amazonaws.com/_snapshot/my-snapshot-repo/_all?pretty'
 ```
 
 Output,
