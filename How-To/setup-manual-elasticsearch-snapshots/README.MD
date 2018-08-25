@@ -1,6 +1,6 @@
 # Setup Amazon Elasticsearch Service Manual Index Snapshots
 
-Snapshots are backups of a cluster's data and state. State includes cluster settings, node information, index settings, and shard allocation. Elasticsearch snapshots are incremental, meaning that they only store data that has changed since the last successful snapshot. This incremental nature means that the difference in disk usage between frequent and infreqent snapshots is often minimal.
+Snapshots are backups of a cluster's data and state. State includes cluster settings, node information, index settings, and shard allocation. Elasticsearch snapshots are incremental, meaning that they only store data that has changed since the last successful snapshot. This incremental nature means that the difference in disk usage between frequent and infrequent snapshots is often minimal.
 
 Snapshots provide a convenient way to migrate data across Amazon Elasticsearch Service domains and recover from failure. Automated snapshots are read-only from within a given domain. You cannot use automated snapshots to migrate to new domains. For migrations, you must use manual snapshots.
 
@@ -9,7 +9,6 @@ Follow this article in **[Youtube](https://www.youtube.com/channel/UC_evcfxhjjui
 ![es-manual-snaps](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-manual-elasticsearch-snapshots/images/ElasticSearch-Manual-Snapshots-00.png)
 
 ### Prerequisites
-You can generate a pre-signed URL programmatically, We will be using python SDK. Here are the high level steps
 1. ElasticSearch Domain - [Get help here](https://youtu.be/cahU_A4c-eE)
 1. Create S3 Bucket - `my-manual-es-snaps-bkt-001`
    - Get the Bucket ARN - `arn:aws:s3:::my-manual-es-snaps-bkt-001`
