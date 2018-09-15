@@ -47,7 +47,7 @@ more /home/ec2-user/.ssh/authorized_keys
    --//
    ```
 1. Start the server
-1. Login with the `Recovery Server` Key
+1. Login to `Server WO Key` with the `Recovery Server` Key
 
 ##### References
 [1] - [AWS Docs](https://aws.amazon.com/premiumsupport/knowledge-center/execute-user-data-ec2/)
