@@ -9,7 +9,7 @@ Follow this article in **[Youtube](https://www.youtube.com/channel/UC_evcfxhjjui
 ### Prerequisites
 1. EC2 Instance [Get help here](https://www.youtube.com/watch?v=KDtS6BzJo3A)
 
-### Registering a Manual Snapshot Repository
+### Update Userdata
 If the instance is running already, stop it and update the `user-data` field with the following code,
  The most important field is this value `[scripts-user, always]`. The keyword `always` basically informs the cloud config to execute the commands every time the server boots.
 
