@@ -4,7 +4,7 @@ By default user data is executed once, at the first boot of the instance. There 
 
 Follow this article in **[Youtube](https://www.youtube.com/channel/UC_evcfxhjjui5hChhLE08tQ/playlists)**
 
-![Execute user data every boot](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-manual-elasticsearch-snapshots/images/setup-user-data-to-execute-after-initial-launch.png)
+![Execute user data every boot](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-user-data-to-execute-after-initial-launch/images/setup-user-data-to-execute-after-initial-launch-00.png)
 
 ### Prerequisites
 1. EC2 Instance [Get help here](https://www.youtube.com/watch?v=KDtS6BzJo3A)
