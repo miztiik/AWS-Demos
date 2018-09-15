@@ -41,9 +41,10 @@ more /home/ec2-user/.ssh/authorized_keys
    Content-Transfer-Encoding: 7bit
    Content-Disposition: attachment; filename="userdata.txt"
    #!/bin/bash
-   /bin/echo -e "ssh-rsa    AAUvoqDuvCKFrVzeq/O68JgAo0zSSD3KMYwO1RSZ8/2FwMEYZP7jAh3GOYJhIS
-   AzFsDcN/jgtluZIwEn7MXym21EDLk1aFdI20WtbQJH79as9   +nV9jtzf9BiQnM/fe18Frb94A1DUALcEyPesloYvcOxyCCaqAKS6v1g1me4Up+IbHNfVgE   +GtLdh+oohR8SRc3xL9
-   tvQu0kzFSRVsfymhu5l2WBpf9STvm3rtMbNKzjmKAqPlMSuShn72pTwqScGoPG+3ofZ36n"    >> /home/ec2-user/.ssh/authorized_keys
+   /bin/echo -e "ssh-rsa AAUvoqDuvCKFrVzeq/O68JgAo0zSSD3KMYwO1RSZ8/2FwMEYZP7jAh3GOYJhIS
+   AzFsDcN/jgtluZIwEn7MXym21EDLk1aFdI20WtbQJH79as9+nV9jtzf9BiQnM/fe18Frb94A1DUALcEyPesl
+   oYvcOxyCCaqAKS6v1g1me4Up+IbHNfVgE+GtLdh+oohR8SRc3xL9tvQu0kzFSRVsfymhu5l2WBpf9STvm3rt
+   MbNKzjmKAqPlMSuShn72pTwqScGoPG+3ofZ36nLdh+oo" >> /home/ec2-user/.ssh/authorized_keys
    --//
    ```
 1. Start the server
