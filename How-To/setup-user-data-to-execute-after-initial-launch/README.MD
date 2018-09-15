@@ -4,13 +4,15 @@ By default user data is executed once, at the first boot of the instance. There 
 
 Follow this article in **[Youtube](https://www.youtube.com/channel/UC_evcfxhjjui5hChhLE08tQ/playlists)**
 
-![Execute user data every boot](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-user-data-to-execute-after-initial-launch/images/setup-user-data-to-execute-after-initial-launch-00.png)
+![Execute user data every boot](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-user-data-to-execute-after-initial-launch/images/setup-user-data-to-execute-after-initial-launch.png)
 
 ### Prerequisites
 1. EC2 Instance [Get help here](https://www.youtube.com/watch?v=KDtS6BzJo3A)
 
 ### Registering a Manual Snapshot Repository
 If the instance is running already, stop it and update the `user-data` field with the following code,
+ The most important field is this value `[scripts-user, always]`. The keyword `always` basically informs the cloud config to execute the commands every time the server boots.
+
 ```sh
 Content-Type: multipart/mixed; boundary="//"
 MIME-Version: 1.0
@@ -38,7 +40,7 @@ Content-Disposition: attachment; filename="userdata.txt"
 
 
 Output,
-![es-manual-snaps](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-manual-elasticsearch-snapshots/images/ElasticSearch-Manual-Snapshots-04.png)
+![Userdata Automation](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-manual-elasticsearch-snapshots/images/ElasticSearch-Manual-Snapshots-04.png)
 
 ##### References
-[1] - [AWS Docs - Working with Amazon Elasticsearch Service Index Snapshots](https://aws.amazon.com/premiumsupport/knowledge-center/execute-user-data-ec2/)
+[1] - [AWS Docs](https://aws.amazon.com/premiumsupport/knowledge-center/execute-user-data-ec2/)
