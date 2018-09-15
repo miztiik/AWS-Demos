@@ -11,7 +11,7 @@ Follow this article in **[Youtube](https://www.youtube.com/channel/UC_evcfxhjjui
 1. Recovery Server - 
 
 ### Generate the Authorized Keys from `Recovery Server`
-Login to the `Recovery Server` and execute the following command and copy the output as shown.
+Login to the `Recovery Server` and execute the following command and copy the output as shown. _Leave out the red underlined text_
 ```sh
 more /home/ec2-user/.ssh/authorized_keys
 ```
