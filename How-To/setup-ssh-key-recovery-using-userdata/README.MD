@@ -7,8 +7,8 @@ Follow this article in **[Youtube](https://www.youtube.com/channel/UC_evcfxhjjui
 ![Execute user data every boot](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ssh-key-recovery-using-userdata/images/setup-ssh-key-recovery-using-userdata-valaxy-00.png)
 
 ### Prerequisites
-1. EC2 Instance [Get help here](https://www.youtube.com/watch?v=KDtS6BzJo3A) - _Without Keys_
-1. Recovery Server - 
+1. `Server WO Key` - EC2 Instance [Get help here](https://www.youtube.com/watch?v=KDtS6BzJo3A) - _Without Keys_
+1. `Recovery Server` EC2 Instance
 
 ### Generate the Authorized Keys from `Recovery Server`
 Login to the `Recovery Server` and execute the following command and copy the output as shown. _Leave out the red underlined text_
@@ -17,7 +17,7 @@ more /home/ec2-user/.ssh/authorized_keys
 ```
 ![Execute user data every boot](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-ssh-key-recovery-using-userdata/images/setup-ssh-key-recovery-using-userdata-valaxy-01.png)
 
-### Update the key in the old Server(the one without keys)
+### Update the key in the `Server WO Key`
 1. Stop the server.
 1. Update the user data field with the code updated with the key.
    - In the below commands update your recovery key, after `echo -e`  _between quotes_
