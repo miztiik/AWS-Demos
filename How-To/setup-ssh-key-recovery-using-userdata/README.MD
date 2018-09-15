@@ -8,7 +8,7 @@ Follow this article in **[Youtube](https://www.youtube.com/channel/UC_evcfxhjjui
 
 ### Prerequisites
 1. `Server WO Key` - EC2 Instance [Get help here](https://www.youtube.com/watch?v=KDtS6BzJo3A) - _Without Keys_
-1. `Recovery Server` EC2 Instance
+1. `Recovery Server` - EC2 Instance
 
 ### Generate the Authorized Keys from `Recovery Server`
 Login to the `Recovery Server` and execute the following command and copy the output as shown. _Leave out the red underlined text_
