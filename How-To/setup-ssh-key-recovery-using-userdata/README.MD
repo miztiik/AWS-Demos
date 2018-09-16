@@ -1,6 +1,6 @@
-# Execute user data after the initial launch of my EC2 instance
+# Recover Lost SSH Key in EC2 using UserData
 
-By default user data is executed once, at the first boot of the instance. There are situations that would benefit from the ability to execute user data a second time. May be dump some data to logs or recover SSH keys
+Sometimes ssh keys gets mis-placed or lost completely that you need to recover access to your server without them. In this article we are going to see how you can gain access to your server with a new set of keys using userdata field with minimal downtime to your environment.
 
 Follow this article in **[Youtube](https://www.youtube.com/channel/UC_evcfxhjjui5hChhLE08tQ/playlists)**
 
