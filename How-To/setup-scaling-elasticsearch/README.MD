@@ -3,7 +3,7 @@ Lets say you are running ES Cluster and you want to downscale your cluster after
 
 _For information about which instance type is appropriate for your use case, see [Sizing Amazon ES Domains](https://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/sizing-domains.html)._
 
-![]()
+![Scaling ElasticSearch Domain Cluster Valaxy Miztiik](https://raw.githubusercontent.com/miztiik/AWS-Demos/master/How-To/setup-scaling-elasticsearch/images/scaling-elasticsearch-miztiik-valaxy.png)
 
 ### Get current config
 We can use the describe option in the CLI to get the curent configuration.
