@@ -189,7 +189,7 @@ curl -XPOST 'https://search-es-flowlogs-01-a1b2c3r4etc.eu-central-1.es.amazonaws
 }' -H 'Content-Type: application/json'
 
 # To restore the entire snapshot
-curl -XDELETE 'https://search-es-flowlogs-01-a1b2c3r4etc.eu-central-1.es.amazonaws.com/_all'
+curl --XPUT 'https://search-es-flowlogs-01-a1b2c3r4etc.eu-central-1.es.amazonaws.com/_all'
 ```
 ### Deleting Indices
 If you don't plan to restore all indices, though, you might want to delete only one:
