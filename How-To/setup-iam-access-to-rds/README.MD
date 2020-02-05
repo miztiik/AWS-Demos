@@ -21,8 +21,6 @@ Follow this article in **[Youtube](https://youtu.be/tvXZWhu35PY)**
 Install the following packages and commands
 ```sh
 yum install curl mysql -y
-service mysqld start
-chkconfig mysqld on
 ```
 
 ### Setup Database to use IAM
