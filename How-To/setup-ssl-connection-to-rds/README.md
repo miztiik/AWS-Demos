@@ -38,7 +38,7 @@ curl -O https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem
 ```
 Connect to db using the certificates,
 ```sh
-mysql -h only-ssl-db.ct5b4uz1gops.eu-central-1.rds.amazonaws.com --ssl-ca=/var/mysql-certs/rds-combined-ca-bundle.pem --ssl-mode=REQUIRED -u onlyssldbusr -P 3306 -p
+mysql -h only-ssl-db.ct5b4uz1gops.eu-central-1.rds.amazonaws.com --ssl-ca=/var/mysql-certs/rds-combined-ca-bundle.pem --ssl=1 -u onlyssldbusr -P 3306 -p
 ```
 
 To determine whether the current connection with the server uses encryption, check the value of the Ssl_cipher status variable. If the value is empty, the connection is not encrypted. Otherwise, the connection is encrypted and the value indicates the encryption cipher. For example:
