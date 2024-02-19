@@ -72,7 +72,7 @@
 
     - **Ans:** S3 stands for Simple Storage Service, with a  simple web service interface to store and retrieve any amount of data from anywhere on the web.
 
-1. **Q: What is AWS Lambada?**
+1. **Q: What is AWS Lambda?**
 
     - **Ans:** Lambda is an event-driven platform. It is a compute service that runs code in response to events and automatically manages the compute resources required by that code.
 
